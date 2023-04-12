@@ -9,8 +9,7 @@ import (
 
 type invocationHandler struct {
 	ctx               *mockContext
-	calls             []*matchers.MethodCall
-	methodMatches     []*methodMatch
+	calls             []*methodRecorder
 	instanceVerifiers []matchers.InstanceVerifier
 	lock              sync.Mutex
 }
@@ -28,20 +27,20 @@ func (h *invocationHandler) Handle(method *dyno.Method, values []reflect.Value) 
 		h.ctx.addServiceMethodCallId(call.ID)
 		return h.DoVerifyMethod(call)
 	}
-	h.calls = append(h.calls, call)
+	h.calls[method.Num].calls = append(h.calls[method.Num].calls, call)
 	return h.DoAnswer(call)
 }
 
 func (h *invocationHandler) DoAnswer(c *matchers.MethodCall) []reflect.Value {
+	rec := h.calls[c.Method.Num]
 	ok := h.VerifyInstance(c)
 	if !ok {
 		return createDefaultReturnValues(c.Method.Type)
 	}
 	h.ctx.getState().whenHandler = h
 	h.ctx.getState().whenCall = c
-	h.ctx.getState().lastMatch = nil
 	matched := true
-	for _, mm := range h.methodMatches {
+	for _, mm := range rec.methodMatches {
 		matched = true
 		for argIdx, matcher := range mm.matchers {
 			if !matcher.Match(c, c.Values[argIdx].Interface()) {
@@ -50,36 +49,20 @@ func (h *invocationHandler) DoAnswer(c *matchers.MethodCall) []reflect.Value {
 			}
 		}
 		if matched {
-			for argIdx, matcher := range mm.matchers {
-				matcher.Match(c, c.Values[argIdx].Interface())
-			}
-			h.ctx.getState().lastMatch = mm
 			ifaces := valueSliceToInterfaceSlice(c.Values)
 
-			if len(mm.answers) == 0 {
+			ansWrapper := mm.popAnswer()
+
+			if ansWrapper == nil {
 				return createDefaultReturnValues(c.Method.Type)
 			}
 
-			actualCalls := make([]*matchers.MethodCall, 0)
-			serviceCallIds := h.ctx.getServiceMethodCallIds()
-			for _, c := range mm.calls {
-				isServiceCall := false
-				for _, cid := range serviceCallIds {
-					if cid == c.ID {
-						isServiceCall = true
-						break
-					}
-				}
-				if !isServiceCall {
-					actualCalls = append(actualCalls, c)
-				}
-			}
-			curAns := len(actualCalls)
-			if curAns >= len(mm.answers) {
-				curAns = len(mm.answers) - 1
-			}
-			ans := mm.answers[curAns](ifaces)
-			result := interfaceSliceToValueSlice(ans, c.Method.Type)
+			retValues := ansWrapper.ans(ifaces)
+
+			h.ctx.getState().whenAnswer = ansWrapper
+			h.ctx.getState().whenMethodMatch = mm
+
+			result := interfaceSliceToValueSlice(retValues, c.Method.Type)
 			if !h.validateReturnValues(result, c.Method.Type) {
 				h.ctx.reporter.ReportInvalidReturnValues(result, c.Method.Type)
 			}
@@ -92,27 +75,41 @@ func (h *invocationHandler) DoAnswer(c *matchers.MethodCall) []reflect.Value {
 func (h *invocationHandler) When() matchers.ReturnerAll {
 	h.lock.Lock()
 	defer h.lock.Unlock()
-	if h.ctx.getState().whenCall == nil {
+
+	whenCall := h.ctx.getState().whenCall
+	whenAnswer := h.ctx.getState().whenAnswer
+	whenMethodMatch := h.ctx.getState().whenMethodMatch
+
+	h.ctx.getState().whenHandler = nil
+	h.ctx.getState().whenCall = nil
+	h.ctx.getState().whenMethodMatch = nil
+	h.ctx.getState().whenAnswer = nil
+
+	if whenAnswer != nil && whenMethodMatch != nil {
+		whenMethodMatch.putBackAnswer(whenAnswer)
+	}
+
+	if whenCall == nil {
 		h.ctx.reporter.ReportIncorrectWhenUsage()
 		return nil
 	}
-	if !h.validateMatchers(h.ctx.getState().whenCall) {
+	if !h.validateMatchers(whenCall) {
 		return nil
 	}
 
-	h.ctx.addServiceMethodCallId(h.ctx.getState().whenCall.ID)
-	h.ctx.getState().whenHandler = nil
-	h.ctx.getState().whenCall = nil
+	rec := h.calls[whenCall.Method.Num]
+
+	h.ctx.addServiceMethodCallId(whenCall.ID)
 
 	argMatchers := h.ctx.getState().matchers
 
 	h.ctx.getState().matchers = make([]matchers.Matcher, 0)
-	h.ctx.getState().lastMatch = nil
 	m := &methodMatch{
-		matchers: argMatchers,
-		answers:  make([]matchers.Answer, 0),
+		matchers:   argMatchers,
+		unanswered: make([]*answerWrapper, 0),
+		answered:   make([]*answerWrapper, 0),
 	}
-	h.methodMatches = append(h.methodMatches, m)
+	rec.methodMatches = append(rec.methodMatches, m)
 	return NewReturnerAll(h.ctx, m)
 }
 
@@ -152,7 +149,8 @@ func (h *invocationHandler) DoVerifyMethod(call *matchers.MethodCall) []reflect.
 		return createDefaultReturnValues(call.Method.Type)
 	}
 	numMethodCalls := 0
-	for _, c := range h.calls {
+	rec := h.calls[call.Method.Num]
+	for _, c := range rec.calls {
 		matches := true
 		if c.Method.Type != call.Method.Type {
 			continue
@@ -180,11 +178,18 @@ func (h *invocationHandler) DoVerifyMethod(call *matchers.MethodCall) []reflect.
 	return createDefaultReturnValues(call.Method.Type)
 }
 
-func NewHandler(holder *mockContext) *invocationHandler {
+func newHandler[T any](holder *mockContext) *invocationHandler {
+	tp := reflect.TypeOf(new(T)).Elem()
+	recorders := make([]*methodRecorder, tp.NumMethod())
+	for i := range recorders {
+		recorders[i] = &methodRecorder{
+			methodMatches: make([]*methodMatch, 0),
+			calls:         make([]*matchers.MethodCall, 0),
+		}
+	}
 	return &invocationHandler{
 		ctx:               holder,
-		calls:             make([]*matchers.MethodCall, 0),
-		methodMatches:     make([]*methodMatch, 0),
+		calls:             recorders,
 		instanceVerifiers: make([]matchers.InstanceVerifier, 0),
 	}
 }

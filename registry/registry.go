@@ -26,7 +26,7 @@ func SetUp(reporter matchers.ErrorReporter) {
 		panic("call to SetUp with nil reporter")
 	}
 	if getInstance().mockContext.reporter != nil {
-		getInstance().mockContext.reporter.Fatalf("Mock registry is already set up. SetUp method should be called once")
+		getInstance().mockContext.reporter.Errorf("Mock registry is already set up. SetUp method should be called once")
 		return
 	}
 	getInstance().mockContext = newMockContext(newEnrichedReporter(reporter))
@@ -34,14 +34,14 @@ func SetUp(reporter matchers.ErrorReporter) {
 
 func TearDown() {
 	if getInstance().mockContext.reporter == nil {
-		getInstance().mockContext.reporter.Fatalf("Cannot TearDown since SetUp function wasn't called")
+		getInstance().mockContext.reporter.Errorf("Cannot TearDown since SetUp function wasn't called")
 	}
 	instance.Set(newRegistry())
 }
 
 func Mock[T any]() T {
 	return withCheck[T](func() T {
-		handler := NewHandler(getInstance().mockContext)
+		handler := newHandler[T](getInstance().mockContext)
 		t, err := dyno.Dynamic[T](handler)
 		if err != nil {
 			getInstance().mockContext.reporter.FailNow(fmt.Errorf("error creating mock: %w", err))

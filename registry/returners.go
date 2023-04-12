@@ -26,13 +26,13 @@ type returner1impl[T any] struct {
 }
 
 func (r *returner1impl[T]) ThenReturn(value T) matchers.Returner1[T] {
-	return r.ThenAnswer(func(args ...interface{}) T {
+	return r.ThenAnswer(func(args []any) T {
 		return value
 	})
 }
 
-func (r *returner1impl[T]) ThenAnswer(f func(args ...interface{}) T) matchers.Returner1[T] {
-	all := r.all.ThenAnswer(func(args ...interface{}) []interface{} {
+func (r *returner1impl[T]) ThenAnswer(f func(args []any) T) matchers.Returner1[T] {
+	all := r.all.ThenAnswer(func(args []any) []any {
 		return []any{f(args)}
 	})
 	return &returner1impl[T]{
@@ -45,13 +45,13 @@ type returnerEImpl[T any] struct {
 }
 
 func (r *returnerEImpl[T]) ThenReturn(value T, err error) matchers.ReturnerE[T] {
-	return r.ThenAnswer(func(args ...any) (T, error) {
+	return r.ThenAnswer(func(args []any) (T, error) {
 		return value, err
 	})
 }
 
-func (r *returnerEImpl[T]) ThenAnswer(f func(args ...interface{}) (T, error)) matchers.ReturnerE[T] {
-	all := r.all.ThenAnswer(func(args ...interface{}) []interface{} {
+func (r *returnerEImpl[T]) ThenAnswer(f func(args []any) (T, error)) matchers.ReturnerE[T] {
+	all := r.all.ThenAnswer(func(args []any) []any {
 		t, e := f(args)
 		return []any{t, e}
 	})
@@ -60,17 +60,20 @@ func (r *returnerEImpl[T]) ThenAnswer(f func(args ...interface{}) (T, error)) ma
 	}
 }
 
-func (r *returnerAllImpl) ThenReturn(values ...interface{}) matchers.ReturnerAll {
+func (r *returnerAllImpl) ThenReturn(values ...any) matchers.ReturnerAll {
 	return r.ThenAnswer(makeReturnFunc(values))
 }
 
 func (r *returnerAllImpl) ThenAnswer(f matchers.Answer) matchers.ReturnerAll {
-	r.methodMatch.answers = append(r.methodMatch.answers, f)
+	wrapper := &answerWrapper{
+		ans: f,
+	}
+	r.methodMatch.addAnswer(wrapper)
 	return r
 }
 
-func makeReturnFunc(values ...interface{}) matchers.Answer {
-	return func(args ...interface{}) []interface{} {
+func makeReturnFunc(values []any) matchers.Answer {
+	return func(args []any) []interface{} {
 		return values
 	}
 }

@@ -19,7 +19,7 @@ type MethodCall struct {
 // This function takes a variable number of interface{} arguments and returns a slice of interface{} values.
 // Each value in the returned slice corresponds to a return value for the mock function call.
 // This type can be used to provide dynamic return values based on the input arguments passed to the mock function call.
-type Answer = func(args ...interface{}) []interface{}
+type Answer = func(args []any) []any
 
 // Matcher interface represents an object capable of matching method calls to specific criteria.
 //
@@ -37,5 +37,5 @@ type Matcher interface {
 
 	// Match returns true if the given method call satisfies the criteria defined by the Matcher.
 	// The actual parameter represents the expected value or type, depending on the Matcher implementation.
-	Match(methodCall *MethodCall, actual interface{}) bool
+	Match(methodCall *MethodCall, actual any) bool
 }

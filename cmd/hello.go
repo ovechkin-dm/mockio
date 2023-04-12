@@ -3,7 +3,7 @@ package main
 import (
 	"fmt"
 	"github.com/ovechkin-dm/mockio/matchers"
-	"github.com/ovechkin-dm/mockio/mock"
+	. "github.com/ovechkin-dm/mockio/mock"
 )
 
 type User struct {
@@ -29,8 +29,8 @@ func (s *Service) IsAdult(userId int) (bool, error) {
 }
 
 func main() {
-	mock.SetUp(&matchers.ConsoleReporter{})
-	storage := mock.Mock[Storage]()
+	SetUp(&matchers.ConsoleReporter{})
+	storage := NewMock[Storage]()
 	service := &Service{
 		storage: storage,
 	}
@@ -39,10 +39,10 @@ func main() {
 		Name: "Tony",
 		Age:  19,
 	}
-	mock.WhenE(storage.GetUser(mock.Any[int]())).ThenReturn(u, nil)
+	WhenE(storage.GetUser(Any[int]())).ThenReturn(u, nil)
 	ad, err := service.IsAdult(10)
-	mock.Verify(storage, mock.Never()).GetUser(mock.Exact(11))
-	mock.VerifyNoMoreInteractions(storage)
+	Verify(storage, Never()).GetUser(Exact(11))
+	VerifyNoMoreInteractions(storage)
 	if err != nil {
 		panic(err)
 	}

@@ -10,12 +10,12 @@ type EnrichedReporter struct {
 	reporter matchers.ErrorReporter
 }
 
-func (e *EnrichedReporter) Fatalf(format string, args ...any) {
+func (e *EnrichedReporter) Errorf(format string, args ...any) {
 	e.reporter.Fatalf(format, args...)
 }
 
 func (e *EnrichedReporter) FailNow(err error) {
-	e.Fatalf(err.Error())
+	e.Errorf(err.Error())
 }
 
 func (e *EnrichedReporter) Fatal(format string) {
@@ -27,7 +27,7 @@ func (e *EnrichedReporter) ReportIncorrectWhenUsage() {
 }
 
 func (e *EnrichedReporter) ReportUnregisteredMockVerify(t any) {
-	e.Fatalf("unregistered mock instance during Verify call: %v", t)
+	e.Errorf("unregistered mock instance during Verify call: %v", t)
 }
 
 func (e *EnrichedReporter) ReportInvalidUseOfMatchers(call *matchers.MethodCall, m []matchers.Matcher) {
@@ -42,7 +42,7 @@ func (e *EnrichedReporter) ReportInvalidUseOfMatchers(call *matchers.MethodCall,
 		inArgs = append(inArgs, tp.In(i).String())
 	}
 	inArgsStr := strings.Join(inArgs, ",")
-	e.Fatalf(`invalid use of matchers
+	e.Errorf(`invalid use of matchers
 method:
 %v
 expected:
@@ -73,7 +73,7 @@ func (e *EnrichedReporter) ReportInvalidReturnValues(ret []reflect.Value, method
 		outTypes = append(outTypes, tp.Out(i).String())
 	}
 	outTypesStr := strings.Join(outTypes, ",")
-	e.Fatalf(`invalid return values
+	e.Errorf(`invalid return values
 method:
 %v
 expected number of return values:

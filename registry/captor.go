@@ -17,11 +17,14 @@ type captorImpl[T any] struct {
 }
 
 func (c *captorImpl[T]) Capture() T {
-	var t T
-	AddMatcher(FunMatcher(fmt.Sprintf("Captor[%s]", reflect.TypeOf(t)), func(m *matchers.MethodCall, a any) bool {
+	tp := reflect.TypeOf(new(T)).Elem()
+	AddMatcher(FunMatcher(fmt.Sprintf("Captor[%s]", tp), func(m *matchers.MethodCall, a any) bool {
+		if c.ctx.IsServiceCall(m.ID) {
+			return true
+		}
 		at, ok := a.(T)
 		if !ok {
-			c.ctx.reporter.Fatalf("incorrect usage of argument captor. expected to capture type %s, got %v", reflect.TypeOf(t).String(), a)
+			c.ctx.reporter.Errorf("incorrect usage of argument captor. expected to capture type %s, got %v", tp.String(), a)
 			return false
 		}
 		cv := &capturedValue[T]{
@@ -31,6 +34,7 @@ func (c *captorImpl[T]) Capture() T {
 		c.values = append(c.values, cv)
 		return true
 	}))
+	var t T
 	return t
 }
 
@@ -47,14 +51,7 @@ func (c *captorImpl[T]) Last() T {
 func (c *captorImpl[T]) Values() []T {
 	result := make([]T, 0)
 	for i := range c.values {
-		serviceCall := false
-		for _, cid := range c.ctx.serviceMethodCalls {
-			if cid == c.values[i].call.ID {
-				serviceCall = true
-				break
-			}
-		}
-		if !serviceCall {
+		if !c.ctx.IsServiceCall(c.values[i].call.ID) {
 			result = append(result, c.values[i].value)
 		}
 	}
