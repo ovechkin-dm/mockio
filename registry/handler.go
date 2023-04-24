@@ -1,6 +1,7 @@
 package registry
 
 import (
+	"fmt"
 	"github.com/ovechkin-dm/go-dyno/pkg/dyno"
 	"github.com/ovechkin-dm/mockio/matchers"
 	"reflect"
@@ -19,12 +20,10 @@ func (h *invocationHandler) Handle(method *dyno.Method, values []reflect.Value) 
 	defer h.lock.Unlock()
 
 	call := &matchers.MethodCall{
-		ID:     GenerateId(),
 		Method: method,
 		Values: values,
 	}
 	if h.ctx.getState().verifyState {
-		h.ctx.addServiceMethodCallId(call.ID)
 		return h.DoVerifyMethod(call)
 	}
 	h.calls[method.Num].calls = append(h.calls[method.Num].calls, call)
@@ -43,7 +42,7 @@ func (h *invocationHandler) DoAnswer(c *matchers.MethodCall) []reflect.Value {
 	for _, mm := range rec.methodMatches {
 		matched = true
 		for argIdx, matcher := range mm.matchers {
-			if !matcher.Match(c, c.Values[argIdx].Interface()) {
+			if !matcher.matcher.Match(valueSliceToInterfaceSlice(c.Values), c.Values[argIdx].Interface()) {
 				matched = false
 				break
 			}
@@ -51,8 +50,13 @@ func (h *invocationHandler) DoAnswer(c *matchers.MethodCall) []reflect.Value {
 		if matched {
 			ifaces := valueSliceToInterfaceSlice(c.Values)
 
-			ansWrapper := mm.popAnswer()
+			for i, m := range mm.matchers {
+				if m.rec != nil {
+					m.rec.Record(c, ifaces[i])
+				}
+			}
 
+			ansWrapper := mm.popAnswer()
 			if ansWrapper == nil {
 				return createDefaultReturnValues(c.Method.Type)
 			}
@@ -80,6 +84,19 @@ func (h *invocationHandler) When() matchers.ReturnerAll {
 	whenAnswer := h.ctx.getState().whenAnswer
 	whenMethodMatch := h.ctx.getState().whenMethodMatch
 
+	if whenCall == nil {
+		h.ctx.reporter.ReportIncorrectWhenUsage()
+		return nil
+	}
+
+	if whenMethodMatch != nil {
+		for _, m := range whenMethodMatch.matchers {
+			if m.rec != nil {
+				m.rec.RemoveRecord(whenCall)
+			}
+		}
+	}
+
 	h.ctx.getState().whenHandler = nil
 	h.ctx.getState().whenCall = nil
 	h.ctx.getState().whenMethodMatch = nil
@@ -89,21 +106,15 @@ func (h *invocationHandler) When() matchers.ReturnerAll {
 		whenMethodMatch.putBackAnswer(whenAnswer)
 	}
 
-	if whenCall == nil {
-		h.ctx.reporter.ReportIncorrectWhenUsage()
-		return nil
-	}
 	if !h.validateMatchers(whenCall) {
 		return nil
 	}
 
 	rec := h.calls[whenCall.Method.Num]
 
-	h.ctx.addServiceMethodCallId(whenCall.ID)
-
 	argMatchers := h.ctx.getState().matchers
 
-	h.ctx.getState().matchers = make([]matchers.Matcher, 0)
+	h.ctx.getState().matchers = make([]*matcherWrapper, 0)
 	m := &methodMatch{
 		matchers:   argMatchers,
 		unanswered: make([]*answerWrapper, 0),
@@ -142,12 +153,24 @@ func (h *invocationHandler) VerifyMethod(verifier matchers.MethodVerifier) {
 
 func (h *invocationHandler) DoVerifyMethod(call *matchers.MethodCall) []reflect.Value {
 	argMatchers := h.ctx.getState().matchers
-	ok := h.validateMatchers(call)
-	h.ctx.getState().matchers = make([]matchers.Matcher, 0)
+
+	matchersOk := h.validateMatchers(call)
+	verifyMatchersOk := true
+
+	if matchersOk {
+		verifyMatchersOk = h.validateVerifyMatchers(call)
+	}
+
+	h.ctx.getState().matchers = make([]*matcherWrapper, 0)
 	h.ctx.getState().verifyState = false
-	if !ok {
+
+	if !matchersOk {
 		return createDefaultReturnValues(call.Method.Type)
 	}
+	if !verifyMatchersOk {
+		return createDefaultReturnValues(call.Method.Type)
+	}
+
 	numMethodCalls := 0
 	rec := h.calls[call.Method.Num]
 	for _, c := range rec.calls {
@@ -157,7 +180,7 @@ func (h *invocationHandler) DoVerifyMethod(call *matchers.MethodCall) []reflect.
 		}
 
 		for i := range argMatchers {
-			if !argMatchers[i].Match(c, c.Values[i].Interface()) {
+			if !argMatchers[i].matcher.Match(valueSliceToInterfaceSlice(c.Values), c.Values[i].Interface()) {
 				matches = false
 				break
 			}
@@ -196,6 +219,22 @@ func newHandler[T any](holder *mockContext) *invocationHandler {
 
 func (h *invocationHandler) validateMatchers(call *matchers.MethodCall) bool {
 	argMatchers := h.ctx.getState().matchers
+	if len(argMatchers) == 0 {
+		ifaces := valueSliceToInterfaceSlice(call.Values)
+		for _, v := range ifaces {
+			cur := v
+			desc := fmt.Sprintf("Exact[%s]", reflect.TypeOf(v).String())
+			fm := FunMatcher(desc, func(call []any, a any) bool {
+				return cur == a
+			})
+			mw := &matcherWrapper{
+				matcher: fm,
+				rec:     nil,
+			}
+			argMatchers = append(argMatchers, mw)
+		}
+		h.ctx.getState().matchers = argMatchers
+	}
 	mt := call.Method.Type
 	if len(argMatchers) != mt.Type.NumIn() {
 		h.ctx.reporter.ReportInvalidUseOfMatchers(call, argMatchers)
@@ -212,6 +251,17 @@ func (h *invocationHandler) validateReturnValues(result []reflect.Value, method 
 		retExpected := method.Type.Out(i)
 		retActual := result[i].Type()
 		if retExpected != retActual {
+			return false
+		}
+	}
+	return true
+}
+
+func (h *invocationHandler) validateVerifyMatchers(call *matchers.MethodCall) bool {
+	argMatchers := h.ctx.getState().matchers
+	for _, a := range argMatchers {
+		if a.rec != nil {
+			h.ctx.reporter.ReportInvalidUseOfCaptors(call, argMatchers)
 			return false
 		}
 	}

@@ -7,7 +7,7 @@ import (
 )
 
 type fiberState struct {
-	matchers        []matchers.Matcher
+	matchers        []*matcherWrapper
 	whenHandler     *invocationHandler
 	verifyState     bool
 	methodVerifier  matchers.MethodVerifier
@@ -17,23 +17,9 @@ type fiberState struct {
 }
 
 type mockContext struct {
-	state              routine.ThreadLocal
-	serviceMethodCalls map[string]struct{}
-	reporter           *EnrichedReporter
-	lock               sync.Mutex
-}
-
-func (ctx *mockContext) addServiceMethodCallId(id string) {
-	ctx.lock.Lock()
-	defer ctx.lock.Unlock()
-	ctx.serviceMethodCalls[id] = struct{}{}
-}
-
-func (ctx *mockContext) IsServiceCall(id string) bool {
-	ctx.lock.Lock()
-	defer ctx.lock.Unlock()
-	_, ok := ctx.serviceMethodCalls[id]
-	return ok
+	state    routine.ThreadLocal
+	reporter *EnrichedReporter
+	lock     sync.Mutex
 }
 
 type methodRecorder struct {
@@ -42,21 +28,23 @@ type methodRecorder struct {
 }
 
 type methodMatch struct {
-	matchers   []matchers.Matcher
+	matchers   []*matcherWrapper
 	unanswered []*answerWrapper
 	answered   []*answerWrapper
 	lock       sync.Mutex
+	lastAnswer *answerWrapper
 }
 
 func (m *methodMatch) popAnswer() *answerWrapper {
 	m.lock.Lock()
 	defer m.lock.Unlock()
 	if len(m.unanswered) == 0 {
-		return nil
+		return m.lastAnswer
 	}
 	last := m.unanswered[0]
 	m.unanswered = m.unanswered[1:]
 	m.answered = append(m.answered, last)
+	m.lastAnswer = last
 	return last
 }
 
@@ -90,6 +78,11 @@ type answerWrapper struct {
 	ans matchers.Answer
 }
 
+type matcherWrapper struct {
+	matcher matchers.Matcher
+	rec     recordable
+}
+
 func (ctx *mockContext) getState() *fiberState {
 	return ctx.state.Get().(*fiberState)
 }
@@ -98,15 +91,14 @@ func newMockContext(reporter *EnrichedReporter) *mockContext {
 	return &mockContext{
 		state: routine.NewThreadLocalWithInitial(func() any {
 			return &fiberState{
-				matchers:       make([]matchers.Matcher, 0),
+				matchers:       make([]*matcherWrapper, 0),
 				whenHandler:    nil,
 				whenCall:       nil,
 				methodVerifier: nil,
 				verifyState:    false,
 			}
 		}),
-		reporter:           reporter,
-		serviceMethodCalls: make(map[string]struct{}, 0),
-		lock:               sync.Mutex{},
+		reporter: reporter,
+		lock:     sync.Mutex{},
 	}
 }

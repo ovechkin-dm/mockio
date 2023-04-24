@@ -1,0 +1,100 @@
+package match
+
+import (
+	. "github.com/ovechkin-dm/mockio/mock"
+	"github.com/ovechkin-dm/mockio/tests/common"
+	"testing"
+)
+
+type Iface interface {
+	Test(i interface{}) bool
+}
+
+type St struct {
+	value int
+}
+
+func TestAny(t *testing.T) {
+	r := common.NewMockReporter(t)
+	SetUp(r)
+	m := Mock[Iface]()
+	WhenA(m.Test(Any[string]())).ThenReturn(true)
+	ret := m.Test("test")
+	r.AssertEqual(true, ret)
+}
+
+func TestAnyStruct(t *testing.T) {
+	r := common.NewMockReporter(t)
+	SetUp(r)
+	m := Mock[Iface]()
+	WhenA(m.Test(Any[*St]())).ThenReturn(true)
+	st := &St{}
+	ret := m.Test(st)
+	r.AssertEqual(true, ret)
+}
+
+func TestAnyWrongType(t *testing.T) {
+	r := common.NewMockReporter(t)
+	SetUp(r)
+	m := Mock[Iface]()
+	WhenA(m.Test(Any[int]())).ThenReturn(true)
+	ret := m.Test("test")
+	r.AssertEqual(false, ret)
+}
+
+func TestExactStruct(t *testing.T) {
+	r := common.NewMockReporter(t)
+	SetUp(r)
+	a := St{}
+	m := Mock[Iface]()
+	WhenA(m.Test(Exact(&a))).ThenReturn(true)
+	ret := m.Test(&a)
+	r.AssertEqual(true, ret)
+}
+
+func TestExactWrongStruct(t *testing.T) {
+	r := common.NewMockReporter(t)
+	SetUp(r)
+	a := &St{10}
+	b := &St{10}
+	m := Mock[Iface]()
+	WhenA(m.Test(Exact(a))).ThenReturn(true)
+	ret := m.Test(b)
+	r.AssertEqual(false, ret)
+}
+
+func TestEqualStruct(t *testing.T) {
+	r := common.NewMockReporter(t)
+	SetUp(r)
+	a := &St{10}
+	b := &St{10}
+	m := Mock[Iface]()
+	WhenA(m.Test(Equal(a))).ThenReturn(true)
+	ret := m.Test(b)
+	r.AssertEqual(true, ret)
+}
+
+func TestNonEqualStruct(t *testing.T) {
+	r := common.NewMockReporter(t)
+	SetUp(r)
+	a := &St{11}
+	b := &St{10}
+	m := Mock[Iface]()
+	WhenA(m.Test(Equal(a))).ThenReturn(true)
+	ret := m.Test(b)
+	r.AssertEqual(false, ret)
+}
+
+func TestCustomMatcher(t *testing.T) {
+	r := common.NewMockReporter(t)
+	SetUp(r)
+	evenm := CreateMatcher("even", func(allArgs []any, actual any) bool {
+		return actual.(int)%2 == 0
+	})
+	m := Mock[Iface]()
+	WhenA(m.Test(Custom[any](evenm))).ThenReturn(true)
+	ret1 := m.Test(10)
+	ret2 := m.Test(11)
+	r.AssertEqual(ret1, true)
+	r.AssertEqual(ret2, false)
+}

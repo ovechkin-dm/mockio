@@ -30,10 +30,10 @@ func (e *EnrichedReporter) ReportUnregisteredMockVerify(t any) {
 	e.Errorf("unregistered mock instance during Verify call: %v", t)
 }
 
-func (e *EnrichedReporter) ReportInvalidUseOfMatchers(call *matchers.MethodCall, m []matchers.Matcher) {
+func (e *EnrichedReporter) ReportInvalidUseOfMatchers(call *matchers.MethodCall, m []*matcherWrapper) {
 	matcherArgs := make([]string, len(m))
 	for i := range m {
-		matcherArgs[i] = m[i].Description()
+		matcherArgs[i] = m[i].matcher.Description()
 	}
 	matchersString := strings.Join(matcherArgs, ",")
 	tp := call.Method.Type.Type
@@ -53,11 +53,19 @@ you can only use matchers within When() call: mock.When(foo.Bar(mock.Any[Int]))
 `, call.Method.Type, inArgsStr, matchersString)
 }
 
+func (e *EnrichedReporter) ReportInvalidUseOfCaptors(call *matchers.MethodCall, m []*matcherWrapper) {
+
+}
+
 func (e *EnrichedReporter) ReportVerifyMethodError(call *matchers.MethodCall, err error) {
 	e.FailNow(err)
 }
 
 func (e *EnrichedReporter) ReportEmptyCaptor() {
+	e.Fatal("no values were captured")
+}
+
+func (e *EnrichedReporter) ReportInvalidCaptorValue(expectedType reflect.Type, actualType reflect.Type) {
 	e.Fatal("no values were captured")
 }
 

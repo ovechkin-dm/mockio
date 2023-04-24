@@ -6,14 +6,14 @@ import (
 	"testing"
 )
 
-type WhenAInterface interface {
+type whenAInterface interface {
 	Foo(a int) int
 }
 
 func TestWhenARet(t *testing.T) {
 	r := common.NewMockReporter(t)
 	SetUp(r)
-	m := NewMock[WhenAInterface]()
+	m := Mock[whenAInterface]()
 	WhenA(m.Foo(Any[int]())).ThenReturn(42)
 	ret := m.Foo(10)
 	r.AssertEqual(42, ret)
@@ -22,7 +22,7 @@ func TestWhenARet(t *testing.T) {
 func TestWhenAAnswer(t *testing.T) {
 	r := common.NewMockReporter(t)
 	SetUp(r)
-	m := NewMock[WhenAInterface]()
+	m := Mock[whenAInterface]()
 	WhenA(m.Foo(Any[int]())).ThenAnswer(func(args []any) int {
 		return 42
 	})
@@ -33,7 +33,7 @@ func TestWhenAAnswer(t *testing.T) {
 func TestWhenAAnswerWithArgs(t *testing.T) {
 	r := common.NewMockReporter(t)
 	SetUp(r)
-	m := NewMock[WhenAInterface]()
+	m := Mock[whenAInterface]()
 	WhenA(m.Foo(Any[int]())).ThenAnswer(func(args []any) int {
 		return args[0].(int) + 1
 	})
@@ -44,7 +44,7 @@ func TestWhenAAnswerWithArgs(t *testing.T) {
 func TestWhenAMultiAnswer(t *testing.T) {
 	r := common.NewMockReporter(t)
 	SetUp(r)
-	m := NewMock[WhenAInterface]()
+	m := Mock[whenAInterface]()
 	WhenA(m.Foo(Any[int]())).
 		ThenAnswer(func(args []any) int {
 			return args[0].(int) + 1
@@ -61,7 +61,7 @@ func TestWhenAMultiAnswer(t *testing.T) {
 func TestWhenAMultiReturn(t *testing.T) {
 	r := common.NewMockReporter(t)
 	SetUp(r)
-	m := NewMock[WhenAInterface]()
+	m := Mock[whenAInterface]()
 	WhenA(m.Foo(Any[int]())).
 		ThenReturn(10).
 		ThenReturn(11)
@@ -74,7 +74,7 @@ func TestWhenAMultiReturn(t *testing.T) {
 func TestWhenAAnswerAndReturn(t *testing.T) {
 	r := common.NewMockReporter(t)
 	SetUp(r)
-	m := NewMock[WhenAInterface]()
+	m := Mock[whenAInterface]()
 	WhenA(m.Foo(Any[int]())).
 		ThenReturn(10).
 		ThenAnswer(func(args []any) int {

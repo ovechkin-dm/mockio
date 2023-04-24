@@ -1,10 +1,15 @@
 package registry
 
 import (
-	"fmt"
 	"github.com/ovechkin-dm/mockio/matchers"
 	"reflect"
+	"sync"
 )
+
+type recordable interface {
+	Record(call *matchers.MethodCall, value any)
+	RemoveRecord(call *matchers.MethodCall)
+}
 
 type capturedValue[T any] struct {
 	value T
@@ -14,26 +19,11 @@ type capturedValue[T any] struct {
 type captorImpl[T any] struct {
 	values []*capturedValue[T]
 	ctx    *mockContext
+	lock   sync.Mutex
 }
 
 func (c *captorImpl[T]) Capture() T {
-	tp := reflect.TypeOf(new(T)).Elem()
-	AddMatcher(FunMatcher(fmt.Sprintf("Captor[%s]", tp), func(m *matchers.MethodCall, a any) bool {
-		if c.ctx.IsServiceCall(m.ID) {
-			return true
-		}
-		at, ok := a.(T)
-		if !ok {
-			c.ctx.reporter.Errorf("incorrect usage of argument captor. expected to capture type %s, got %v", tp.String(), a)
-			return false
-		}
-		cv := &capturedValue[T]{
-			value: at,
-			call:  m,
-		}
-		c.values = append(c.values, cv)
-		return true
-	}))
+	AddCaptor[T](c)
 	var t T
 	return t
 }
@@ -49,11 +39,39 @@ func (c *captorImpl[T]) Last() T {
 }
 
 func (c *captorImpl[T]) Values() []T {
-	result := make([]T, 0)
+	c.lock.Lock()
+	defer c.lock.Unlock()
+	result := make([]T, len(c.values))
 	for i := range c.values {
-		if !c.ctx.IsServiceCall(c.values[i].call.ID) {
-			result = append(result, c.values[i].value)
-		}
+		result[i] = c.values[i].value
 	}
 	return result
+}
+
+func (c *captorImpl[T]) Record(call *matchers.MethodCall, value any) {
+	c.lock.Lock()
+	defer c.lock.Unlock()
+	t, ok := value.(T)
+	if !ok {
+		tp := reflect.TypeOf(new(T)).Elem()
+		c.ctx.reporter.ReportInvalidCaptorValue(tp, reflect.TypeOf(value))
+		return
+	}
+	cv := &capturedValue[T]{
+		value: t,
+		call:  call,
+	}
+	c.values = append(c.values, cv)
+}
+
+func (c *captorImpl[T]) RemoveRecord(call *matchers.MethodCall) {
+	c.lock.Lock()
+	defer c.lock.Unlock()
+	wo := make([]*capturedValue[T], 0)
+	for _, v := range c.values {
+		if v.call != call {
+			wo = append(wo, v)
+		}
+	}
+	c.values = wo
 }

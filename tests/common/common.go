@@ -24,7 +24,7 @@ func (m *MockReporter) ErrorContains(s string) bool {
 	return m.IsError() && strings.Contains(strings.ToLower(m.reported), strings.ToLower(s))
 }
 
-func (m *MockReporter) GetErrorScript() string {
+func (m *MockReporter) GetErrorString() string {
 	return m.reported
 }
 

@@ -5,10 +5,8 @@ import (
 	"reflect"
 )
 
-// MethodCall represents a recorded method call with its unique identifier, method object, and arguments.
+// MethodCall represents a recorded method call with its method object and arguments.
 type MethodCall struct {
-	// ID is the unique identifier for the recorded method call.
-	ID string
 	// Method is a pointer to the dyno.Method object representing the method being called.
 	Method *dyno.Method
 	// Values is a slice containing the argument values passed to the method.
@@ -37,5 +35,5 @@ type Matcher interface {
 
 	// Match returns true if the given method call satisfies the criteria defined by the Matcher.
 	// The actual parameter represents the expected value or type, depending on the Matcher implementation.
-	Match(methodCall *MethodCall, actual any) bool
+	Match(allArgs []any, actual any) bool
 }

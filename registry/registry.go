@@ -6,6 +6,7 @@ import (
 	"github.com/ovechkin-dm/mockio/matchers"
 	"github.com/timandy/routine"
 	"log"
+	"reflect"
 	"sync"
 )
 
@@ -55,7 +56,25 @@ func Mock[T any]() T {
 
 func AddMatcher(m matchers.Matcher) {
 	withCheck[any](func() any {
-		getInstance().mockContext.getState().matchers = append(getInstance().mockContext.getState().matchers, m)
+		w := &matcherWrapper{
+			matcher: m,
+			rec:     nil,
+		}
+		getInstance().mockContext.getState().matchers = append(getInstance().mockContext.getState().matchers, w)
+		return nil
+	})
+}
+
+func AddCaptor[T any](c *captorImpl[T]) {
+	withCheck[any](func() any {
+		tp := reflect.TypeOf(new(T)).Elem()
+		w := &matcherWrapper{
+			matcher: FunMatcher(fmt.Sprintf("Captor[%s]", tp), func(call []any, a any) bool {
+				return true
+			}),
+			rec: c,
+		}
+		getInstance().mockContext.getState().matchers = append(getInstance().mockContext.getState().matchers, w)
 		return nil
 	})
 }

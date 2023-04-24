@@ -30,7 +30,7 @@ func (s *Service) IsAdult(userId int) (bool, error) {
 
 func main() {
 	SetUp(&matchers.ConsoleReporter{})
-	storage := NewMock[Storage]()
+	storage := Mock[Storage]()
 	service := &Service{
 		storage: storage,
 	}
@@ -41,7 +41,7 @@ func main() {
 	}
 	WhenE(storage.GetUser(Any[int]())).ThenReturn(u, nil)
 	ad, err := service.IsAdult(10)
-	Verify(storage, Never()).GetUser(Exact(11))
+	Verify(storage, Never()).GetUser(Equal(11))
 	VerifyNoMoreInteractions(storage)
 	if err != nil {
 		panic(err)

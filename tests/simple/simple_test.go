@@ -6,14 +6,14 @@ import (
 	"testing"
 )
 
-type MyInterface interface {
+type myInterface interface {
 	Foo(a int) int
 }
 
 func TestSimple(t *testing.T) {
 	r := common.NewMockReporter(t)
 	SetUp(r)
-	m := NewMock[MyInterface]()
+	m := Mock[myInterface]()
 	WhenA(m.Foo(Any[int]())).ThenReturn(42)
 	ret := m.Foo(10)
 	r.AssertEqual(42, ret)
