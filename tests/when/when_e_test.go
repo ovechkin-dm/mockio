@@ -95,9 +95,9 @@ func TestWhenEReturnError(t *testing.T) {
 	SetUp(r)
 	m := Mock[WhenEInterface]()
 	WhenE(m.Foo(Any[int]())).
-		ThenReturn(0, errors.New("err"))
+		ThenReturn(1, errors.New("err"))
 	ret, err := m.Foo(12)
-	r.AssertEqual(0, ret)
+	r.AssertEqual(1, ret)
 	r.AssertErrorContains(err, "err")
 }
 

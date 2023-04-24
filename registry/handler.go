@@ -66,10 +66,12 @@ func (h *invocationHandler) DoAnswer(c *matchers.MethodCall) []reflect.Value {
 			h.ctx.getState().whenAnswer = ansWrapper
 			h.ctx.getState().whenMethodMatch = mm
 
-			result := interfaceSliceToValueSlice(retValues, c.Method.Type)
-			if !h.validateReturnValues(result, c.Method.Type) {
-				h.ctx.reporter.ReportInvalidReturnValues(result, c.Method.Type)
+			if !h.validateReturnValues(retValues, c.Method.Type) {
+				h.ctx.reporter.ReportInvalidReturnValues(retValues, c.Method.Type)
+				return createDefaultReturnValues(c.Method.Type)
 			}
+
+			result := interfaceSliceToValueSlice(retValues, c.Method.Type)
 			return result
 		}
 	}
@@ -88,6 +90,7 @@ func (h *invocationHandler) When() matchers.ReturnerAll {
 		h.ctx.reporter.ReportIncorrectWhenUsage()
 		return nil
 	}
+	whenCall.WhenCall = true
 
 	if whenMethodMatch != nil {
 		for _, m := range whenMethodMatch.matchers {
@@ -174,6 +177,9 @@ func (h *invocationHandler) DoVerifyMethod(call *matchers.MethodCall) []reflect.
 	numMethodCalls := 0
 	rec := h.calls[call.Method.Num]
 	for _, c := range rec.calls {
+		if c.WhenCall {
+			continue
+		}
 		matches := true
 		if c.Method.Type != call.Method.Type {
 			continue
@@ -243,14 +249,17 @@ func (h *invocationHandler) validateMatchers(call *matchers.MethodCall) bool {
 	return true
 }
 
-func (h *invocationHandler) validateReturnValues(result []reflect.Value, method reflect.Method) bool {
+func (h *invocationHandler) validateReturnValues(result []any, method reflect.Method) bool {
 	if method.Type.NumOut() != len(result) {
 		return false
 	}
 	for i := range result {
+		if reflect.Zero(method.Type.Out(i)).Interface() == result[i] {
+			continue
+		}
 		retExpected := method.Type.Out(i)
-		retActual := result[i].Type()
-		if retExpected != retActual {
+		retActual := reflect.TypeOf(result[i])
+		if !retActual.AssignableTo(retExpected) {
 			return false
 		}
 	}

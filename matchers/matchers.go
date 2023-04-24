@@ -10,7 +10,8 @@ type MethodCall struct {
 	// Method is a pointer to the dyno.Method object representing the method being called.
 	Method *dyno.Method
 	// Values is a slice containing the argument values passed to the method.
-	Values []reflect.Value
+	Values   []reflect.Value
+	WhenCall bool
 }
 
 // Answer is a type alias for a function that can be used as a return value for mock function calls.

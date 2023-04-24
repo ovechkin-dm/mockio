@@ -69,10 +69,10 @@ func (e *EnrichedReporter) ReportInvalidCaptorValue(expectedType reflect.Type, a
 	e.Fatal("no values were captured")
 }
 
-func (e *EnrichedReporter) ReportInvalidReturnValues(ret []reflect.Value, method reflect.Method) {
+func (e *EnrichedReporter) ReportInvalidReturnValues(ret []any, method reflect.Method) {
 	retStrValues := make([]string, len(ret))
 	for i := range retStrValues {
-		retStrValues[i] = ret[i].String()
+		retStrValues[i] = reflect.ValueOf(ret[i]).String()
 	}
 	retStr := strings.Join(retStrValues, ",")
 	tp := method.Type
