@@ -1,10 +1,18 @@
 package registry
 
 import (
+	"fmt"
 	"github.com/ovechkin-dm/mockio/matchers"
 	"reflect"
 	"strings"
 )
+
+type panicReporter struct {
+}
+
+func (p *panicReporter) Fatalf(format string, args ...any) {
+	panic(fmt.Sprintf(format, args))
+}
 
 type EnrichedReporter struct {
 	reporter matchers.ErrorReporter

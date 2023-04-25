@@ -62,3 +62,13 @@ func TestVerifyNeverFails(t *testing.T) {
 	Verify(m, Never()).Foo(10)
 	r.AssertError()
 }
+
+func TestNoMoreInteractions(t *testing.T) {
+	r := common.NewMockReporter(t)
+	SetUp(r)
+	m := Mock[iface]()
+	WhenA(m.Foo(Any[int]())).ThenReturn(10)
+	VerifyNoMoreInteractions(m)
+	m.Foo(10)
+	r.AssertError()
+}

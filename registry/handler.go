@@ -155,14 +155,16 @@ func (h *invocationHandler) VerifyMethod(verifier matchers.MethodVerifier) {
 }
 
 func (h *invocationHandler) DoVerifyMethod(call *matchers.MethodCall) []reflect.Value {
-	argMatchers := h.ctx.getState().matchers
 
 	matchersOk := h.validateMatchers(call)
+
 	verifyMatchersOk := true
 
 	if matchersOk {
 		verifyMatchersOk = h.validateVerifyMatchers(call)
 	}
+
+	argMatchers := h.ctx.getState().matchers
 
 	h.ctx.getState().matchers = make([]*matcherWrapper, 0)
 	h.ctx.getState().verifyState = false
