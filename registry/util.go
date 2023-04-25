@@ -1,7 +1,6 @@
 package registry
 
 import (
-	"github.com/google/uuid"
 	"reflect"
 )
 
@@ -31,8 +30,4 @@ func interfaceSliceToValueSlice(values []any, m reflect.Method) []reflect.Value 
 		result[i] = retV
 	}
 	return result
-}
-
-func GenerateId() string {
-	return uuid.Must(uuid.NewRandom()).String()
 }

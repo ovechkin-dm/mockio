@@ -6,6 +6,7 @@ import (
 	"github.com/ovechkin-dm/mockio/matchers"
 	"github.com/timandy/routine"
 	"log"
+	"reflect"
 	"sync"
 )
 
@@ -23,25 +24,21 @@ func getInstance() *Registry {
 
 func SetUp(reporter matchers.ErrorReporter) {
 	if reporter == nil {
-		panic("call to SetUp with nil reporter")
-	}
-	if getInstance().mockContext.reporter != nil {
-		getInstance().mockContext.reporter.Fatalf("Mock registry is already set up. SetUp method should be called once")
-		return
+		log.Println("Warn: call to SetUp with nil reporter")
 	}
 	getInstance().mockContext = newMockContext(newEnrichedReporter(reporter))
 }
 
 func TearDown() {
 	if getInstance().mockContext.reporter == nil {
-		getInstance().mockContext.reporter.Fatalf("Cannot TearDown since SetUp function wasn't called")
+		getInstance().mockContext.reporter.Errorf("Cannot TearDown since SetUp function wasn't called")
 	}
 	instance.Set(newRegistry())
 }
 
 func Mock[T any]() T {
 	return withCheck[T](func() T {
-		handler := NewHandler(getInstance().mockContext)
+		handler := newHandler[T](getInstance().mockContext)
 		t, err := dyno.Dynamic[T](handler)
 		if err != nil {
 			getInstance().mockContext.reporter.FailNow(fmt.Errorf("error creating mock: %w", err))
@@ -55,7 +52,25 @@ func Mock[T any]() T {
 
 func AddMatcher(m matchers.Matcher) {
 	withCheck[any](func() any {
-		getInstance().mockContext.getState().matchers = append(getInstance().mockContext.getState().matchers, m)
+		w := &matcherWrapper{
+			matcher: m,
+			rec:     nil,
+		}
+		getInstance().mockContext.getState().matchers = append(getInstance().mockContext.getState().matchers, w)
+		return nil
+	})
+}
+
+func AddCaptor[T any](c *captorImpl[T]) {
+	withCheck[any](func() any {
+		tp := reflect.TypeOf(new(T)).Elem()
+		w := &matcherWrapper{
+			matcher: FunMatcher(fmt.Sprintf("Captor[%s]", tp), func(call []any, a any) bool {
+				return true
+			}),
+			rec: c,
+		}
+		getInstance().mockContext.getState().matchers = append(getInstance().mockContext.getState().matchers, w)
 		return nil
 	})
 }
@@ -96,8 +111,9 @@ func VerifyInstance(t any, v matchers.InstanceVerifier) {
 }
 
 func newRegistry() any {
+	reporter := &EnrichedReporter{&panicReporter{}}
 	return &Registry{
-		mockContext: newMockContext(nil),
+		mockContext: newMockContext(reporter),
 		mapping:     make(map[any]*invocationHandler, 0),
 	}
 }
@@ -105,9 +121,9 @@ func newRegistry() any {
 func withCheck[T any](f func() T) T {
 	lock.Lock()
 	defer lock.Unlock()
-
-	if getInstance() == nil || getInstance().mockContext.reporter == nil {
-		log.Fatalf("reporter is not initialized. You can initialize it with `mock.SetUp(*testing.T)`")
+	_, ok := getInstance().mockContext.reporter.reporter.(*panicReporter)
+	if ok {
+		log.Println("Warning: reporter is not initialized. You can initialize it with `mock.SetUp(*testing.T). Defaulting to the panic reporter. This could also happens when using mocks concurrently`")
 	}
 	return f()
 }

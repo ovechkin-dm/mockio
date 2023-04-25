@@ -1,21 +1,29 @@
 package registry
 
 import (
+	"fmt"
 	"github.com/ovechkin-dm/mockio/matchers"
 	"reflect"
 	"strings"
 )
 
+type panicReporter struct {
+}
+
+func (p *panicReporter) Fatalf(format string, args ...any) {
+	panic(fmt.Sprintf(format, args))
+}
+
 type EnrichedReporter struct {
 	reporter matchers.ErrorReporter
 }
 
-func (e *EnrichedReporter) Fatalf(format string, args ...any) {
+func (e *EnrichedReporter) Errorf(format string, args ...any) {
 	e.reporter.Fatalf(format, args...)
 }
 
 func (e *EnrichedReporter) FailNow(err error) {
-	e.Fatalf(err.Error())
+	e.Errorf(err.Error())
 }
 
 func (e *EnrichedReporter) Fatal(format string) {
@@ -27,13 +35,13 @@ func (e *EnrichedReporter) ReportIncorrectWhenUsage() {
 }
 
 func (e *EnrichedReporter) ReportUnregisteredMockVerify(t any) {
-	e.Fatalf("unregistered mock instance during Verify call: %v", t)
+	e.Errorf("unregistered mock instance during Verify call: %v", t)
 }
 
-func (e *EnrichedReporter) ReportInvalidUseOfMatchers(call *matchers.MethodCall, m []matchers.Matcher) {
+func (e *EnrichedReporter) ReportInvalidUseOfMatchers(call *matchers.MethodCall, m []*matcherWrapper) {
 	matcherArgs := make([]string, len(m))
 	for i := range m {
-		matcherArgs[i] = m[i].Description()
+		matcherArgs[i] = m[i].matcher.Description()
 	}
 	matchersString := strings.Join(matcherArgs, ",")
 	tp := call.Method.Type.Type
@@ -42,7 +50,7 @@ func (e *EnrichedReporter) ReportInvalidUseOfMatchers(call *matchers.MethodCall,
 		inArgs = append(inArgs, tp.In(i).String())
 	}
 	inArgsStr := strings.Join(inArgs, ",")
-	e.Fatalf(`invalid use of matchers
+	e.Errorf(`invalid use of matchers
 method:
 %v
 expected:
@@ -53,6 +61,10 @@ you can only use matchers within When() call: mock.When(foo.Bar(mock.Any[Int]))
 `, call.Method.Type, inArgsStr, matchersString)
 }
 
+func (e *EnrichedReporter) ReportInvalidUseOfCaptors(call *matchers.MethodCall, m []*matcherWrapper) {
+
+}
+
 func (e *EnrichedReporter) ReportVerifyMethodError(call *matchers.MethodCall, err error) {
 	e.FailNow(err)
 }
@@ -61,10 +73,14 @@ func (e *EnrichedReporter) ReportEmptyCaptor() {
 	e.Fatal("no values were captured")
 }
 
-func (e *EnrichedReporter) ReportInvalidReturnValues(ret []reflect.Value, method reflect.Method) {
+func (e *EnrichedReporter) ReportInvalidCaptorValue(expectedType reflect.Type, actualType reflect.Type) {
+	e.Fatal("no values were captured")
+}
+
+func (e *EnrichedReporter) ReportInvalidReturnValues(ret []any, method reflect.Method) {
 	retStrValues := make([]string, len(ret))
 	for i := range retStrValues {
-		retStrValues[i] = ret[i].String()
+		retStrValues[i] = reflect.ValueOf(ret[i]).String()
 	}
 	retStr := strings.Join(retStrValues, ",")
 	tp := method.Type
@@ -73,7 +89,7 @@ func (e *EnrichedReporter) ReportInvalidReturnValues(ret []reflect.Value, method
 		outTypes = append(outTypes, tp.Out(i).String())
 	}
 	outTypesStr := strings.Join(outTypes, ",")
-	e.Fatalf(`invalid return values
+	e.Errorf(`invalid return values
 method:
 %v
 expected number of return values:

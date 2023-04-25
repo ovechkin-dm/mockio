@@ -82,18 +82,19 @@ func Any[T any]() T {
 	return t
 }
 
-// Equal returns a matcher that matches values of type T that are equal to the provided value.
-// The value passed to Equal must be comparable with values of type T.
+// Exact returns a matcher that matches values of type T that are equal to the provided value.
+// The value passed to Exact must be comparable with values of type T.
 //
 // Example usage:
 //
 //	// Set up a mock behavior for a method that takes a string argument equal to "foo"
-//	mock.WhenA(myMock.MyMethod(mock.Equal("foo"))).ThenReturn("bar")
+//	mock.WhenA(myMock.MyMethod(mock.Exact("foo"))).ThenReturn("bar")
 //
 //	// Set up a mock behavior for a method that takes an integer argument equal to 42
-//	mock.WhenA(myMock.MyOtherMethod(mock.Equal(42))).ThenReturn("baz")
-func Equal[T comparable](value T) T {
-	m := registry.FunMatcher("mock.Equal", func(m *matchers.MethodCall, actual any) bool {
+//	mock.WhenA(myMock.MyOtherMethod(mock.Exact(42))).ThenReturn("baz")
+func Exact[T comparable](value T) T {
+	desc := fmt.Sprintf("Exact[%s]", reflect.TypeOf(new(T)).Elem().String())
+	m := registry.FunMatcher(desc, func(m []any, actual any) bool {
 		return value == actual
 	})
 	registry.AddMatcher(m)
@@ -101,18 +102,19 @@ func Equal[T comparable](value T) T {
 	return t
 }
 
-// Exact returns a matcher that matches values of type T that are equal via reflect.DeepEqual to the provided value.
-// The value passed to Exact must be of the exact same type as values of type T.
+// Equal returns a matcher that matches values of type T that are equal via reflect.DeepEqual to the provided value.
+// The value passed to Equal must be of the exact same type as values of type T.
 //
 // Example usage:
 //
 //	// Set up a mock behavior for a method that takes a string argument exactly equal to "foo"
-//	mock.WhenA(myMock.MyMethod(mock.Exact("foo"))).ThenReturn("bar")
+//	mock.WhenA(myMock.MyMethod(mock.Equal("foo"))).ThenReturn("bar")
 //
 //	// Set up a mock behavior for a method that takes an integer argument exactly equal to 42
-//	mock.WhenA(myMock.MyOtherMethod(mock.Exact(42))).ThenReturn("baz")
-func Exact[T any](value T) T {
-	m := registry.FunMatcher("mock.Exact", func(m *matchers.MethodCall, actual any) bool {
+//	mock.WhenA(myMock.MyOtherMethod(mock.Equal(42))).ThenReturn("baz")
+func Equal[T any](value T) T {
+	desc := fmt.Sprintf("Equal[%s]", reflect.TypeOf(new(T)).Elem().String())
+	m := registry.FunMatcher(desc, func(m []any, actual any) bool {
 		return reflect.DeepEqual(value, actual)
 	})
 	registry.AddMatcher(m)
@@ -120,9 +122,14 @@ func Exact[T any](value T) T {
 	return t
 }
 
-// Match returns a Matcher that matches values of type T using the provided Matcher implementation.
+// CreateMatcher returns a Matcher that matches values of type T using the provided Matcher implementation.
 // The provided Matcher implementation must implement the Matcher interface.
-func Match[T any](m matchers.Matcher) T {
+func CreateMatcher(description string, f func(allArgs []any, actual any) bool) matchers.Matcher {
+	m := registry.FunMatcher(description, f)
+	return m
+}
+
+func Custom[T any](m matchers.Matcher) T {
 	registry.AddMatcher(m)
 	var t T
 	return t
@@ -138,7 +145,7 @@ func Match[T any](m matchers.Matcher) T {
 //
 //	// Set up a mock behavior for a method call that takes a custom struct as an argument
 //	myStruct := MyStruct{Field1: "value1", Field2: "value2"}
-//	mock.WhenA(myMock.MyOtherMethod(mock.Exact(myStruct))).ThenReturn("baz")
+//	mock.WhenA(myMock.MyOtherMethod(mock.Equal(myStruct))).ThenReturn("baz")
 func WhenA[T any](t T) matchers.Returner1[T] {
 	return registry.ToReturner1[T](registry.When())
 }
@@ -149,7 +156,7 @@ func WhenA[T any](t T) matchers.Returner1[T] {
 // Example usage:
 //
 //	// Set up a mock behavior for a method call that takes a string argument and returns an error
-//	mock.WhenE(myMock.MyMethod(mock.Exact("some string"))).ThenReturn("", errors.New("some other error"))
+//	mock.WhenE(myMock.MyMethod(mock.Equal("some string"))).ThenReturn("", errors.New("some other error"))
 func WhenE[T any](t T, err error) matchers.ReturnerE[T] {
 	return registry.ToReturnerE[T](registry.When())
 }
@@ -180,17 +187,17 @@ func WhenE[T any](t T, err error) matchers.ReturnerE[T] {
 //	mockMyInterface := mock.Mock[MyInterface]()
 //
 //	// Set up a method call expectation
-//	mockWhen := mock.When(mockMyInterface.MyMethod(mock.Any[int](), mock.Exact[String]("test"))).ThenReturn(true)
+//	mockWhen := mock.When(mockMyInterface.MyMethod(mock.Any[int](), mock.Equal[String]("test"))).ThenReturn(true)
 //
 //	// Call the method on the mocked object
 //	result := mockMyInterface.MyMethod(123, "test")
 //
 //	// Verify that the method was called with the expected arguments
-//	mock.Verify(mockMyInterface, mockMyInterface.MyMethod(mock.Equal(123), mock.Exact("test"))).Once()
+//	mock.Verify(mockMyInterface, mockMyInterface.MyMethod(mock.Exact(123), mock.Equal("test"))).Once()
 //
 //	// Verify that the method was called with any int and the string "test"
-//	mock.Verify(mockMyInterface, mockMyInterface.MyMethod(mock.Any[int](), mock.Exact("test"))).Once()
-func When(args ...interface{}) matchers.ReturnerAll {
+//	mock.Verify(mockMyInterface, mockMyInterface.MyMethod(mock.Any[int](), mock.Equal("test"))).Once()
+func When(args ...any) matchers.ReturnerAll {
 	return registry.When()
 }
 
@@ -256,7 +263,7 @@ func Captor[T any]() matchers.ArgumentCaptor[T] {
 //	        mockObj.MyMethod("arg1", "arg2")
 //
 //	        // Verify that the MyMethod was called exactly once
-//	        mock.Verify(mockObj, mock.Once()).MyMethod(mock.Match(matchers.Any[String]()), mock.Match(matchers.Exact[String]("arg2")))
+//	        mock.Verify(mockObj, mock.Once()).MyMethod(mock.CreateMatcher(matchers.Any[String]()), mock.CreateMatcher(matchers.Equal[String]("arg2")))
 //	}
 func Verify[T any](t T, v matchers.MethodVerifier) T {
 	registry.VerifyMethod(t, v)

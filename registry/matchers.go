@@ -7,17 +7,16 @@ import (
 )
 
 func AnyMatcher[T any]() matchers.Matcher {
-	var t T
 	return &matcherImpl{
-		f: func(m *matchers.MethodCall, a any) bool {
+		f: func(values []any, a any) bool {
 			_, ok := a.(T)
 			return ok
 		},
-		desc: fmt.Sprintf("Any[%s]", reflect.TypeOf(t).String()),
+		desc: fmt.Sprintf("Any[%s]", reflect.TypeOf(new(T)).Elem().String()),
 	}
 }
 
-func FunMatcher(description string, f func(*matchers.MethodCall, any) bool) matchers.Matcher {
+func FunMatcher(description string, f func([]any, any) bool) matchers.Matcher {
 	return &matcherImpl{
 		f:    f,
 		desc: description,
@@ -25,7 +24,7 @@ func FunMatcher(description string, f func(*matchers.MethodCall, any) bool) matc
 }
 
 type matcherImpl struct {
-	f    func(*matchers.MethodCall, any) bool
+	f    func([]any, any) bool
 	desc string
 }
 
@@ -33,6 +32,6 @@ func (m *matcherImpl) Description() string {
 	return m.desc
 }
 
-func (m *matcherImpl) Match(methodCall *matchers.MethodCall, actual interface{}) bool {
-	return m.f(methodCall, actual)
+func (m *matcherImpl) Match(allArgs []any, actual any) bool {
+	return m.f(allArgs, actual)
 }

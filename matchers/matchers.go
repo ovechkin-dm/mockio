@@ -5,21 +5,20 @@ import (
 	"reflect"
 )
 
-// MethodCall represents a recorded method call with its unique identifier, method object, and arguments.
+// MethodCall represents a recorded method call with its method object and arguments.
 type MethodCall struct {
-	// ID is the unique identifier for the recorded method call.
-	ID string
 	// Method is a pointer to the dyno.Method object representing the method being called.
 	Method *dyno.Method
 	// Values is a slice containing the argument values passed to the method.
-	Values []reflect.Value
+	Values   []reflect.Value
+	WhenCall bool
 }
 
 // Answer is a type alias for a function that can be used as a return value for mock function calls.
 // This function takes a variable number of interface{} arguments and returns a slice of interface{} values.
 // Each value in the returned slice corresponds to a return value for the mock function call.
 // This type can be used to provide dynamic return values based on the input arguments passed to the mock function call.
-type Answer = func(args ...interface{}) []interface{}
+type Answer = func(args []any) []any
 
 // Matcher interface represents an object capable of matching method calls to specific criteria.
 //
@@ -37,5 +36,5 @@ type Matcher interface {
 
 	// Match returns true if the given method call satisfies the criteria defined by the Matcher.
 	// The actual parameter represents the expected value or type, depending on the Matcher implementation.
-	Match(methodCall *MethodCall, actual interface{}) bool
+	Match(allArgs []any, actual any) bool
 }
