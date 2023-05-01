@@ -18,23 +18,25 @@ go get github.com/ovechkin-dm/mockio
 
 ## Quick start
 ```go
-package main
+package simple
 
 import (
-	"fmt"
-	. "github.com/ovechkin-dm/mockio/mock"
+  . "github.com/ovechkin-dm/mockio/mock"
+  "testing"
 )
 
-type Greeter interface {
-	Greet(name string) string
+type myInterface interface {
+  Foo(a int) int
 }
 
-func main() {
-	m := Mock[Greeter]()
-	WhenA(m.Greet(AnyString())).ThenReturn("Hello, world!")
-	s := m.Greet("")
-	fmt.Println(s) // Prints `Hello, world!`
+func TestSimple(t *testing.T) {
+  SetUp(t)
+  m := Mock[myInterface]()
+  WhenA(m.Foo(Any[int]())).ThenReturn(42)
+  _ = m.Foo(10)
+  Verify(m, AtLeastOnce()).Foo(10)
 }
+
 
 ```
 
@@ -74,15 +76,17 @@ Mockio also provides functionality for capturing the arguments passed to a mocke
 ```go
 // Use an argument captor to capture the argument passed to a function
 mockObject := Mock[MyInterface]()
-argumentCaptor := mockio.Captor[int]()
-mockio.WhenA(mockObject.MethodCall(argumentCaptor.Capture())).ThenReturn("value")
+argumentCaptor := Captor[int]()
+WhenA(mockObject.MethodCall(argumentCaptor.Capture())).ThenReturn("value")
 mockObject.MethodCall(42)
 capturedArgument := argumentCaptor.Last() // 42
 ```
 
 ## Reporting
 The `ErrorReporter` interface defines how errors should be reported in the library. It has a single method `Fatalf` which takes a format string and its arguments and panics with a formatted error message.
+```go
 
+```
 
 ## Returner
 The `Returner` interfaces define how the mocked function should return values. There are three different `Returner` interfaces:
@@ -96,10 +100,10 @@ Each of these interfaces provides methods ThenReturn and ThenAnswer for setting 
 
 The `MethodVerifier` interface defines how method calls should be verified. There are four concrete implementations of this interface:
 
-`AtLeastOnce()` verifies that the mocked method was called at least once
-`Once()` verifies that the mocked method was called exactly once
-`Times(n int)` verifies that the mocked method was called n times
-`Never()` verifies that the mocked method was never called
+* `AtLeastOnce()` verifies that the mocked method was called at least once
+* `Once()` verifies that the mocked method was called exactly once
+* `Times(n int)` verifies that the mocked method was called n times
+* `Never()` verifies that the mocked method was never called
 The `Verify` method of the MethodVerifier interface takes a MethodVerificationData object which contains information about the method call, such as the number of times it was called. If the verification fails, an error is returned.
 
 The `InstanceVerifier` interface defines how instances should be verified. It has a single method RecordInteraction which takes an InvocationData object containing information about the method call. If the verification fails, error is being reported.
