@@ -57,7 +57,7 @@ Mockio also provides a set of matchers that you can use to define more complex c
 ```go
 // Use a matcher to stub a method with a specific input
 mockObject := Mock[MyInterface]()
-WhenA(mockObject.MethodCall(matchers.Equal("input"))).ThenReturn("value")
+WhenA(mockObject.MethodCall(Equal("input"))).ThenReturn("value")
 ```
 
 ## Verification
@@ -66,7 +66,7 @@ Mockio also provides functionality for verifying that certain methods were calle
 // Verify that a method was called exactly once
 mockObject := Mock[MyInterface]()
 mockObject.MethodCall("input")
-Verify(mockObject, Once()).MethodCall(matchers.Equal("input"))
+Verify(mockObject, Once()).MethodCall(Equal("input"))
 ```
 
 ## Argument Captors
