@@ -1,8 +1,10 @@
 package registry
 
 import (
+	"github.com/ovechkin-dm/go-dyno/pkg/dyno"
 	"github.com/ovechkin-dm/mockio/matchers"
 	"github.com/timandy/routine"
+	"reflect"
 	"sync"
 )
 
@@ -11,20 +13,21 @@ type fiberState struct {
 	whenHandler     *invocationHandler
 	verifyState     bool
 	methodVerifier  matchers.MethodVerifier
-	whenCall        *matchers.MethodCall
+	whenCall        *MethodCall
 	whenAnswer      *answerWrapper
 	whenMethodMatch *methodMatch
 }
 
 type mockContext struct {
-	state    routine.ThreadLocal
-	reporter *EnrichedReporter
-	lock     sync.Mutex
+	state     routine.ThreadLocal
+	reporter  *EnrichedReporter
+	lock      sync.Mutex
+	routineID int64
 }
 
 type methodRecorder struct {
 	methodMatches []*methodMatch
-	calls         []*matchers.MethodCall
+	calls         []*MethodCall
 }
 
 type methodMatch struct {
@@ -98,7 +101,14 @@ func newMockContext(reporter *EnrichedReporter) *mockContext {
 				verifyState:    false,
 			}
 		}),
-		reporter: reporter,
-		lock:     sync.Mutex{},
+		reporter:  reporter,
+		lock:      sync.Mutex{},
+		routineID: routine.Goid(),
 	}
+}
+
+type MethodCall struct {
+	Method   *dyno.Method
+	Values   []reflect.Value
+	WhenCall bool
 }

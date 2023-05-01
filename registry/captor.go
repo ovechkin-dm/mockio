@@ -1,19 +1,18 @@
 package registry
 
 import (
-	"github.com/ovechkin-dm/mockio/matchers"
 	"reflect"
 	"sync"
 )
 
 type recordable interface {
-	Record(call *matchers.MethodCall, value any)
-	RemoveRecord(call *matchers.MethodCall)
+	Record(call *MethodCall, value any)
+	RemoveRecord(call *MethodCall)
 }
 
 type capturedValue[T any] struct {
 	value T
-	call  *matchers.MethodCall
+	call  *MethodCall
 }
 
 type captorImpl[T any] struct {
@@ -48,7 +47,7 @@ func (c *captorImpl[T]) Values() []T {
 	return result
 }
 
-func (c *captorImpl[T]) Record(call *matchers.MethodCall, value any) {
+func (c *captorImpl[T]) Record(call *MethodCall, value any) {
 	c.lock.Lock()
 	defer c.lock.Unlock()
 	t, ok := value.(T)
@@ -64,7 +63,7 @@ func (c *captorImpl[T]) Record(call *matchers.MethodCall, value any) {
 	c.values = append(c.values, cv)
 }
 
-func (c *captorImpl[T]) RemoveRecord(call *matchers.MethodCall) {
+func (c *captorImpl[T]) RemoveRecord(call *MethodCall) {
 	c.lock.Lock()
 	defer c.lock.Unlock()
 	wo := make([]*capturedValue[T], 0)

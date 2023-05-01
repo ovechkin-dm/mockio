@@ -11,7 +11,7 @@ type panicReporter struct {
 }
 
 func (p *panicReporter) Fatalf(format string, args ...any) {
-	panic(fmt.Sprintf(format, args))
+	panic(fmt.Sprintf(format, args...))
 }
 
 type EnrichedReporter struct {
@@ -31,14 +31,14 @@ func (e *EnrichedReporter) Fatal(format string) {
 }
 
 func (e *EnrichedReporter) ReportIncorrectWhenUsage() {
-	e.Fatal("incorrect usage of mock.When. You can only use it with method call: mock.When(foo.Bar()).ThenReturn(...)")
+	e.Fatal("incorrect usage of `When`. You can only use it with method call: When(foo.Bar()).ThenReturn(...)")
 }
 
 func (e *EnrichedReporter) ReportUnregisteredMockVerify(t any) {
 	e.Errorf("unregistered mock instance during Verify call: %v", t)
 }
 
-func (e *EnrichedReporter) ReportInvalidUseOfMatchers(call *matchers.MethodCall, m []*matcherWrapper) {
+func (e *EnrichedReporter) ReportInvalidUseOfMatchers(instanceType reflect.Type, call *MethodCall, m []*matcherWrapper) {
 	matcherArgs := make([]string, len(m))
 	for i := range m {
 		matcherArgs[i] = m[i].matcher.Description()
@@ -46,6 +46,7 @@ func (e *EnrichedReporter) ReportInvalidUseOfMatchers(call *matchers.MethodCall,
 	matchersString := strings.Join(matcherArgs, ",")
 	tp := call.Method.Type.Type
 	inArgs := make([]string, 0)
+	methodSig := prettyPrintMethodSignature(instanceType, call.Method.Type)
 	for i := 0; i < tp.NumIn(); i++ {
 		inArgs = append(inArgs, tp.In(i).String())
 	}
@@ -57,15 +58,16 @@ expected:
 (%s)
 got:
 (%s)
-you can only use matchers within When() call: mock.When(foo.Bar(mock.Any[Int]))
-`, call.Method.Type, inArgsStr, matchersString)
+you can only use matchers within When() call: When(foo.Bar(Any[Int])).
+Possible cause is the mixing of matchers with exact values. In this case use "Exact" method instead. 
+`, methodSig, inArgsStr, matchersString)
 }
 
-func (e *EnrichedReporter) ReportInvalidUseOfCaptors(call *matchers.MethodCall, m []*matcherWrapper) {
-
+func (e *EnrichedReporter) ReportCaptorInsideVerify(call *MethodCall, m []*matcherWrapper) {
+	e.Fatal("Unexpected use of captor. `captor.Capture()` should not be used inside `Verify` method")
 }
 
-func (e *EnrichedReporter) ReportVerifyMethodError(call *matchers.MethodCall, err error) {
+func (e *EnrichedReporter) ReportVerifyMethodError(call *MethodCall, err error) {
 	e.FailNow(err)
 }
 
@@ -77,34 +79,75 @@ func (e *EnrichedReporter) ReportInvalidCaptorValue(expectedType reflect.Type, a
 	e.Fatal("no values were captured")
 }
 
-func (e *EnrichedReporter) ReportInvalidReturnValues(ret []any, method reflect.Method) {
+func (e *EnrichedReporter) ReportInvalidReturnValues(instanceType reflect.Type, method reflect.Method, ret []any) {
 	retStrValues := make([]string, len(ret))
 	for i := range retStrValues {
-		retStrValues[i] = reflect.ValueOf(ret[i]).String()
+		if ret[i] == nil {
+			retStrValues[i] = "nil"
+		} else {
+			retStrValues[i] = reflect.ValueOf(ret[i]).Type().Name()
+		}
 	}
 	retStr := strings.Join(retStrValues, ",")
 	tp := method.Type
 	outTypes := make([]string, 0)
 	for i := 0; i < tp.NumOut(); i++ {
-		outTypes = append(outTypes, tp.Out(i).String())
+		outTypes = append(outTypes, tp.Out(i).Name())
 	}
-	outTypesStr := strings.Join(outTypes, ",")
+	outTypesStr := strings.Join(outTypes, ", ")
+	methodSig := prettyPrintMethodSignature(instanceType, method)
 	e.Errorf(`invalid return values
 method:
 %v
-expected number of return values:
-%d
-actual number of return values:
-%d
-expected types:
+expected:
 (%s)
 got:
 (%s)
-`, tp, method.Type.NumIn(), len(ret), outTypesStr, retStr)
+`, methodSig, outTypesStr, retStr)
 }
 
 func newEnrichedReporter(reporter matchers.ErrorReporter) *EnrichedReporter {
 	return &EnrichedReporter{
 		reporter: reporter,
 	}
+}
+
+func prettyPrintMethodSignature(interfaceType reflect.Type, method reflect.Method) string {
+	var signature string
+
+	interfaceName := interfaceType.Name()
+	methodName := method.Name
+	methodType := method.Type
+	signature += interfaceName + "." + methodName
+
+	numParams := methodType.NumIn()
+	signature += "("
+	for i := 0; i < numParams; i++ {
+		paramType := methodType.In(i)
+		signature += paramType.String()
+		if i != numParams-1 {
+			signature += ", "
+		}
+	}
+	signature += ")"
+
+	numReturns := methodType.NumOut()
+	if numReturns > 0 {
+		signature += " "
+	}
+	if numReturns > 1 {
+		signature += "("
+	}
+	for i := 0; i < numReturns; i++ {
+		returnType := methodType.Out(i)
+		signature += returnType.String()
+		if i != numReturns-1 {
+			signature += ", "
+		}
+	}
+	if numReturns > 1 {
+		signature += ")"
+	}
+
+	return signature
 }

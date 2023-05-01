@@ -9,31 +9,24 @@ package matchers
 //
 // Example usage:
 //
-//	// Define a mock interface
-//	type MyInterface interface {
-//	      MyMethod(param1 int, param2 string) (string, error)
-//	}
+// // Create a mock object
 //
-//	// Create a mock object
-//	mockObj := mock.Mock[MyInterface]()
+//	m := Mock[Iface]()
 //
-//	// Call the method with arguments to be captured
-//	param1 := 123
-//	param2 := "test string"
-//	mockObj.MyMethod(param1, param2)
+//	// Create captor for int value
+//	c := Captor[int]()
 //
-//	// Create an argument captor
-//	captor := mock.Captor[string]()
+//	// Use captor.Capture() inside When expression
+//	WhenA(m.Foo(AnyInt(), c.Capture())).ThenReturn(10)
 //
-//	// Verify that the method was called with the expected arguments
-//	mock.WhenE(mockObj.MyMethod(mock.Any[Int](), captor.Capture())).ThenReturn("", nil)
-//	mockObj.MyMethod(1, "")
-//	capturedValue := captor.Last()
+//	m.Foo(10, 20)
+//	capturedValue := c.Last()
+//
 //	fmt.Printf("Captured value: %v\n", capturedValue)
 //
 // Output:
 //
-//	Captured value: test string
+//	Captured value: 20
 type ArgumentCaptor[T any] interface {
 	// Capture captures and stores a single argument passed to a method call.
 	Capture() T

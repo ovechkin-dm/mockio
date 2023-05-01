@@ -1,19 +1,5 @@
 package matchers
 
-import (
-	"github.com/ovechkin-dm/go-dyno/pkg/dyno"
-	"reflect"
-)
-
-// MethodCall represents a recorded method call with its method object and arguments.
-type MethodCall struct {
-	// Method is a pointer to the dyno.Method object representing the method being called.
-	Method *dyno.Method
-	// Values is a slice containing the argument values passed to the method.
-	Values   []reflect.Value
-	WhenCall bool
-}
-
 // Answer is a type alias for a function that can be used as a return value for mock function calls.
 // This function takes a variable number of interface{} arguments and returns a slice of interface{} values.
 // Each value in the returned slice corresponds to a return value for the mock function call.
@@ -35,6 +21,7 @@ type Matcher interface {
 	Description() string
 
 	// Match returns true if the given method call satisfies the criteria defined by the Matcher.
-	// The actual parameter represents the expected value or type, depending on the Matcher implementation.
+	// The actual parameter represents the actual value passed to method.
+	// The allArgs parameter represents all the arguments that were passed to a method.
 	Match(allArgs []any, actual any) bool
 }

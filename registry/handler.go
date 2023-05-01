@@ -13,13 +13,14 @@ type invocationHandler struct {
 	calls             []*methodRecorder
 	instanceVerifiers []matchers.InstanceVerifier
 	lock              sync.Mutex
+	instanceType      reflect.Type
 }
 
 func (h *invocationHandler) Handle(method *dyno.Method, values []reflect.Value) []reflect.Value {
 	h.lock.Lock()
 	defer h.lock.Unlock()
 
-	call := &matchers.MethodCall{
+	call := &MethodCall{
 		Method: method,
 		Values: values,
 	}
@@ -30,7 +31,7 @@ func (h *invocationHandler) Handle(method *dyno.Method, values []reflect.Value) 
 	return h.DoAnswer(call)
 }
 
-func (h *invocationHandler) DoAnswer(c *matchers.MethodCall) []reflect.Value {
+func (h *invocationHandler) DoAnswer(c *MethodCall) []reflect.Value {
 	rec := h.calls[c.Method.Num]
 	ok := h.VerifyInstance(c)
 	if !ok {
@@ -67,7 +68,7 @@ func (h *invocationHandler) DoAnswer(c *matchers.MethodCall) []reflect.Value {
 			h.ctx.getState().whenMethodMatch = mm
 
 			if !h.validateReturnValues(retValues, c.Method.Type) {
-				h.ctx.reporter.ReportInvalidReturnValues(retValues, c.Method.Type)
+				h.ctx.reporter.ReportInvalidReturnValues(h.instanceType, c.Method.Type, retValues)
 				return createDefaultReturnValues(c.Method.Type)
 			}
 
@@ -127,7 +128,7 @@ func (h *invocationHandler) When() matchers.ReturnerAll {
 	return NewReturnerAll(h.ctx, m)
 }
 
-func (h *invocationHandler) VerifyInstance(m *matchers.MethodCall) bool {
+func (h *invocationHandler) VerifyInstance(m *MethodCall) bool {
 	data := &matchers.InvocationData{
 		MethodType: m.Method.Type,
 		MethodName: m.Method.Name,
@@ -154,7 +155,7 @@ func (h *invocationHandler) VerifyMethod(verifier matchers.MethodVerifier) {
 	h.ctx.getState().methodVerifier = verifier
 }
 
-func (h *invocationHandler) DoVerifyMethod(call *matchers.MethodCall) []reflect.Value {
+func (h *invocationHandler) DoVerifyMethod(call *MethodCall) []reflect.Value {
 
 	matchersOk := h.validateMatchers(call)
 
@@ -215,17 +216,18 @@ func newHandler[T any](holder *mockContext) *invocationHandler {
 	for i := range recorders {
 		recorders[i] = &methodRecorder{
 			methodMatches: make([]*methodMatch, 0),
-			calls:         make([]*matchers.MethodCall, 0),
+			calls:         make([]*MethodCall, 0),
 		}
 	}
 	return &invocationHandler{
 		ctx:               holder,
 		calls:             recorders,
 		instanceVerifiers: make([]matchers.InstanceVerifier, 0),
+		instanceType:      tp,
 	}
 }
 
-func (h *invocationHandler) validateMatchers(call *matchers.MethodCall) bool {
+func (h *invocationHandler) validateMatchers(call *MethodCall) bool {
 	argMatchers := h.ctx.getState().matchers
 	if len(argMatchers) == 0 {
 		ifaces := valueSliceToInterfaceSlice(call.Values)
@@ -245,7 +247,7 @@ func (h *invocationHandler) validateMatchers(call *matchers.MethodCall) bool {
 	}
 	mt := call.Method.Type
 	if len(argMatchers) != mt.Type.NumIn() {
-		h.ctx.reporter.ReportInvalidUseOfMatchers(call, argMatchers)
+		h.ctx.reporter.ReportInvalidUseOfMatchers(h.instanceType, call, argMatchers)
 		return false
 	}
 	return true
@@ -261,6 +263,9 @@ func (h *invocationHandler) validateReturnValues(result []any, method reflect.Me
 		}
 		retExpected := method.Type.Out(i)
 		retActual := reflect.TypeOf(result[i])
+		if retActual == nil {
+			return false
+		}
 		if !retActual.AssignableTo(retExpected) {
 			return false
 		}
@@ -268,11 +273,11 @@ func (h *invocationHandler) validateReturnValues(result []any, method reflect.Me
 	return true
 }
 
-func (h *invocationHandler) validateVerifyMatchers(call *matchers.MethodCall) bool {
+func (h *invocationHandler) validateVerifyMatchers(call *MethodCall) bool {
 	argMatchers := h.ctx.getState().matchers
 	for _, a := range argMatchers {
 		if a.rec != nil {
-			h.ctx.reporter.ReportInvalidUseOfCaptors(call, argMatchers)
+			h.ctx.reporter.ReportCaptorInsideVerify(call, argMatchers)
 			return false
 		}
 	}

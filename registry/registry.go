@@ -27,6 +27,7 @@ func SetUp(reporter matchers.ErrorReporter) {
 		log.Println("Warn: call to SetUp with nil reporter")
 	}
 	getInstance().mockContext = newMockContext(newEnrichedReporter(reporter))
+
 }
 
 func TearDown() {
@@ -121,9 +122,13 @@ func newRegistry() any {
 func withCheck[T any](f func() T) T {
 	lock.Lock()
 	defer lock.Unlock()
-	_, ok := getInstance().mockContext.reporter.reporter.(*panicReporter)
+	rep, ok := getInstance().mockContext.reporter.reporter.(*panicReporter)
 	if ok {
-		log.Println("Warning: reporter is not initialized. You can initialize it with `mock.SetUp(*testing.T). Defaulting to the panic reporter. This could also happens when using mocks concurrently`")
+		log.Println("Warning: reporter is not initialized. You can initialize it with `SetUp(*testing.T)`. Defaulting to the panic reporter. This could also happen when using mocks concurrently")
+	}
+	initRoutineID := getInstance().mockContext.routineID
+	if initRoutineID != routine.Goid() {
+		rep.Fatalf("Call to mock api from a different goroutine. `When` or `Verify` can only be used from the initial goroutine.")
 	}
 	return f()
 }

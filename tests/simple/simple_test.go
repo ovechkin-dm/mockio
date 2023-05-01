@@ -17,4 +17,5 @@ func TestSimple(t *testing.T) {
 	WhenA(m.Foo(Any[int]())).ThenReturn(42)
 	ret := m.Foo(10)
 	r.AssertEqual(42, ret)
+	Verify(m, AtLeastOnce()).Foo(10)
 }
