@@ -1,5 +1,5 @@
 # Mockio 
-## Mock library fo golang without code generation
+# Mock library fo golang without code generation
 Mockio is a Golang library that provides functionality for mocking and stubbing functions and methods in tests inspired by mockito. The library is designed to simplify the testing process by allowing developers to easily create test doubles for their code, which can then be used to simulate different scenarios.
 
 # Features
