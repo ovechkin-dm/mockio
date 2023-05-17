@@ -16,12 +16,12 @@ type Answer = func(args []any) []any
 //
 // Matchers can be used in conjunction with the Match function to create flexible and powerful method call matching
 // capabilities.
-type Matcher interface {
+type Matcher[T any] interface {
 	// Description returns a string describing the criteria defined by the Matcher.
 	Description() string
 
 	// Match returns true if the given method call satisfies the criteria defined by the Matcher.
 	// The actual parameter represents the actual value passed to method.
 	// The allArgs parameter represents all the arguments that were passed to a method.
-	Match(allArgs []any, actual any) bool
+	Match(allArgs []any, actual T) bool
 }

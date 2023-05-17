@@ -144,14 +144,14 @@ func Equal[T any](value T) T {
 
 // CreateMatcher returns a Matcher that matches values of type T using the provided Matcher implementation.
 // The provided Matcher implementation must implement the Matcher interface.
-func CreateMatcher(description string, f func(allArgs []any, actual any) bool) matchers.Matcher {
+func CreateMatcher[T any](description string, f func(allArgs []any, actual T) bool) matchers.Matcher[T] {
 	m := registry.FunMatcher(description, f)
 	return m
 }
 
-// Custom provides matching for method argument with a matcher that was created via CreateMatcher
+// Match provides matching for method argument with a matcher that was created via CreateMatcher
 // The provided Matcher implementation must implement the Matcher interface.
-func Custom[T any](m matchers.Matcher) T {
+func Match[T any](m matchers.Matcher[T]) T {
 	registry.AddMatcher(m)
 	var t T
 	return t

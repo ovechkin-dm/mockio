@@ -51,10 +51,10 @@ func Mock[T any]() T {
 	})
 }
 
-func AddMatcher(m matchers.Matcher) {
+func AddMatcher[T any](m matchers.Matcher[T]) {
 	withCheck[any](func() any {
 		w := &matcherWrapper{
-			matcher: m,
+			matcher: untypedMatcher(m),
 			rec:     nil,
 		}
 		getInstance().mockContext.getState().matchers = append(getInstance().mockContext.getState().matchers, w)

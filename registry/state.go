@@ -82,7 +82,7 @@ type answerWrapper struct {
 }
 
 type matcherWrapper struct {
-	matcher matchers.Matcher
+	matcher matchers.Matcher[any]
 	rec     recordable
 }
 

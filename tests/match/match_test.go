@@ -92,7 +92,7 @@ func TestCustomMatcher(t *testing.T) {
 		return actual.(int)%2 == 0
 	})
 	m := Mock[Iface]()
-	WhenA(m.Test(Custom[any](evenm))).ThenReturn(true)
+	WhenA(m.Test(Match[any](evenm))).ThenReturn(true)
 	ret1 := m.Test(10)
 	ret2 := m.Test(11)
 	r.AssertEqual(ret1, true)
