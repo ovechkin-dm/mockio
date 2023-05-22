@@ -4,14 +4,14 @@ import (
 	"github.com/ovechkin-dm/mockio/matchers"
 )
 
-func ToReturner1[T any](retAll matchers.ReturnerAll) matchers.Returner1[T] {
-	return &returner1impl[T]{
+func ToReturnerSingle[T any](retAll matchers.ReturnerAll) matchers.ReturnerSingle[T] {
+	return &returnerSingleImpl[T]{
 		all: retAll,
 	}
 }
 
-func ToReturnerE[T any](retAll matchers.ReturnerAll) matchers.ReturnerE[T] {
-	return &returnerEImpl[T]{
+func ToReturnerDouble[A any, B any](retAll matchers.ReturnerAll) matchers.ReturnerDouble[A, B] {
+	return &returnerDoubleImpl[A, B]{
 		all: retAll,
 	}
 }
@@ -21,41 +21,41 @@ type returnerAllImpl struct {
 	ctx         *mockContext
 }
 
-type returner1impl[T any] struct {
+type returnerSingleImpl[T any] struct {
 	all matchers.ReturnerAll
 }
 
-func (r *returner1impl[T]) ThenReturn(value T) matchers.Returner1[T] {
+func (r *returnerSingleImpl[T]) ThenReturn(value T) matchers.ReturnerSingle[T] {
 	return r.ThenAnswer(func(args []any) T {
 		return value
 	})
 }
 
-func (r *returner1impl[T]) ThenAnswer(f func(args []any) T) matchers.Returner1[T] {
+func (r *returnerSingleImpl[T]) ThenAnswer(f func(args []any) T) matchers.ReturnerSingle[T] {
 	all := r.all.ThenAnswer(func(args []any) []any {
 		return []any{f(args)}
 	})
-	return &returner1impl[T]{
+	return &returnerSingleImpl[T]{
 		all: all,
 	}
 }
 
-type returnerEImpl[T any] struct {
+type returnerDoubleImpl[A any, B any] struct {
 	all matchers.ReturnerAll
 }
 
-func (r *returnerEImpl[T]) ThenReturn(value T, err error) matchers.ReturnerE[T] {
-	return r.ThenAnswer(func(args []any) (T, error) {
-		return value, err
+func (r *returnerDoubleImpl[A, B]) ThenReturn(a A, b B) matchers.ReturnerDouble[A, B] {
+	return r.ThenAnswer(func(args []any) (A, B) {
+		return a, b
 	})
 }
 
-func (r *returnerEImpl[T]) ThenAnswer(f func(args []any) (T, error)) matchers.ReturnerE[T] {
+func (r *returnerDoubleImpl[A, B]) ThenAnswer(f func(args []any) (A, B)) matchers.ReturnerDouble[A, B] {
 	all := r.all.ThenAnswer(func(args []any) []any {
 		t, e := f(args)
 		return []any{t, e}
 	})
-	return &returnerEImpl[T]{
+	return &returnerDoubleImpl[A, B]{
 		all: all,
 	}
 }

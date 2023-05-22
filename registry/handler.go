@@ -233,9 +233,9 @@ func (h *invocationHandler) validateMatchers(call *MethodCall) bool {
 		ifaces := valueSliceToInterfaceSlice(call.Values)
 		for _, v := range ifaces {
 			cur := v
-			desc := fmt.Sprintf("Exact[%s]", reflect.TypeOf(v).String())
+			desc := fmt.Sprintf("Equal[%s]", reflect.TypeOf(v).String())
 			fm := FunMatcher(desc, func(call []any, a any) bool {
-				return cur == a
+				return reflect.DeepEqual(cur, a)
 			})
 			mw := &matcherWrapper{
 				matcher: fm,

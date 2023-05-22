@@ -7,46 +7,46 @@ import (
 	"testing"
 )
 
-type WhenEInterface interface {
+type WhenDoubleInterface interface {
 	Foo(a int) (int, error)
 }
 
-func TestWhenERet(t *testing.T) {
+func TestWhenDoubleRet(t *testing.T) {
 	r := common.NewMockReporter(t)
 	SetUp(r)
-	m := Mock[WhenEInterface]()
-	WhenE(m.Foo(Any[int]())).ThenReturn(42, nil)
+	m := Mock[WhenDoubleInterface]()
+	WhenDouble(m.Foo(Any[int]())).ThenReturn(42, nil)
 	ret, _ := m.Foo(10)
 	r.AssertEqual(42, ret)
 }
 
-func TestWhenEAnswer(t *testing.T) {
+func TestWhenDoubleAnswer(t *testing.T) {
 	r := common.NewMockReporter(t)
 	SetUp(r)
-	m := Mock[WhenEInterface]()
-	WhenE(m.Foo(Any[int]())).ThenAnswer(func(args []any) (int, error) {
+	m := Mock[WhenDoubleInterface]()
+	WhenDouble(m.Foo(Any[int]())).ThenAnswer(func(args []any) (int, error) {
 		return 42, nil
 	})
 	ret, _ := m.Foo(10)
 	r.AssertEqual(42, ret)
 }
 
-func TestWhenEAnswerWithArgs(t *testing.T) {
+func TestWhenDoubleAnswerWithArgs(t *testing.T) {
 	r := common.NewMockReporter(t)
 	SetUp(r)
-	m := Mock[WhenEInterface]()
-	WhenE(m.Foo(Any[int]())).ThenAnswer(func(args []any) (int, error) {
+	m := Mock[WhenDoubleInterface]()
+	WhenDouble(m.Foo(Any[int]())).ThenAnswer(func(args []any) (int, error) {
 		return args[0].(int) + 1, nil
 	})
 	ret, _ := m.Foo(10)
 	r.AssertEqual(11, ret)
 }
 
-func TestWhenEMultiAnswer(t *testing.T) {
+func TestWhenDoubleMultiAnswer(t *testing.T) {
 	r := common.NewMockReporter(t)
 	SetUp(r)
-	m := Mock[WhenEInterface]()
-	WhenE(m.Foo(Any[int]())).
+	m := Mock[WhenDoubleInterface]()
+	WhenDouble(m.Foo(Any[int]())).
 		ThenAnswer(func(args []any) (int, error) {
 			return args[0].(int) + 1, nil
 		}).
@@ -59,11 +59,11 @@ func TestWhenEMultiAnswer(t *testing.T) {
 	r.AssertEqual(13, ret2)
 }
 
-func TestWhenEMultiReturn(t *testing.T) {
+func TestWhenDoubleMultiReturn(t *testing.T) {
 	r := common.NewMockReporter(t)
 	SetUp(r)
-	m := Mock[WhenEInterface]()
-	WhenE(m.Foo(Any[int]())).
+	m := Mock[WhenDoubleInterface]()
+	WhenDouble(m.Foo(Any[int]())).
 		ThenReturn(10, nil).
 		ThenReturn(11, nil)
 	ret1, _ := m.Foo(12)
@@ -72,11 +72,11 @@ func TestWhenEMultiReturn(t *testing.T) {
 	r.AssertEqual(11, ret2)
 }
 
-func TestWhenEAnswerAndReturn(t *testing.T) {
+func TestWhenDoubleAnswerAndReturn(t *testing.T) {
 	r := common.NewMockReporter(t)
 	SetUp(r)
-	m := Mock[WhenEInterface]()
-	WhenE(m.Foo(Any[int]())).
+	m := Mock[WhenDoubleInterface]()
+	WhenDouble(m.Foo(Any[int]())).
 		ThenReturn(10, nil).
 		ThenAnswer(func(args []any) (int, error) {
 			return args[0].(int) + 1, nil
@@ -90,22 +90,22 @@ func TestWhenEAnswerAndReturn(t *testing.T) {
 	r.AssertEqual(11, ret3)
 }
 
-func TestWhenEReturnError(t *testing.T) {
+func TestWhenDoubleReturnError(t *testing.T) {
 	r := common.NewMockReporter(t)
 	SetUp(r)
-	m := Mock[WhenEInterface]()
-	WhenE(m.Foo(Any[int]())).
+	m := Mock[WhenDoubleInterface]()
+	WhenDouble(m.Foo(Any[int]())).
 		ThenReturn(1, errors.New("err"))
 	ret, err := m.Foo(12)
 	r.AssertEqual(1, ret)
 	r.AssertErrorContains(err, "err")
 }
 
-func TestWhenEAnswerError(t *testing.T) {
+func TestWhenDoubleAnswerError(t *testing.T) {
 	r := common.NewMockReporter(t)
 	SetUp(r)
-	m := Mock[WhenEInterface]()
-	WhenE(m.Foo(Any[int]())).
+	m := Mock[WhenDoubleInterface]()
+	WhenDouble(m.Foo(Any[int]())).
 		ThenAnswer(func(args []any) (int, error) {
 			return 0, errors.New("err")
 		})

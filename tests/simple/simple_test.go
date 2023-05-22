@@ -14,7 +14,7 @@ func TestSimple(t *testing.T) {
 	r := common.NewMockReporter(t)
 	SetUp(r)
 	m := Mock[myInterface]()
-	WhenA(m.Foo(Any[int]())).ThenReturn(42)
+	WhenSingle(m.Foo(Any[int]())).ThenReturn(42)
 	ret := m.Foo(10)
 	r.AssertEqual(42, ret)
 	Verify(m, AtLeastOnce()).Foo(10)
