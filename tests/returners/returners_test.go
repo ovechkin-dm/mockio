@@ -15,7 +15,7 @@ func TestReturnSimple(t *testing.T) {
 	r := common.NewMockReporter(t)
 	SetUp(r)
 	m := Mock[iface]()
-	WhenA(m.Test(10)).ThenReturn(true)
+	WhenSingle(m.Test(10)).ThenReturn(true)
 	ret := m.Test(10)
 	r.AssertEqual(true, ret)
 }
@@ -24,7 +24,7 @@ func TestAnswerSimple(t *testing.T) {
 	r := common.NewMockReporter(t)
 	SetUp(r)
 	m := Mock[iface]()
-	WhenA(m.Test(10)).ThenAnswer(func(args []any) bool {
+	WhenSingle(m.Test(10)).ThenAnswer(func(args []any) bool {
 		return args[0].(int) > 0
 	})
 	ret1 := m.Test(10)
@@ -37,7 +37,7 @@ func TestMultiReturn(t *testing.T) {
 	r := common.NewMockReporter(t)
 	SetUp(r)
 	m := Mock[iface]()
-	WhenA(m.Foo(10)).
+	WhenSingle(m.Foo(10)).
 		ThenReturn(1).
 		ThenReturn(2)
 	ret1 := m.Foo(10)
@@ -52,7 +52,7 @@ func TestMultiAnswer(t *testing.T) {
 	r := common.NewMockReporter(t)
 	SetUp(r)
 	m := Mock[iface]()
-	WhenA(m.Foo(10)).
+	WhenSingle(m.Foo(10)).
 		ThenAnswer(func(args []any) int {
 			return 1
 		}).
@@ -71,7 +71,7 @@ func TestReturnBetweenCalls(t *testing.T) {
 	r := common.NewMockReporter(t)
 	SetUp(r)
 	m := Mock[iface]()
-	ret := WhenA(m.Foo(10))
+	ret := WhenSingle(m.Foo(10))
 	ret.ThenReturn(1)
 	r1 := m.Foo(10)
 	ret.ThenReturn(2)

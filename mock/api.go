@@ -5,6 +5,7 @@ import (
 	"github.com/ovechkin-dm/mockio/matchers"
 	"github.com/ovechkin-dm/mockio/registry"
 	"reflect"
+	"strings"
 )
 
 // SetUp initializes the mock library with the reporter.
@@ -24,7 +25,7 @@ import (
 //	func TestSimple(t *testing.T) {
 //		SetUp(t)
 //		m := Mock[myInterface]()
-//		WhenA(m.Foo(Any[int]())).ThenReturn(42)
+//		WhenSingle(m.Foo(Any[int]())).ThenReturn(42)
 //		ret := m.Foo(10)
 //		r.AssertEqual(42, ret)
 //	}
@@ -49,7 +50,7 @@ func SetUp(t matchers.ErrorReporter) {
 //	   myMock := Mock[MyInterface]()
 //
 //	   // Set up a mock behavior for the MyMethod method
-//	   WhenA(myMock.MyMethod("foo", 42)).ThenReturn("bar")
+//	   WhenSingle(myMock.MyMethod("foo", 42)).ThenReturn("bar")
 //
 //	   // Call the method on the mock object
 //	   result, err := myMock.MyMethod("foo", 42)
@@ -68,10 +69,10 @@ func Mock[T any]() T {
 // Example usage:
 //
 //	// Set up a mock behavior for a method that takes a string argument
-//	WhenA(myMock.MyMethod(mock.Any[string]())).ThenReturn("bar")
+//	WhenSingle(myMock.MyMethod(mock.Any[string]())).ThenReturn("bar")
 //
 //	// Set up a mock behavior for a method that takes an integer argument
-//	WhenA(myMock.MyOtherMethod(mock.Any[int]())).ThenReturn("baz")
+//	WhenSingle(myMock.MyOtherMethod(mock.Any[int]())).ThenReturn("baz")
 func Any[T any]() T {
 	registry.AddMatcher(registry.AnyMatcher[T]())
 	var t T
@@ -96,9 +97,9 @@ func AnyInterface() any {
 	return Any[any]()
 }
 
-// AnyOf is an alias for Any[T] for specific type
+// AnyOfType is an alias for Any[T] for specific type
 // Used for automatic type inference
-func AnyOf[T any](t T) T {
+func AnyOfType[T any](t T) T {
 	return Any[T]()
 }
 
@@ -108,12 +109,12 @@ func AnyOf[T any](t T) T {
 // Example usage:
 //
 //	// Set up a mock behavior for a method that takes a string argument equal to "foo"
-//	WhenA(myMock.MyMethod(Exact("foo"))).ThenReturn("bar")
+//	WhenSingle(myMock.MyMethod(Exact("foo"))).ThenReturn("bar")
 //
 //	// Set up a mock behavior for a method that takes an integer argument equal to 42
-//	WhenA(myMock.MyOtherMethod(Exact(42))).ThenReturn("baz")
+//	WhenSingle(myMock.MyOtherMethod(Exact(42))).ThenReturn("baz")
 func Exact[T comparable](value T) T {
-	desc := fmt.Sprintf("Exact[%s]", reflect.TypeOf(new(T)).Elem().String())
+	desc := fmt.Sprintf("Exact(%v)", value)
 	m := registry.FunMatcher(desc, func(m []any, actual any) bool {
 		return value == actual
 	})
@@ -128,14 +129,64 @@ func Exact[T comparable](value T) T {
 // Example usage:
 //
 //	// Set up a mock behavior for a method that takes a string argument exactly equal to "foo"
-//	WhenA(myMock.MyMethod(Equal("foo"))).ThenReturn("bar")
+//	WhenSingle(myMock.MyMethod(Equal("foo"))).ThenReturn("bar")
 //
 //	// Set up a mock behavior for a method that takes an integer argument exactly equal to 42
-//	WhenA(myMock.MyOtherMethod(Equal(42))).ThenReturn("baz")
+//	WhenSingle(myMock.MyOtherMethod(Equal(42))).ThenReturn("baz")
 func Equal[T any](value T) T {
-	desc := fmt.Sprintf("Equal[%s]", reflect.TypeOf(new(T)).Elem().String())
+	desc := fmt.Sprintf("Equal(%v)", value)
 	m := registry.FunMatcher(desc, func(m []any, actual any) bool {
 		return reflect.DeepEqual(value, actual)
+	})
+	registry.AddMatcher(m)
+	var t T
+	return t
+}
+
+// NotEqual returns a matcher that matches values of type T that are not equal via reflect.DeepEqual to the provided value.
+// The value passed to NotEqual must be of the exact same type as values of type T.
+//
+// Example usage:
+//
+//	// Set up a mock behavior for a method that takes a string argument not equal to "foo"
+//	WhenSingle(myMock.MyMethod(NotEqual("foo"))).ThenReturn("bar")
+//
+//	// Set up a mock behavior for a method that takes an integer argument not equal to 42
+//	WhenSingle(myMock.MyOtherMethod(NotEqual(42))).ThenReturn("baz")
+func NotEqual[T any](value T) T {
+	desc := fmt.Sprintf("NotEqual(%v)", value)
+	m := registry.FunMatcher(desc, func(m []any, actual any) bool {
+		return !reflect.DeepEqual(value, actual)
+	})
+	registry.AddMatcher(m)
+	var t T
+	return t
+}
+
+// OneOf returns a matcher that matches at least one of values of type T that are equal via reflect.DeepEqual to the provided value.
+// The value passed to OneOf must be of the exact same type as values of type T.
+//
+// Example usage:
+//
+//	// Set up a mock behavior for a method that takes a string argument equal to either "foo" or "bar"
+//	WhenSingle(myMock.MyMethod(OneOf("foo", "bar"))).ThenReturn("bar")
+//
+//	// Set up a mock behavior for a method that takes an integer argument equal to either 41 or 42
+//	WhenSingle(myMock.MyOtherMethod(OneOf(41, 42))).ThenReturn("baz")
+func OneOf[T any](values ...T) T {
+	vs := make([]string, len(values))
+	for i := range values {
+		vs[i] = fmt.Sprintf("%v", values[i])
+	}
+
+	desc := fmt.Sprintf("OneOf(%s)", strings.Join(vs, ","))
+	m := registry.FunMatcher[T](desc, func(args []any, t T) bool {
+		for i := range values {
+			if reflect.DeepEqual(values[i], t) {
+				return true
+			}
+		}
+		return false
 	})
 	registry.AddMatcher(m)
 	var t T
@@ -157,22 +208,22 @@ func Match[T any](m matchers.Matcher[T]) T {
 	return t
 }
 
-// WhenA takes an argument of type T and returns a Returner1 interface
+// WhenSingle takes an argument of type T and returns a ReturnerSingle interface
 // that allows for specifying a return value for a method call that has that argument.
 // This function should be used for method that returns exactly one return value
 // It acts like When, but also provides additional type check on return value
-// For more than on value consider using WhenE or When
-func WhenA[T any](t T) matchers.Returner1[T] {
-	return registry.ToReturner1[T](registry.When())
+// For more than on value consider using WhenDouble or When
+func WhenSingle[T any](t T) matchers.ReturnerSingle[T] {
+	return registry.ToReturnerSingle[T](registry.When())
 }
 
-// WhenE takes an argument of type T and an error value and returns a ReturnerE interface
-// that allows for specifying a return value and an error for a method call that has that argument.
-// This function should be used for method that returns exactly one return value and an error
+// WhenDouble takes an arguments of type A and B and  returns a ReturnerDouble interface
+// that allows for specifying two return values for a method call that has that argument.
+// This function should be used for method that returns exactly two return values
 // It acts like When, but also provides additional type check on return values
 // For more multiple return values consider using When
-func WhenE[T any](t T, err error) matchers.ReturnerE[T] {
-	return registry.ToReturnerE[T](registry.When())
+func WhenDouble[A any, B any](a A, b B) matchers.ReturnerDouble[A, B] {
+	return registry.ToReturnerDouble[A, B](registry.When())
 }
 
 // When sets up a method call expectation on a mocked object with a specified set of arguments
@@ -226,7 +277,7 @@ func Captor[T any]() matchers.ArgumentCaptor[T] {
 //		r := common.NewMockReporter(t)
 //		SetUp(r)
 //		m := Mock[myInterface]()
-//		WhenA(m.Foo(Any[int]())).ThenReturn(42)
+//		WhenSingle(m.Foo(Any[int]())).ThenReturn(42)
 //		ret := m.Foo(10)
 //		r.AssertEqual(42, ret)
 //		Verify(m, AtLeastOnce()).Foo(10)

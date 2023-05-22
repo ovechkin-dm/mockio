@@ -32,7 +32,7 @@ type myInterface interface {
 func TestSimple(t *testing.T) {
   SetUp(t)
   m := Mock[myInterface]()
-  WhenA(m.Foo(Any[int]())).ThenReturn(42)
+  WhenSingle(m.Foo(Any[int]())).ThenReturn(42)
   _ = m.Foo(10)
   Verify(m, AtLeastOnce()).Foo(10)
 }
@@ -41,25 +41,25 @@ func TestSimple(t *testing.T) {
 ```
 
 ## Stubs and Matchers
-Once you have a mock object, you can start stubbing methods or functions using the `WhenA`, `WhenE`, and `When` functions. These functions allow you to define a set of conditions under which the stubbed method or function will return a certain value.
+Once you have a mock object, you can start stubbing methods or functions using the `WhenSingle`, `WhenDouble`, and `When` functions. These functions allow you to define a set of conditions under which the stubbed method or function will return a certain value.
 
 Because golang does not support method overloading, and we still want additional type check on returning values three separate methods were introduced for stubbing:
-* `WhenA` is used when there is only one return value for the method
-* `WhenE` is used when there is a `(T, error)` tuple as return value for the method
+* `WhenSingle` is used when there is only one return value for the method
+* `WhenDouble` is used when there is a `(A, B)` tuple as return value for the method
 * `When` for multiple return values
 
 Example usage: 
 ```go
 // Stub a method to always return a specific value
 mockObject := Mock[MyInterface]()
-WhenA(mockObject.MethodCall(Exact[Int](1))).ThenReturn("value")
+WhenSingle(mockObject.MethodCall(Exact[Int](1))).ThenReturn("value")
 ```
 
 Mockio also provides a set of matchers that you can use to define more complex conditions for your stubbed methods.
 ```go
 // Use a matcher to stub a method with a specific input
 mockObject := Mock[MyInterface]()
-WhenA(mockObject.MethodCall(Equal("input"))).ThenReturn("value")
+WhenSingle(mockObject.MethodCall(Equal("input"))).ThenReturn("value")
 ```
 
 ## Verification
@@ -77,7 +77,7 @@ Mockio also provides functionality for capturing the arguments passed to a mocke
 // Use an argument captor to capture the argument passed to a function
 mockObject := Mock[MyInterface]()
 argumentCaptor := Captor[int]()
-WhenA(mockObject.MethodCall(argumentCaptor.Capture())).ThenReturn("value")
+WhenSingle(mockObject.MethodCall(argumentCaptor.Capture())).ThenReturn("value")
 mockObject.MethodCall(42)
 capturedArgument := argumentCaptor.Last() // 42
 ```

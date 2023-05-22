@@ -17,7 +17,7 @@ package matchers
 //	c := Captor[int]()
 //
 //	// Use captor.Capture() inside When expression
-//	WhenA(m.Foo(AnyInt(), c.Capture())).ThenReturn(10)
+//	WhenSingle(m.Foo(AnyInt(), c.Capture())).ThenReturn(10)
 //
 //	m.Foo(10, 20)
 //	capturedValue := c.Last()

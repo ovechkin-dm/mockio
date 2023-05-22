@@ -1,25 +1,25 @@
 package matchers
 
-// Returner1 is interface that defines methods for returning a value or an answer
+// ReturnerSingle is interface that defines methods for returning a value or an answer
 // for a mock function with one argument.
-type Returner1[T any] interface {
+type ReturnerSingle[T any] interface {
 	// ThenReturn sets the return value for the mock function with one argument.
 	// The return value must be of type T.
-	ThenReturn(value T) Returner1[T]
+	ThenReturn(value T) ReturnerSingle[T]
 	// ThenAnswer sets a function that will be called when the mock function is
 	// called with one argument. The function must take a variable number of
 	// arguments of type interface{} and return a value of type T.
-	ThenAnswer(func(args []any) T) Returner1[T]
+	ThenAnswer(func(args []any) T) ReturnerSingle[T]
 }
 
-// ReturnerE is an interface that provides methods to define the returned value and error of a mock function with a single argument.
+// ReturnerDouble is an interface that provides methods to define the returned value and error of a mock function with a single argument.
 // ThenReturn method sets the return value and error of the mocked function to the provided value and error respectively.
 // ThenAnswer method sets the return value and error of the mocked function to the value and error returned by the provided function respectively.
-type ReturnerE[T any] interface {
+type ReturnerDouble[A any, B any] interface {
 	// ThenReturn sets the return value and error of the mocked function to the provided value and error respectively.
-	ThenReturn(value T, err error) ReturnerE[T]
+	ThenReturn(a A, b B) ReturnerDouble[A, B]
 	// ThenAnswer sets the return value and error of the mocked function to the value and error returned by the provided function respectively.
-	ThenAnswer(func(args []any) (T, error)) ReturnerE[T]
+	ThenAnswer(func(args []any) (A, B)) ReturnerDouble[A, B]
 }
 
 // ReturnerAll is a type that defines the methods for returning and answering values for

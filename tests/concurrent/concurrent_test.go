@@ -17,7 +17,7 @@ func TestNewMockInOtherFiber(t *testing.T) {
 	m := Mock[myInterface]()
 	wg := sync.WaitGroup{}
 	wg.Add(1)
-	WhenA(m.Foo(Any[int]())).ThenReturn(42)
+	WhenSingle(m.Foo(Any[int]())).ThenReturn(42)
 	ans := 0
 	go func() {
 		ans = m.Foo(10)
