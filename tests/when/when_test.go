@@ -17,7 +17,6 @@ type WhenInterface2 interface {
 }
 
 type WhenStruct struct {
-	value int
 }
 
 func (w *WhenStruct) foo() int {

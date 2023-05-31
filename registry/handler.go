@@ -6,6 +6,7 @@ import (
 	"github.com/ovechkin-dm/mockio/matchers"
 	"reflect"
 	"sync"
+	"sync/atomic"
 )
 
 type invocationHandler struct {
@@ -39,7 +40,7 @@ func (h *invocationHandler) DoAnswer(c *MethodCall) []reflect.Value {
 	}
 	h.ctx.getState().whenHandler = h
 	h.ctx.getState().whenCall = c
-	matched := true
+	var matched bool
 	for _, mm := range rec.methodMatches {
 		matched = true
 		for argIdx, matcher := range mm.matchers {
@@ -288,7 +289,7 @@ func (h *invocationHandler) validateVerifyMatchers(call *MethodCall) bool {
 func (h *invocationHandler) CheckUnusedStubs() {
 	for _, rec := range h.calls {
 		for _, m := range rec.methodMatches {
-			if m.invocations.Load() == 0 {
+			if atomic.LoadInt64(&m.invocations) == 0 {
 				h.ctx.reporter.ReportWantedButNotInvoked(h.instanceType, rec.methodType, m)
 			}
 		}

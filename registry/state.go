@@ -38,13 +38,13 @@ type methodMatch struct {
 	answered    []*answerWrapper
 	lock        sync.Mutex
 	lastAnswer  *answerWrapper
-	invocations atomic.Int64
+	invocations int64
 }
 
 func (m *methodMatch) popAnswer() *answerWrapper {
 	m.lock.Lock()
 	defer m.lock.Unlock()
-	m.invocations.Add(1)
+	atomic.AddInt64(&m.invocations, 1)
 	if len(m.unanswered) == 0 {
 		return m.lastAnswer
 	}
@@ -64,7 +64,7 @@ func (m *methodMatch) addAnswer(wrapper *answerWrapper) {
 func (m *methodMatch) putBackAnswer(wrapper *answerWrapper) {
 	m.lock.Lock()
 	defer m.lock.Unlock()
-	m.invocations.Add(-1)
+	atomic.AddInt64(&m.invocations, -1)
 	foundIdx := -1
 	for i := len(m.answered) - 1; i >= 0; i-- {
 		if wrapper == m.answered[i] {
