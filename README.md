@@ -114,6 +114,6 @@ The mock package provides a powerful library for creating and managing mock obje
 
 ## Limitations
 * **Restricted support for processor architectures**. For now library only supports amd64 architecture, but can be extended to others if there is demand for it. 
-* **Go >= 1.17**
+* **Go >= 1.18**
 * **Concurrency limitations**
   * For now, you have to use every call to library in the same goroutine, on which  `SetUp()` was called.
