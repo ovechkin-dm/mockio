@@ -7,4 +7,6 @@ type ErrorReporter interface {
 	// It formats the message according to a format specifier and arguments
 	// It can be used to report an error and provide additional context about the error.
 	Fatalf(format string, args ...any)
+	// Cleanup adds hooks that are used to clean up data after test was executed.
+	Cleanup(func())
 }

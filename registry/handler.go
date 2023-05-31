@@ -217,6 +217,7 @@ func newHandler[T any](holder *mockContext) *invocationHandler {
 		recorders[i] = &methodRecorder{
 			methodMatches: make([]*methodMatch, 0),
 			calls:         make([]*MethodCall, 0),
+			methodType:    tp.Method(i),
 		}
 	}
 	return &invocationHandler{
@@ -282,4 +283,14 @@ func (h *invocationHandler) validateVerifyMatchers(call *MethodCall) bool {
 		}
 	}
 	return true
+}
+
+func (h *invocationHandler) CheckUnusedStubs() {
+	for _, rec := range h.calls {
+		for _, m := range rec.methodMatches {
+			if m.invocations.Load() == 0 {
+				h.ctx.reporter.ReportWantedButNotInvoked(h.instanceType, rec.methodType, m)
+			}
+		}
+	}
 }

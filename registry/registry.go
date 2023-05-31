@@ -10,7 +10,7 @@ import (
 	"sync"
 )
 
-var instance = routine.NewInheritableThreadLocalWithInitial(newRegistry)
+var instance = routine.NewThreadLocalWithInitial(newRegistry)
 var lock sync.Mutex
 
 type Registry struct {
@@ -19,7 +19,12 @@ type Registry struct {
 }
 
 func getInstance() *Registry {
-	return instance.Get().(*Registry)
+	v := instance.Get()
+	if v == nil {
+		v = newRegistry()
+		instance.Set(v)
+	}
+	return v.(*Registry)
 }
 
 func SetUp(reporter matchers.ErrorReporter) {
@@ -27,14 +32,20 @@ func SetUp(reporter matchers.ErrorReporter) {
 		log.Println("Warn: call to SetUp with nil reporter")
 	}
 	getInstance().mockContext = newMockContext(newEnrichedReporter(reporter))
-
+	reporter.Cleanup(TearDown)
 }
 
 func TearDown() {
-	if getInstance().mockContext.reporter == nil {
-		getInstance().mockContext.reporter.Errorf("Cannot TearDown since SetUp function wasn't called")
+	reg := getInstance()
+	instance.Remove()
+
+	if reg.mockContext.reporter == nil {
+		reg.mockContext.reporter.Errorf("Cannot TearDown since SetUp function wasn't called")
 	}
-	instance.Set(newRegistry())
+
+	for _, v := range reg.mapping {
+		v.CheckUnusedStubs()
+	}
 }
 
 func Mock[T any]() T {
