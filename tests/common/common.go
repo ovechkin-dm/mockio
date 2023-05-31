@@ -10,6 +10,7 @@ import (
 type MockReporter struct {
 	reported string
 	t        *testing.T
+	cleanups []func()
 }
 
 func (m *MockReporter) Fatalf(format string, args ...any) {
@@ -53,9 +54,20 @@ func (m *MockReporter) AssertErrorContains(err error, s string) {
 	err.Error()
 }
 
+func (m *MockReporter) Cleanup(clean func()) {
+	m.cleanups = append(m.cleanups, clean)
+}
+
 func NewMockReporter(t *testing.T) *MockReporter {
-	return &MockReporter{
+	rep := &MockReporter{
 		reported: "",
 		t:        t,
+		cleanups: make([]func(), 0),
 	}
+	t.Cleanup(func() {
+		for _, v := range rep.cleanups {
+			v()
+		}
+	})
+	return rep
 }

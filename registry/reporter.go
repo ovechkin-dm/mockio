@@ -10,6 +10,10 @@ import (
 type panicReporter struct {
 }
 
+func (p *panicReporter) Cleanup(f func()) {
+
+}
+
 func (p *panicReporter) Fatalf(format string, args ...any) {
 	panic(fmt.Sprintf(format, args...))
 }
@@ -104,6 +108,21 @@ expected:
 got:
 (%s)
 `, methodSig, outTypesStr, retStr)
+}
+
+func (e *EnrichedReporter) ReportWantedButNotInvoked(instanceType reflect.Type, methodType reflect.Method, match *methodMatch) {
+	m := match.matchers
+	matcherArgs := make([]string, len(m))
+	for i := range m {
+		matcherArgs[i] = m[i].matcher.Description()
+	}
+	matchersString := strings.Join(matcherArgs, ", ")
+	interfaceName := instanceType.Name()
+	methodName := methodType.Name
+	methodSig := interfaceName + "." + methodName
+	e.Errorf(`Wanted, but ont invoked:
+%s(%s)
+`, methodSig, matchersString)
 }
 
 func newEnrichedReporter(reporter matchers.ErrorReporter) *EnrichedReporter {
