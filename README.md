@@ -1,4 +1,12 @@
 # Mockio 
+
+[![Build Status](https://github.com/ovechkin-dm/mockio/actions/workflows/build.yml/badge.svg)](https://github.com/ovechkin-dm/mockio/actions)
+[![Codecov](https://codecov.io/gh/ovechkin-dm/mockio/branch/main/graph/badge.svg)](https://app.codecov.io/gh/ovechkin-dm/mockio)
+[![Go Report Card](https://goreportcard.com/badge/github.com/ovechkin-dm/mockio)](https://goreportcard.com/report/github.com/ovechkin-dm/mockio)
+[![Documentation](https://pkg.go.dev/badge/github.com/ovechkin-dm/mockio.svg)](https://pkg.go.dev/github.com/ovechkin-dm/mockio)
+[![Release](https://img.shields.io/github/release/ovechkin-dm/mockio.svg)](https://github.com/ovechkin-dm/mockio/releases)
+[![License](https://img.shields.io/github/license/ovechkin-dm/mockio.svg)](https://github.com/ovechkin-dm/mockio/blob/main/LICENSE)
+
 # Mock library for golang without code generation
 Mockio is a Golang library that provides functionality for mocking and stubbing functions and methods in tests inspired by mockito. The library is designed to simplify the testing process by allowing developers to easily create test doubles for their code, which can then be used to simulate different scenarios.
 
