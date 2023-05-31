@@ -51,7 +51,9 @@ func (m *MockReporter) AssertErrorContains(err error, s string) {
 	if err == nil {
 		m.t.Fatalf("expected error, got nil")
 	}
-	err.Error()
+	if !strings.Contains(err.Error(), s) {
+		m.t.Fatalf("expected error to contain %s", s)
+	}
 }
 
 func (m *MockReporter) Cleanup(clean func()) {

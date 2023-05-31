@@ -39,7 +39,7 @@ func (h *invocationHandler) DoAnswer(c *MethodCall) []reflect.Value {
 	}
 	h.ctx.getState().whenHandler = h
 	h.ctx.getState().whenCall = c
-	matched := true
+	var matched bool
 	for _, mm := range rec.methodMatches {
 		matched = true
 		for argIdx, matcher := range mm.matchers {
