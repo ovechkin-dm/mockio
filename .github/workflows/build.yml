@@ -96,5 +96,6 @@ jobs:
       - name: Codecov
         uses: codecov/codecov-action@v3
         with:
+          token: ${{ secrets.CODECOV_TOKEN }}
           name: Codecov on ${{ matrix.os }}/${{ matrix.arch }} go${{ matrix.go }}
           fail_ci_if_error: false
