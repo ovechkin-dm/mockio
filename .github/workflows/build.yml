@@ -76,14 +76,14 @@ jobs:
         env:
           GOOS: ${{ matrix.os }}
           GOARCH: ${{ matrix.arch }}
-        run: go test -v -race -coverprofile="coverage.txt" -covermode=atomic ./...
+        run: go test -v -race -coverprofile="coverage.txt" -covermode=atomic -coverpkg=./mock/... ./...
 
       - name: 'Test on linux'
         if: ${{ matrix.os == 'linux' }}
         env:
           GOOS: ${{ matrix.os }}
           GOARCH: ${{ matrix.arch }}
-        run: go test -v -race -coverprofile="coverage.txt" -covermode=atomic ./...
+        run: go test -v -race -coverprofile="coverage.txt" -covermode=atomic -coverpkg=./mock/... ./...
 
 
       - name: 'Test on windows'
@@ -91,7 +91,7 @@ jobs:
         env:
           GOOS: ${{ matrix.os }}
           GOARCH: ${{ matrix.arch }}
-        run: go test -v -race -coverprofile="coverage.txt" -covermode=atomic ./...
+        run: go test -v -race -coverprofile="coverage.txt" -covermode=atomic -coverpkg=./mock/... ./...
 
       - name: Codecov
         uses: codecov/codecov-action@v3
