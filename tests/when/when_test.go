@@ -11,6 +11,7 @@ type WhenInterface interface {
 	Bar(a int, b string, c string) (int, string)
 	Empty() int
 	RespondWithMock() Nested
+	RespondWithSlice() []int
 }
 
 type WhenInterface2 interface {
@@ -123,5 +124,17 @@ func TestWhenWithinWhen(t *testing.T) {
 	})
 	nested := m1.RespondWithMock()
 	result := nested.Foo()
+	r.AssertNoError()
 	r.AssertEqual(10, result)
+}
+
+func TestSliceReturn(t *testing.T) {
+	r := common.NewMockReporter(t)
+	SetUp(r)
+	m1 := Mock[WhenInterface]()
+	expected := []int{1,2,3}
+	When(m1.RespondWithSlice()).ThenReturn(expected)
+	result := m1.RespondWithSlice()
+	r.AssertEqual(expected, result)
+	r.AssertNoError()
 }
