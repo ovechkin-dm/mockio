@@ -3,6 +3,7 @@ package registry
 import (
 	"fmt"
 	"github.com/ovechkin-dm/go-dyno/pkg/dyno"
+	"github.com/ovechkin-dm/go-dyno/proxy"
 	"github.com/ovechkin-dm/mockio/matchers"
 	"reflect"
 	"sync"
@@ -268,6 +269,12 @@ func (h *invocationHandler) validateReturnValues(result []any, method reflect.Me
 		if retActual == nil {
 			return false
 		}
+		switch v := result[i].(type) {
+		case *proxy.DynamicStruct:
+			retActual = v.IFaceValue.Type()
+		default:
+		}
+
 		if !retActual.AssignableTo(retExpected) {
 			return false
 		}
