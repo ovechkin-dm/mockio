@@ -261,7 +261,7 @@ func (h *invocationHandler) validateReturnValues(result []any, method reflect.Me
 		return false
 	}
 	for i := range result {
-		if reflect.Zero(method.Type.Out(i)).Interface() == result[i] {
+		if result[i] == nil {
 			continue
 		}
 		retExpected := method.Type.Out(i)
