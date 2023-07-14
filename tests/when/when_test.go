@@ -10,10 +10,15 @@ type WhenInterface interface {
 	Foo(a int) (int, string)
 	Bar(a int, b string, c string) (int, string)
 	Empty() int
+	RespondWithMock() Nested
 }
 
 type WhenInterface2 interface {
 	Bar(a int, b string, c string) (int, string)
+}
+
+type Nested interface {
+	Foo() int
 }
 
 type WhenStruct struct {
@@ -105,4 +110,18 @@ func TestWhenMultipleIfaces(t *testing.T) {
 	r.AssertEqual(11, i2)
 	r.AssertEqual("test1", s2)
 	r.AssertNoError()
+}
+
+func TestWhenWithinWhen(t *testing.T) {
+	r := common.NewMockReporter(t)
+	SetUp(r)
+	m1 := Mock[WhenInterface]()
+	When(m1.RespondWithMock()).ThenAnswer(func(args []any) []any {
+		n := Mock[Nested]()
+		WhenSingle(n.Foo()).ThenReturn(10)
+		return []any{n}
+	})
+	nested := m1.RespondWithMock()
+	result := nested.Foo()
+	r.AssertEqual(10, result)
 }

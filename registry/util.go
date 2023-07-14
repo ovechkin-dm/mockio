@@ -1,6 +1,7 @@
 package registry
 
 import (
+	"github.com/ovechkin-dm/go-dyno/proxy"
 	"reflect"
 )
 
@@ -15,7 +16,12 @@ func createDefaultReturnValues(m reflect.Method) []reflect.Value {
 func valueSliceToInterfaceSlice(values []reflect.Value) []any {
 	result := make([]any, len(values))
 	for i := range values {
-		result[i] = values[i].Interface()
+		switch v := values[i].Interface().(type) {
+		case *proxy.DynamicStruct:
+			result[i] = v.IFaceValue
+		default:
+			result[i] = values[i].Interface()
+		}
 	}
 	return result
 }
@@ -23,11 +29,16 @@ func valueSliceToInterfaceSlice(values []reflect.Value) []any {
 func interfaceSliceToValueSlice(values []any, m reflect.Method) []reflect.Value {
 	result := make([]reflect.Value, len(values))
 	for i := range values {
-		retV := reflect.New(m.Type.Out(i)).Elem()
-		if values[i] != nil {
-			retV.Set(reflect.ValueOf(values[i]))
+		switch v := values[i].(type) {
+		case *proxy.DynamicStruct:
+			result[i] = v.IFaceValue
+		default:
+			retV := reflect.New(m.Type.Out(i)).Elem()
+			if values[i] != nil {
+				retV.Set(reflect.ValueOf(values[i]))
+			}
+			result[i] = retV
 		}
-		result[i] = retV
 	}
 	return result
 }
