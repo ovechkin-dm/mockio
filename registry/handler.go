@@ -295,9 +295,15 @@ func (h *invocationHandler) validateVerifyMatchers(call *MethodCall) bool {
 
 func (h *invocationHandler) CheckUnusedStubs() {
 	for _, rec := range h.calls {
+		calls := make([]*MethodCall, 0)
+		for i := range rec.calls {
+			if !rec.calls[i].WhenCall {
+				calls = append(calls, rec.calls[i])
+			}
+		}
 		for _, m := range rec.methodMatches {
 			if atomic.LoadInt64(&m.invocations) == 0 {
-				h.ctx.reporter.ReportWantedButNotInvoked(h.instanceType, rec.methodType, m)
+				h.ctx.reporter.ReportWantedButNotInvoked(h.instanceType, rec.methodType, m, calls)
 			}
 		}
 	}
