@@ -14,6 +14,14 @@ type St struct {
 	value int
 }
 
+type MyStruct struct {
+	items any
+}
+
+type MyInterface interface {
+	Test(m *MyStruct) int
+}
+
 func TestAny(t *testing.T) {
 	r := common.NewMockReporter(t)
 	SetUp(r)
@@ -115,4 +123,19 @@ func TestOneOf(t *testing.T) {
 	WhenSingle(m.Test(OneOf("test1", "test2"))).ThenReturn(true)
 	ret := m.Test("test2")
 	r.AssertEqual(true, ret)
+}
+
+func TestDeepEqual(t *testing.T) {
+	r := common.NewMockReporter(t)
+	SetUp(r)
+	m := Mock[MyInterface]()
+	s1 := MyStruct{
+		items: &[]int{1, 2, 3},
+	}
+	s2 := MyStruct{
+		items: &[]int{1, 2, 3},
+	}
+	WhenSingle(m.Test(&s1)).ThenReturn(9)
+	result := m.Test(&s2)
+	r.AssertEqual(result, 9)
 }

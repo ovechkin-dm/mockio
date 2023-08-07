@@ -110,7 +110,12 @@ got:
 `, methodSig, outTypesStr, retStr)
 }
 
-func (e *EnrichedReporter) ReportWantedButNotInvoked(instanceType reflect.Type, methodType reflect.Method, match *methodMatch) {
+func (e *EnrichedReporter) ReportWantedButNotInvoked(
+	instanceType reflect.Type,
+	methodType reflect.Method,
+	match *methodMatch,
+	calls []*MethodCall,
+) {
 	m := match.matchers
 	matcherArgs := make([]string, len(m))
 	for i := range m {
@@ -120,9 +125,19 @@ func (e *EnrichedReporter) ReportWantedButNotInvoked(instanceType reflect.Type, 
 	interfaceName := instanceType.Name()
 	methodName := methodType.Name
 	methodSig := interfaceName + "." + methodName
-	e.Errorf(`Wanted, but ont invoked:
-%s(%s)
-`, methodSig, matchersString)
+	sb := strings.Builder{}
+	sb.WriteString(fmt.Sprintf("Wanted, but not invoked:\n\t%s(%s)\n", methodSig, matchersString))
+	if len(calls) == 0 {
+		sb.WriteString("There were zero invocations on this method")
+	} else {
+		sb.WriteString(fmt.Sprintf("There were %v invocations on this method:\n", len(calls)))
+		for _, c := range calls {
+			invocation := PrettyPrintMethodInvocation(instanceType, methodType, c.Values)
+			sb.WriteString("\t" + invocation)
+			sb.WriteString("\n")
+		}
+	}
+	e.Errorf(sb.String())
 }
 
 func newEnrichedReporter(reporter matchers.ErrorReporter) *EnrichedReporter {
@@ -169,4 +184,21 @@ func prettyPrintMethodSignature(interfaceType reflect.Type, method reflect.Metho
 	}
 
 	return signature
+}
+
+func PrettyPrintMethodInvocation(interfaceType reflect.Type, method reflect.Method, values []reflect.Value) string {
+	sb := strings.Builder{}
+	interfaceName := interfaceType.Name()
+	methodName := method.Name
+	sb.WriteString(interfaceName + "." + methodName)
+	sb.WriteRune('(')
+	anyvals := valueSliceToInterfaceSlice(values)
+	for i, v := range anyvals {
+		sb.WriteString(fmt.Sprintf("%v", v))
+		if i != len(anyvals)-1 {
+			sb.WriteString(", ")
+		}
+	}
+	sb.WriteRune(')')
+	return sb.String()
 }
