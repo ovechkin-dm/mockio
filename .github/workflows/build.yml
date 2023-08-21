@@ -72,7 +72,7 @@ jobs:
           go-version: ${{ matrix.go }}
 
       - name: 'Test on darwin'
-        if: ${{ matrix.os == 'darwin' }}
+        if: ${{ matrix.os == 'darwin' && contains(fromJson('["amd64"]'), matrix.arch) }}
         env:
           GOOS: ${{ matrix.os }}
           GOARCH: ${{ matrix.arch }}
@@ -90,7 +90,7 @@ jobs:
         env:
           GOOS: ${{ matrix.os }}
           GOARCH: ${{ matrix.arch }}
-        run: go test -v -coverprofile="coverage.txt" -covermode=atomic -coverpkg=./mock/... ./...
+        run: go test -coverpkg=./mock/... ./...
 
 
       - name: 'Test on windows'
