@@ -53,8 +53,8 @@ jobs:
       fail-fast: false
       matrix:
         os: [ darwin, linux, windows ]
-        arch: [ amd64 ]
-        go: [ '1.18', '1.19', '1.20' ]
+        arch: [ amd64, arm64 ]
+        go: [ '1.20', '1.21' ]
         include:
           - os: darwin
             runs-on: macos-latest
@@ -72,18 +72,23 @@ jobs:
           go-version: ${{ matrix.go }}
 
       - name: 'Test on darwin'
-        if: ${{ matrix.os == 'darwin' }}
+        if: ${{ matrix.os == 'darwin' && contains(fromJson('["amd64"]'), matrix.arch) }}
         env:
           GOOS: ${{ matrix.os }}
           GOARCH: ${{ matrix.arch }}
         run: go test -v -race -coverprofile="coverage.txt" -covermode=atomic -coverpkg=./mock/... ./...
 
       - name: 'Test on linux'
-        if: ${{ matrix.os == 'linux' }}
+        if: ${{ matrix.os == 'linux' && contains(fromJson('["amd64"]'), matrix.arch) }}
         env:
           GOOS: ${{ matrix.os }}
           GOARCH: ${{ matrix.arch }}
         run: go test -v -race -coverprofile="coverage.txt" -covermode=atomic -coverpkg=./mock/... ./...
+
+      - name: 'Test on [linux] arch [arm64]'
+        if: ${{ matrix.os == 'linux' && contains(fromJson('["arm64"]'), matrix.arch) }}
+
+        run: go test -coverpkg=./mock/... ./...
 
 
       - name: 'Test on windows'
