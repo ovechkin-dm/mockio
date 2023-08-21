@@ -53,8 +53,8 @@ jobs:
       fail-fast: false
       matrix:
         os: [ darwin, linux, windows ]
-        arch: [ amd64 ]
-        go: [ '1.18', '1.19', '1.20' ]
+        arch: [ amd64, arm64 ]
+        go: [ '1.20', '1.21' ]
         include:
           - os: darwin
             runs-on: macos-latest
