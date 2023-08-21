@@ -87,9 +87,7 @@ jobs:
 
       - name: 'Test on [linux] arch [arm64]'
         if: ${{ matrix.os == 'linux' && contains(fromJson('["arm64"]'), matrix.arch) }}
-        env:
-          GOOS: ${{ matrix.os }}
-          GOARCH: ${{ matrix.arch }}
+
         run: go test -coverpkg=./mock/... ./...
 
 
