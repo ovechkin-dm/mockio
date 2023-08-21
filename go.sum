@@ -1,6 +1,6 @@
 github.com/davecgh/go-spew v1.1.1 h1:vj9j/u1bqnvCEfJOwUhtlOARqs3+rkHYY13jYWTU97c=
-github.com/ovechkin-dm/go-dyno v0.0.11 h1:inouInAWkQf6ySi8lrQ+AaAJdj8/3f4fhVDboVB1RZQ=
-github.com/ovechkin-dm/go-dyno v0.0.11/go.mod h1:06OT6ztP0Y4rO1lXEn3oB2u/ErA5dxCCjkEpa54L5Jw=
+github.com/ovechkin-dm/go-dyno v0.0.12 h1:FSFntI2sOnQGzZr09jsYyW+pzMewifjscPorzAiDXLs=
+github.com/ovechkin-dm/go-dyno v0.0.12/go.mod h1:06OT6ztP0Y4rO1lXEn3oB2u/ErA5dxCCjkEpa54L5Jw=
 github.com/pmezard/go-difflib v1.0.0 h1:4DBwDE0NGyQoBHbLQYPwSUPoCMWR5BEzIk/f1lZbAQM=
 github.com/stretchr/testify v1.8.1 h1:w7B6lhMri9wdJUVmEZPGGhZzrYTPvgJArz7wNPgYKsk=
 github.com/timandy/routine v1.1.1 h1:6/Z7qLFZj3GrzuRksBFzIG8YGUh8CLhjnnMePBQTrEI=
