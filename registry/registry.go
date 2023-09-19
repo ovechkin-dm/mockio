@@ -4,13 +4,14 @@ import (
 	"fmt"
 	"github.com/ovechkin-dm/go-dyno/pkg/dyno"
 	"github.com/ovechkin-dm/mockio/matchers"
-	"github.com/timandy/routine"
+	"github.com/ovechkin-dm/mockio/threadlocal"
+
 	"log"
 	"reflect"
 	"sync"
 )
 
-var instance = routine.NewThreadLocalWithInitial(newRegistry)
+var instance = threadlocal.NewThreadLocal(newRegistry)
 var lock sync.Mutex
 
 type Registry struct {
@@ -37,7 +38,7 @@ func SetUp(reporter matchers.ErrorReporter) {
 
 func TearDown() {
 	reg := getInstance()
-	instance.Remove()
+	instance.Clear()
 
 	if reg.mockContext.reporter == nil {
 		reg.mockContext.reporter.Errorf("Cannot TearDown since SetUp function wasn't called")
@@ -138,7 +139,7 @@ func withCheck[T any](f func() T) T {
 		log.Println("Warning: reporter is not initialized. You can initialize it with `SetUp(*testing.T)`. Defaulting to the panic reporter. This could also happen when using mocks concurrently")
 	}
 	initRoutineID := getInstance().mockContext.routineID
-	if initRoutineID != routine.Goid() {
+	if initRoutineID != threadlocal.GoId() {
 		rep.Fatalf("Call to mock api from a different goroutine. `When` or `Verify` can only be used from the initial goroutine.")
 	}
 	return f()

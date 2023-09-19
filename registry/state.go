@@ -3,7 +3,7 @@ package registry
 import (
 	"github.com/ovechkin-dm/go-dyno/pkg/dyno"
 	"github.com/ovechkin-dm/mockio/matchers"
-	"github.com/timandy/routine"
+	"github.com/ovechkin-dm/mockio/threadlocal"
 	"reflect"
 	"sync"
 	"sync/atomic"
@@ -20,7 +20,7 @@ type fiberState struct {
 }
 
 type mockContext struct {
-	state     routine.ThreadLocal
+	state     threadlocal.ThreadLocal[*fiberState]
 	reporter  *EnrichedReporter
 	lock      sync.Mutex
 	routineID int64
@@ -92,12 +92,12 @@ type matcherWrapper struct {
 }
 
 func (ctx *mockContext) getState() *fiberState {
-	return ctx.state.Get().(*fiberState)
+	return ctx.state.Get()
 }
 
 func newMockContext(reporter *EnrichedReporter) *mockContext {
 	return &mockContext{
-		state: routine.NewThreadLocalWithInitial(func() any {
+		state: threadlocal.NewThreadLocal(func() *fiberState {
 			return &fiberState{
 				matchers:       make([]*matcherWrapper, 0),
 				whenHandler:    nil,
@@ -108,7 +108,7 @@ func newMockContext(reporter *EnrichedReporter) *mockContext {
 		}),
 		reporter:  reporter,
 		lock:      sync.Mutex{},
-		routineID: routine.Goid(),
+		routineID: threadlocal.GoId(),
 	}
 }
 

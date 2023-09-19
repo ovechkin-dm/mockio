@@ -87,9 +87,11 @@ jobs:
 
       - name: 'Test on [linux] arch [arm64]'
         if: ${{ matrix.os == 'linux' && contains(fromJson('["arm64"]'), matrix.arch) }}
-
         run: go test -coverpkg=./mock/... ./...
 
+      - name: 'Test on [darwin] arch [arm64]'
+        if: ${{ matrix.os == 'darwin' && contains(fromJson('["arm64"]'), matrix.arch) }}
+        run: go test -coverpkg=./mock/... ./...
 
       - name: 'Test on windows'
         if: ${{ matrix.os == 'windows' && contains(fromJson('["amd64"]'), matrix.arch) }}
