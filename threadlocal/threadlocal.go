@@ -33,7 +33,8 @@ func (i *impl[T]) Set(t T) {
 }
 
 func (i *impl[T]) Clear() {
-	i.data = sync.Map{}
+	id := goid.Get()
+	i.data.Delete(id)
 }
 
 func NewThreadLocal[T any](initFunc func() T) ThreadLocal[T] {
