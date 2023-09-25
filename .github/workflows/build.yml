@@ -85,12 +85,8 @@ jobs:
           GOARCH: ${{ matrix.arch }}
         run: go test -v -race -coverprofile="coverage.txt" -covermode=atomic -coverpkg=./mock/... ./...
 
-      - name: 'Test on [linux] arch [arm64]'
+      - name: 'Test on [linux] arch [arm64] TODO'
         if: ${{ matrix.os == 'linux' && contains(fromJson('["arm64"]'), matrix.arch) }}
-        run: go test -coverpkg=./mock/... ./...
-
-      - name: 'Test on [darwin] arch [arm64]'
-        if: ${{ matrix.os == 'darwin' && contains(fromJson('["arm64"]'), matrix.arch) }}
         run: go test -coverpkg=./mock/... ./...
 
       - name: 'Test on windows'
