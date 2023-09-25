@@ -1,7 +1,6 @@
 package mocking
 
 import (
-	"fmt"
 	. "github.com/ovechkin-dm/mockio/mock"
 	"github.com/ovechkin-dm/mockio/tests/common"
 	"testing"
@@ -19,5 +18,5 @@ func TestByteArrayArgs(t *testing.T) {
 
 	WhenSingle(myMock.DoSomething(myBytes)).ThenReturn("test")
 	result := myMock.DoSomething(myBytes)
-	fmt.Println(result)
+	r.AssertEqual(result, "test")
 }
