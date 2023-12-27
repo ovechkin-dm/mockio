@@ -43,10 +43,6 @@ func TearDown() {
 	if reg.mockContext.reporter == nil {
 		reg.mockContext.reporter.Errorf("Cannot TearDown since SetUp function wasn't called")
 	}
-
-	for _, v := range reg.mapping {
-		v.CheckUnusedStubs()
-	}
 }
 
 func Mock[T any]() T {
