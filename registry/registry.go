@@ -107,14 +107,14 @@ func VerifyMethod(t any, v matchers.MethodVerifier) {
 	})
 }
 
-func VerifyInstance(t any, v matchers.InstanceVerifier) {
+func VerifyNoMoreInteractions(t any) {
 	withCheck(func() any {
 		handler, ok := getInstance().mapping[t]
 		if !ok {
 			getInstance().mockContext.reporter.ReportUnregisteredMockVerify(t)
 			return nil
 		}
-		handler.AddInstanceVerifier(v)
+		handler.VerifyNoMoreInteractions()
 		return nil
 	})
 }

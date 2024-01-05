@@ -15,10 +15,6 @@ type InvocationData struct {
 	Args       []reflect.Value
 }
 
-type InstanceVerifier interface {
-	RecordInteraction(data *InvocationData) error
-}
-
 type MethodVerifier interface {
 	Verify(data *MethodVerificationData) error
 }
@@ -47,24 +43,10 @@ func MethodVerifierFromFunc(f func(data *MethodVerificationData) error) MethodVe
 	}
 }
 
-func InstanceVerifierFromFunc(f func(data *InvocationData) error) InstanceVerifier {
-	return &instanceVerifierImpl{
-		f: f,
-	}
-}
-
 type methodVerifierImpl struct {
 	f func(data *MethodVerificationData) error
 }
 
 func (m *methodVerifierImpl) Verify(data *MethodVerificationData) error {
 	return m.f(data)
-}
-
-type instanceVerifierImpl struct {
-	f func(data *InvocationData) error
-}
-
-func (i *instanceVerifierImpl) RecordInteraction(data *InvocationData) error {
-	return i.f(data)
 }

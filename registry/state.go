@@ -116,4 +116,5 @@ type MethodCall struct {
 	Method   *dyno.Method
 	Values   []reflect.Value
 	WhenCall bool
+	Verified bool
 }

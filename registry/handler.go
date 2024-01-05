@@ -13,7 +13,6 @@ import (
 type invocationHandler struct {
 	ctx               *mockContext
 	calls             []*methodRecorder
-	instanceVerifiers []matchers.InstanceVerifier
 	lock              sync.Mutex
 	instanceType      reflect.Type
 }
@@ -35,10 +34,6 @@ func (h *invocationHandler) Handle(method *dyno.Method, values []reflect.Value) 
 
 func (h *invocationHandler) DoAnswer(c *MethodCall) []reflect.Value {
 	rec := h.calls[c.Method.Num]
-	ok := h.VerifyInstance(c)
-	if !ok {
-		return createDefaultReturnValues(c.Method.Type)
-	}
 	h.ctx.getState().whenHandler = h
 	h.ctx.getState().whenCall = c
 	var matched bool
@@ -130,26 +125,6 @@ func (h *invocationHandler) When() matchers.ReturnerAll {
 	return NewReturnerAll(h.ctx, m)
 }
 
-func (h *invocationHandler) VerifyInstance(m *MethodCall) bool {
-	data := &matchers.InvocationData{
-		MethodType: m.Method.Type,
-		MethodName: m.Method.Name,
-		Args:       m.Values,
-	}
-	for _, v := range h.instanceVerifiers {
-		err := v.RecordInteraction(data)
-		if err != nil {
-			h.ctx.reporter.FailNow(err)
-			return false
-		}
-	}
-	return true
-}
-
-func (h *invocationHandler) AddInstanceVerifier(v matchers.InstanceVerifier) {
-	h.instanceVerifiers = append(h.instanceVerifiers, v)
-}
-
 func (h *invocationHandler) VerifyMethod(verifier matchers.MethodVerifier) {
 	h.lock.Lock()
 	defer h.lock.Unlock()
@@ -198,6 +173,7 @@ func (h *invocationHandler) DoVerifyMethod(call *MethodCall) []reflect.Value {
 		}
 
 		if matches {
+			c.Verified = true
 			numMethodCalls += 1
 		}
 	}
@@ -225,7 +201,6 @@ func newHandler[T any](holder *mockContext) *invocationHandler {
 	return &invocationHandler{
 		ctx:               holder,
 		calls:             recorders,
-		instanceVerifiers: make([]matchers.InstanceVerifier, 0),
 		instanceType:      tp,
 	}
 }
@@ -304,6 +279,19 @@ func (h *invocationHandler) CheckUnusedStubs() {
 		for _, m := range rec.methodMatches {
 			if atomic.LoadInt64(&m.invocations) == 0 {
 				h.ctx.reporter.ReportWantedButNotInvoked(h.instanceType, rec.methodType, m, calls)
+			}
+		}
+	}
+}
+
+func (h *invocationHandler) VerifyNoMoreInteractions() {
+	for _, rec := range h.calls {
+		for _, call := range rec.calls {
+			if call.WhenCall {
+				continue
+			}
+			if !call.Verified {
+				h.ctx.reporter.ReportNoMoreInteractionsExpected(h.instanceType, call)
 			}
 		}
 	}
