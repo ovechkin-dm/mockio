@@ -63,12 +63,50 @@ func TestVerifyNeverFails(t *testing.T) {
 	r.AssertError()
 }
 
-func TestNoMoreInteractions(t *testing.T) {
+func TestNoMoreInteractionsFails(t *testing.T) {
 	r := common.NewMockReporter(t)
 	SetUp(r)
 	m := Mock[iface]()
 	WhenSingle(m.Foo(Any[int]())).ThenReturn(10)
-	VerifyNoMoreInteractions(m)
 	m.Foo(10)
+	VerifyNoMoreInteractions(m)
 	r.AssertError()
+}
+
+func TestNoMoreInteractionsSuccess(t *testing.T) {
+	r := common.NewMockReporter(t)
+	SetUp(r)
+	m := Mock[iface]()
+	WhenSingle(m.Foo(Any[int]())).ThenReturn(10)
+	m.Foo(10)
+	Verify(m, Once()).Foo(10)
+	VerifyNoMoreInteractions(m)
+	r.AssertNoError()
+}
+
+func TestNoMoreInteractionsComplexFail(t *testing.T) {
+	r := common.NewMockReporter(t)
+	SetUp(r)
+	m := Mock[iface]()
+	WhenSingle(m.Foo(10)).ThenReturn(10)
+	WhenSingle(m.Foo(11)).ThenReturn(10)
+	m.Foo(10)
+	m.Foo(11)
+	Verify(m, Once()).Foo(10)
+	VerifyNoMoreInteractions(m)
+	r.AssertError()
+}
+
+func TestNoMoreInteractionsComplexSuccess(t *testing.T) {
+	r := common.NewMockReporter(t)
+	SetUp(r)
+	m := Mock[iface]()
+	WhenSingle(m.Foo(10)).ThenReturn(10)
+	WhenSingle(m.Foo(11)).ThenReturn(10)
+	m.Foo(10)
+	m.Foo(11)
+	Verify(m, AtLeastOnce()).Foo(AnyInt())
+	Verify(m, Once()).Foo(11)
+	VerifyNoMoreInteractions(m)
+	r.AssertNoError()
 }

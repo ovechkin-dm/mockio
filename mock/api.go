@@ -1,6 +1,7 @@
 package mock
 
 import (
+	"context"
 	"fmt"
 	"github.com/ovechkin-dm/mockio/matchers"
 	"github.com/ovechkin-dm/mockio/registry"
@@ -95,6 +96,12 @@ func AnyString() string {
 // See Any for more description
 func AnyInterface() any {
 	return Any[any]()
+}
+
+// AnyContext is an alias for Any[context.Context]
+// See Any for more description
+func AnyContext() context.Context {
+	return Any[context.Context]()
 }
 
 // AnyOfType is an alias for Any[T] for specific type
@@ -354,7 +361,7 @@ func Never() matchers.MethodVerifier {
 }
 
 // VerifyNoMoreInteractions verifies that there are no more unverified interactions with the mock object.
-//
+// For example if
 // Example usage:
 //
 //	// Create a mock object for testing
@@ -369,7 +376,5 @@ func Never() matchers.MethodVerifier {
 //	// Verify that there are no more unverified interactions
 //	VerifyNoMoreInteractions(mockObj)
 func VerifyNoMoreInteractions(value any) {
-	registry.VerifyInstance(value, matchers.InstanceVerifierFromFunc(func(data *matchers.InvocationData) error {
-		return fmt.Errorf("no more interactions should be recorded for mock")
-	}))
+	registry.VerifyNoMoreInteractions(value)
 }

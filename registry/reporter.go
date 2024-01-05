@@ -202,3 +202,8 @@ func PrettyPrintMethodInvocation(interfaceType reflect.Type, method reflect.Meth
 	sb.WriteRune(')')
 	return sb.String()
 }
+
+func (e *EnrichedReporter) ReportNoMoreInteractionsExpected(instanceType reflect.Type, call *MethodCall) {
+	methodSig := prettyPrintMethodSignature(instanceType, call.Method.Type)
+	e.Errorf("no more interactions expected on %v", methodSig)
+}
