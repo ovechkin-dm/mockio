@@ -15,3 +15,5 @@ func TestNonInterfaceNotAllowed(t *testing.T) {
 	_ = Mock[St]()
 	r.AssertError()
 }
+
+
