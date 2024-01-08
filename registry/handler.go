@@ -130,6 +130,9 @@ func (h *invocationHandler) VerifyMethod(verifier matchers.MethodVerifier) {
 	defer h.lock.Unlock()
 	h.ctx.getState().verifyState = true
 	h.ctx.getState().methodVerifier = verifier
+	if len(h.ctx.getState().matchers) != 0 {
+		h.ctx.reporter.ReportUnexpectedMatcherDeclaration(h.ctx.getState().matchers)
+	}
 }
 
 func (h *invocationHandler) DoVerifyMethod(call *MethodCall) []reflect.Value {

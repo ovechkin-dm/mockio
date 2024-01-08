@@ -139,3 +139,12 @@ func TestDeepEqual(t *testing.T) {
 	result := m.Test(&s2)
 	r.AssertEqual(result, 9)
 }
+
+func TestUnexpectedUseOfMatchers(t *testing.T) {
+	r := common.NewMockReporter(t)
+	SetUp(r)
+	m := Mock[Iface]()
+	m.Test(AnyString())
+	Verify(m, Once()).Test("test")
+	r.AssertErrorContains(r.GetError(), "Unexpected matchers declaration")
+}
