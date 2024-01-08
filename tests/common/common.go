@@ -1,6 +1,7 @@
 package common
 
 import (
+	"errors"
 	"fmt"
 	"reflect"
 	"strings"
@@ -27,6 +28,10 @@ func (m *MockReporter) ErrorContains(s string) bool {
 
 func (m *MockReporter) GetErrorString() string {
 	return m.reported
+}
+
+func (m *MockReporter) GetError() error {
+	return errors.New(m.reported)
 }
 
 func (m *MockReporter) AssertNoError() {

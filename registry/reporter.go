@@ -207,3 +207,13 @@ func (e *EnrichedReporter) ReportNoMoreInteractionsExpected(instanceType reflect
 	methodSig := prettyPrintMethodSignature(instanceType, call.Method.Type)
 	e.Errorf("no more interactions expected on %v", methodSig)
 }
+
+func (e *EnrichedReporter) ReportUnexpectedMatcherDeclaration(m []*matcherWrapper) {
+	sb := strings.Builder{}
+	sb.WriteString("Unexpected matchers declaration:\n")
+	for _, v := range m {
+		sb.WriteString(fmt.Sprintf("\t%s\n", v.matcher.Description()))
+	}
+	sb.WriteString("Matchers can only be used within When() call")
+	e.Errorf(sb.String())
+}
