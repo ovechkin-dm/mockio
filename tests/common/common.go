@@ -65,6 +65,10 @@ func (m *MockReporter) Cleanup(clean func()) {
 	m.cleanups = append(m.cleanups, clean)
 }
 
+func (m *MockReporter) PrintError() {
+	fmt.Println(m.reported)
+}
+
 func NewMockReporter(t *testing.T) *MockReporter {
 	rep := &MockReporter{
 		reported: "",

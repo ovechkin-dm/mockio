@@ -16,6 +16,18 @@ func ToReturnerDouble[A any, B any](retAll matchers.ReturnerAll) matchers.Return
 	}
 }
 
+type returnerDummyImpl struct {
+
+}
+
+func (r *returnerDummyImpl) ThenReturn(values ...any) matchers.ReturnerAll {
+	return r
+}
+
+func (r *returnerDummyImpl) ThenAnswer(f matchers.Answer) matchers.ReturnerAll {
+	return r
+}
+
 type returnerAllImpl struct {
 	methodMatch *methodMatch
 	ctx         *mockContext
@@ -83,4 +95,8 @@ func NewReturnerAll(ctx *mockContext, data *methodMatch) matchers.ReturnerAll {
 		methodMatch: data,
 		ctx:         ctx,
 	}
+}
+
+func NewEmptyReturner() matchers.ReturnerAll {
+	return &returnerDummyImpl{}
 }

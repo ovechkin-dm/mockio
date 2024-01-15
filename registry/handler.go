@@ -7,14 +7,13 @@ import (
 	"github.com/ovechkin-dm/mockio/matchers"
 	"reflect"
 	"sync"
-	"sync/atomic"
 )
 
 type invocationHandler struct {
-	ctx               *mockContext
-	calls             []*methodRecorder
-	lock              sync.Mutex
-	instanceType      reflect.Type
+	ctx          *mockContext
+	methods      []*methodRecorder
+	lock         sync.Mutex
+	instanceType reflect.Type
 }
 
 func (h *invocationHandler) Handle(method *dyno.Method, values []reflect.Value) []reflect.Value {
@@ -22,18 +21,19 @@ func (h *invocationHandler) Handle(method *dyno.Method, values []reflect.Value) 
 	defer h.lock.Unlock()
 
 	call := &MethodCall{
-		Method: method,
-		Values: values,
+		Method:     method,
+		Values:     values,
+		StackTrace: NewStackTrace(),
 	}
 	if h.ctx.getState().verifyState {
 		return h.DoVerifyMethod(call)
 	}
-	h.calls[method.Num].calls = append(h.calls[method.Num].calls, call)
+	h.methods[method.Num].calls = append(h.methods[method.Num].calls, call)
 	return h.DoAnswer(call)
 }
 
 func (h *invocationHandler) DoAnswer(c *MethodCall) []reflect.Value {
-	rec := h.calls[c.Method.Num]
+	rec := h.methods[c.Method.Num]
 	h.ctx.getState().whenHandler = h
 	h.ctx.getState().whenCall = c
 	var matched bool
@@ -108,10 +108,10 @@ func (h *invocationHandler) When() matchers.ReturnerAll {
 	}
 
 	if !h.validateMatchers(whenCall) {
-		return nil
+		return NewEmptyReturner()
 	}
 
-	rec := h.calls[whenCall.Method.Num]
+	rec := h.methods[whenCall.Method.Num]
 
 	argMatchers := h.ctx.getState().matchers
 
@@ -157,8 +157,8 @@ func (h *invocationHandler) DoVerifyMethod(call *MethodCall) []reflect.Value {
 		return createDefaultReturnValues(call.Method.Type)
 	}
 
-	numMethodCalls := 0
-	rec := h.calls[call.Method.Num]
+	rec := h.methods[call.Method.Num]
+	matchedInvocations := make([]*MethodCall, 0)
 	for _, c := range rec.calls {
 		if c.WhenCall {
 			continue
@@ -177,16 +177,16 @@ func (h *invocationHandler) DoVerifyMethod(call *MethodCall) []reflect.Value {
 
 		if matches {
 			c.Verified = true
-			numMethodCalls += 1
+			matchedInvocations = append(matchedInvocations, c)
 		}
 	}
 	verifyData := &matchers.MethodVerificationData{
-		NumMethodCalls: numMethodCalls,
+		NumMethodCalls: len(matchedInvocations),
 	}
 	err := h.ctx.getState().methodVerifier.Verify(verifyData)
 	h.ctx.getState().methodVerifier = nil
 	if err != nil {
-		h.ctx.reporter.ReportVerifyMethodError(call, err)
+		h.ctx.reporter.ReportVerifyMethodError(h.instanceType, call, matchedInvocations, argMatchers, h.methods[call.Method.Num], err)
 	}
 	return createDefaultReturnValues(call.Method.Type)
 }
@@ -202,9 +202,9 @@ func newHandler[T any](holder *mockContext) *invocationHandler {
 		}
 	}
 	return &invocationHandler{
-		ctx:               holder,
-		calls:             recorders,
-		instanceType:      tp,
+		ctx:          holder,
+		methods:      recorders,
+		instanceType: tp,
 	}
 }
 
@@ -271,31 +271,19 @@ func (h *invocationHandler) validateVerifyMatchers(call *MethodCall) bool {
 	return true
 }
 
-func (h *invocationHandler) CheckUnusedStubs() {
-	for _, rec := range h.calls {
-		calls := make([]*MethodCall, 0)
-		for i := range rec.calls {
-			if !rec.calls[i].WhenCall {
-				calls = append(calls, rec.calls[i])
-			}
-		}
-		for _, m := range rec.methodMatches {
-			if atomic.LoadInt64(&m.invocations) == 0 {
-				h.ctx.reporter.ReportWantedButNotInvoked(h.instanceType, rec.methodType, m, calls)
-			}
-		}
-	}
-}
-
 func (h *invocationHandler) VerifyNoMoreInteractions() {
-	for _, rec := range h.calls {
+	unexpected := make([]*MethodCall, 0)
+	for _, rec := range h.methods {
 		for _, call := range rec.calls {
 			if call.WhenCall {
 				continue
 			}
 			if !call.Verified {
-				h.ctx.reporter.ReportNoMoreInteractionsExpected(h.instanceType, call)
+				unexpected = append(unexpected, call)
 			}
 		}
+	}
+	if len(unexpected) > 0 {
+		h.ctx.reporter.ReportNoMoreInteractionsExpected(h.instanceType, unexpected)
 	}
 }
