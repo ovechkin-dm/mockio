@@ -2,6 +2,7 @@ package registry
 
 import (
 	"fmt"
+	"github.com/ovechkin-dm/go-dyno/proxy"
 	"github.com/ovechkin-dm/mockio/matchers"
 	"reflect"
 	"strings"
@@ -26,6 +27,19 @@ func (e *EnrichedReporter) Errorf(format string, args ...any) {
 	e.reporter.Fatalf(format, args...)
 }
 
+func (e *EnrichedReporter) StackTraceErrorf(format string, args ...any) {
+	s := NewStackTrace()
+	result := fmt.Sprintf(format, args...)
+	st := fmt.Sprintf(`At:
+	%s
+Cause:
+	%s
+Trace:
+%s
+`, s.CallerLine(), result, s.WithoutLibraryCalls().String())
+	e.reporter.Fatalf(st)
+}
+
 func (e *EnrichedReporter) FailNow(err error) {
 	e.Errorf(err.Error())
 }
@@ -35,11 +49,22 @@ func (e *EnrichedReporter) Fatal(format string) {
 }
 
 func (e *EnrichedReporter) ReportIncorrectWhenUsage() {
-	e.Fatal("incorrect usage of `When`. You can only use it with method call: When(foo.Bar()).ThenReturn(...)")
+	e.StackTraceErrorf(`When() requires an argument which has to be 'a method call on a mock'.
+	For example: When(mock.GetArticles()).ThenReturn(articles)`)
 }
 
 func (e *EnrichedReporter) ReportUnregisteredMockVerify(t any) {
-	e.Errorf("unregistered mock instance during Verify call: %v", t)
+	switch t.(type) {
+	case *proxy.DynamicStruct:
+		e.StackTraceErrorf(`Argument passed to Verify() is a mock from different goroutine.
+	Make sure you made call to Mock() and Verify() from the same goroutine.`)
+	default:
+		e.StackTraceErrorf(`Argument passed to Verify() is %v and is not a mock.
+	Make sure you place the parenthesis correctly.
+	Example of correct verification:
+		Verify(mock, Times(10)).SomeMethod()`, t)
+	}
+
 }
 
 func (e *EnrichedReporter) ReportInvalidUseOfMatchers(instanceType reflect.Type, call *MethodCall, m []*matcherWrapper) {
@@ -55,89 +80,130 @@ func (e *EnrichedReporter) ReportInvalidUseOfMatchers(instanceType reflect.Type,
 		inArgs = append(inArgs, tp.In(i).String())
 	}
 	inArgsStr := strings.Join(inArgs, ",")
-	e.Errorf(`invalid use of matchers
-method:
+	numExpected := call.Method.Type.Type.NumIn()
+	numActual := len(m)
+	declarationLines := make([]string, 0)
+	for i := range m {
+		declarationLines = append(declarationLines, "\t\t" + m[i].stackTrace.CallerLine())
+	}
+	decl := strings.Join(declarationLines, "\n")
+	e.StackTraceErrorf(`Invalid use of matchers
+	%v expected, %v recorded:
 %v
-expected:
-(%s)
-got:
-(%s)
-you can only use matchers within When() call: When(foo.Bar(Any[Int])).
-Possible cause is the mixing of matchers with exact values. In this case use "Exact" method instead. 
-`, methodSig, inArgsStr, matchersString)
+	method:
+		%v
+	expected:
+		(%s)
+	got:
+		(%s)
+	This can happen for 2 reasons:
+		1. Declaration of matcher outside When() call
+		2. Mixing matchers and exact values in When() call. Is this case, consider using "Exact" matcher.`,
+		numExpected, numActual, decl, methodSig, inArgsStr, matchersString)
 }
 
 func (e *EnrichedReporter) ReportCaptorInsideVerify(call *MethodCall, m []*matcherWrapper) {
-	e.Fatal("Unexpected use of captor. `captor.Capture()` should not be used inside `Verify` method")
+	e.StackTraceErrorf("Unexpected use of captor. `captor.Capture()` should not be used inside `Verify` method")
 }
 
-func (e *EnrichedReporter) ReportVerifyMethodError(call *MethodCall, err error) {
-	e.FailNow(err)
-}
-
-func (e *EnrichedReporter) ReportEmptyCaptor() {
-	e.Fatal("no values were captured")
-}
-
-func (e *EnrichedReporter) ReportInvalidCaptorValue(expectedType reflect.Type, actualType reflect.Type) {
-	e.Fatal("no values were captured")
-}
-
-func (e *EnrichedReporter) ReportInvalidReturnValues(instanceType reflect.Type, method reflect.Method, ret []any) {
-	retStrValues := make([]string, len(ret))
-	for i := range retStrValues {
-		if ret[i] == nil {
-			retStrValues[i] = "nil"
-		} else {
-			retStrValues[i] = reflect.ValueOf(ret[i]).Type().Name()
-		}
-	}
-	retStr := strings.Join(retStrValues, ",")
-	tp := method.Type
-	outTypes := make([]string, 0)
-	for i := 0; i < tp.NumOut(); i++ {
-		outTypes = append(outTypes, tp.Out(i).Name())
-	}
-	outTypesStr := strings.Join(outTypes, ", ")
-	methodSig := prettyPrintMethodSignature(instanceType, method)
-	e.Errorf(`invalid return values
-method:
-%v
-expected:
-(%s)
-got:
-(%s)
-`, methodSig, outTypesStr, retStr)
-}
-
-func (e *EnrichedReporter) ReportWantedButNotInvoked(
-	instanceType reflect.Type,
-	methodType reflect.Method,
-	match *methodMatch,
-	calls []*MethodCall,
+func (e *EnrichedReporter) ReportVerifyMethodError(
+	tp reflect.Type,
+	call *MethodCall,
+	invocations []*MethodCall,
+	argMatchers []*matcherWrapper,
+	recorder *methodRecorder,
+	err error,
 ) {
-	m := match.matchers
-	matcherArgs := make([]string, len(m))
-	for i := range m {
-		matcherArgs[i] = m[i].matcher.Description()
-	}
-	matchersString := strings.Join(matcherArgs, ", ")
-	interfaceName := instanceType.Name()
-	methodName := methodType.Name
-	methodSig := interfaceName + "." + methodName
 	sb := strings.Builder{}
-	sb.WriteString(fmt.Sprintf("Wanted, but not invoked:\n\t%s(%s)\n", methodSig, matchersString))
-	if len(calls) == 0 {
-		sb.WriteString("There were zero invocations on this method")
-	} else {
-		sb.WriteString(fmt.Sprintf("There were %v invocations on this method:\n", len(calls)))
-		for _, c := range calls {
-			invocation := PrettyPrintMethodInvocation(instanceType, methodType, c.Values)
-			sb.WriteString("\t" + invocation)
+	for i, c := range invocations {
+		if c.WhenCall {
+			continue
+		}
+		sb.WriteString("\t\t" + c.StackTrace.CallerLine())
+		if i != len(invocations)-1 {
 			sb.WriteString("\n")
 		}
 	}
-	e.Errorf(sb.String())
+	args := make([]string, len(argMatchers))
+	for i := range argMatchers {
+		args[i] = argMatchers[i].matcher.Description()
+	}
+	callStr := PrettyPrintMethodInvocation(tp, call.Method.Type, args)
+
+	other := strings.Builder{}
+	for j, c := range recorder.calls {
+		callArgs := make([]string, len(c.Values))
+		for i := range c.Values {
+			callArgs[i] = fmt.Sprintf("%v", c.Values[i])
+		}
+		pretty := PrettyPrintMethodInvocation(tp, c.Method.Type, callArgs)
+		other.WriteString(fmt.Sprintf("\t\t%s at %s", pretty, c.StackTrace.CallerLine()))
+		if j != len(recorder.calls)-1 {
+			other.WriteString("\n")
+		}
+	}
+
+	if len(invocations) == 0 {
+		e.StackTraceErrorf(`%v
+		%v
+	However, there were other interactions with this method:
+%v`, err, callStr, other.String())
+	} else {
+		e.StackTraceErrorf(`%v
+		%v
+	Invocations:
+%v`, err, callStr, sb.String())
+	}
+
+}
+
+func (e *EnrichedReporter) ReportEmptyCaptor() {
+	e.StackTraceErrorf("no values were captured for captor")
+}
+
+func (e *EnrichedReporter) ReportInvalidCaptorValue(expectedType reflect.Type, actualType reflect.Type) {
+	e.StackTraceErrorf("captor contains unexpected type")
+}
+
+func (e *EnrichedReporter) ReportInvalidReturnValues(instanceType reflect.Type, method reflect.Method, ret []any) {
+	tp := method.Type
+	outTypesSB := strings.Builder{}
+
+	interfaceName := instanceType.Name()
+	methodName := method.Name
+	outTypesSB.WriteString(interfaceName + "." + methodName)
+	outTypesSB.WriteString("(")
+	for i := 0; i < tp.NumIn(); i++ {
+		outTypesSB.WriteString(tp.In(i).Name())
+		if i != tp.NumIn()-1 {
+			outTypesSB.WriteString(", ")
+		}
+	}
+	outTypesSB.WriteString(")")
+	if len(ret) > 0 {
+		outTypesSB.WriteString(" ")
+	}
+	if len(ret) > 1 {
+		outTypesSB.WriteString("(")
+	}
+	for i := 0; i < len(ret); i++ {
+		outTypesSB.WriteString(reflect.ValueOf(ret[i]).Type().String())
+		if i != len(ret)-1 {
+			outTypesSB.WriteString(", ")
+		}
+	}
+	if len(ret) > 1 {
+		outTypesSB.WriteString(")")
+	}
+
+	methodSig := prettyPrintMethodSignature(instanceType, method)
+
+	e.StackTraceErrorf(`invalid return values
+expected:
+	%v
+got:
+	%s
+`, methodSig, outTypesSB.String())
 }
 
 func newEnrichedReporter(reporter matchers.ErrorReporter) *EnrichedReporter {
@@ -186,16 +252,15 @@ func prettyPrintMethodSignature(interfaceType reflect.Type, method reflect.Metho
 	return signature
 }
 
-func PrettyPrintMethodInvocation(interfaceType reflect.Type, method reflect.Method, values []reflect.Value) string {
+func PrettyPrintMethodInvocation(interfaceType reflect.Type, method reflect.Method, args []string) string {
 	sb := strings.Builder{}
 	interfaceName := interfaceType.Name()
 	methodName := method.Name
 	sb.WriteString(interfaceName + "." + methodName)
 	sb.WriteRune('(')
-	anyvals := valueSliceToInterfaceSlice(values)
-	for i, v := range anyvals {
+	for i, v := range args {
 		sb.WriteString(fmt.Sprintf("%v", v))
-		if i != len(anyvals)-1 {
+		if i != len(args)-1 {
 			sb.WriteString(", ")
 		}
 	}
@@ -203,17 +268,34 @@ func PrettyPrintMethodInvocation(interfaceType reflect.Type, method reflect.Meth
 	return sb.String()
 }
 
-func (e *EnrichedReporter) ReportNoMoreInteractionsExpected(instanceType reflect.Type, call *MethodCall) {
-	methodSig := prettyPrintMethodSignature(instanceType, call.Method.Type)
-	e.Errorf("no more interactions expected on %v", methodSig)
+func (e *EnrichedReporter) ReportNoMoreInteractionsExpected(instanceType reflect.Type, calls []*MethodCall) {
+	sb := strings.Builder{}
+	for i, c := range calls {
+		args := make([]string, 0)
+		for _, v := range c.Values {
+			args = append(args, fmt.Sprintf("%v", v))
+		}
+		s := PrettyPrintMethodInvocation(instanceType, c.Method.Type, args)
+		line := fmt.Sprintf("\t\t%s at %s", s, c.StackTrace.CallerLine())
+		sb.WriteString(line)
+		if i != len(calls)-1 {
+			sb.WriteString("\n")
+		}
+
+	}
+	e.StackTraceErrorf(`No more interactions expected, but unverified interactions found:
+%v`, sb.String())
 }
 
 func (e *EnrichedReporter) ReportUnexpectedMatcherDeclaration(m []*matcherWrapper) {
 	sb := strings.Builder{}
-	sb.WriteString("Unexpected matchers declaration:\n")
-	for _, v := range m {
-		sb.WriteString(fmt.Sprintf("\t%s\n", v.matcher.Description()))
+	for i, v := range m {
+		sb.WriteString("\t\tat " + v.stackTrace.CallerLine())
+		if i != len(m)-1 {
+			sb.WriteString("\n")
+		}
 	}
-	sb.WriteString("Matchers can only be used within When() call")
-	e.Errorf(sb.String())
+	e.StackTraceErrorf(`Unexpected matchers declaration.
+%s
+	Matchers can only be used inside When() method call.`, sb.String())
 }

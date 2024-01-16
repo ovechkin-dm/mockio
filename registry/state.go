@@ -87,8 +87,9 @@ type answerWrapper struct {
 }
 
 type matcherWrapper struct {
-	matcher matchers.Matcher[any]
-	rec     recordable
+	matcher    matchers.Matcher[any]
+	rec        recordable
+	stackTrace *StackTrace
 }
 
 func (ctx *mockContext) getState() *fiberState {
@@ -113,8 +114,9 @@ func newMockContext(reporter *EnrichedReporter) *mockContext {
 }
 
 type MethodCall struct {
-	Method   *dyno.Method
-	Values   []reflect.Value
-	WhenCall bool
-	Verified bool
+	Method     *dyno.Method
+	Values     []reflect.Value
+	WhenCall   bool
+	Verified   bool
+	StackTrace *StackTrace
 }

@@ -64,6 +64,7 @@ func AddMatcher[T any](m matchers.Matcher[T]) {
 		w := &matcherWrapper{
 			matcher: untypedMatcher(m),
 			rec:     nil,
+			stackTrace: NewStackTrace(),
 		}
 		getInstance().mockContext.getState().matchers = append(getInstance().mockContext.getState().matchers, w)
 		return nil
@@ -78,6 +79,7 @@ func AddCaptor[T any](c *captorImpl[T]) {
 				return true
 			}),
 			rec: c,
+			stackTrace: NewStackTrace(),
 		}
 		getInstance().mockContext.getState().matchers = append(getInstance().mockContext.getState().matchers, w)
 		return nil
