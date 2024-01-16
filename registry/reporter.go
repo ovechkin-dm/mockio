@@ -50,21 +50,19 @@ func (e *EnrichedReporter) Fatal(format string) {
 
 func (e *EnrichedReporter) ReportIncorrectWhenUsage() {
 	e.StackTraceErrorf(`When() requires an argument which has to be 'a method call on a mock'.
-For example:
-    When(mock.GetArticles()).ThenReturn(articles)
-`)
+	For example: When(mock.GetArticles()).ThenReturn(articles)`)
 }
 
 func (e *EnrichedReporter) ReportUnregisteredMockVerify(t any) {
 	switch t.(type) {
 	case *proxy.DynamicStruct:
 		e.StackTraceErrorf(`Argument passed to Verify() is a mock from different goroutine.
-Make sure you made call to Mock() and Verify() from the same goroutine.`)
+	Make sure you made call to Mock() and Verify() from the same goroutine.`)
 	default:
 		e.StackTraceErrorf(`Argument passed to Verify() is %v and is not a mock.
-Make sure you place the parenthesis correctly.
-Example of correct verification:
-	 Verify(mock, Times(10)).SomeMethod()`, t)
+	Make sure you place the parenthesis correctly.
+	Example of correct verification:
+		Verify(mock, Times(10)).SomeMethod()`, t)
 	}
 
 }
@@ -86,22 +84,22 @@ func (e *EnrichedReporter) ReportInvalidUseOfMatchers(instanceType reflect.Type,
 	numActual := len(m)
 	declarationLines := make([]string, 0)
 	for i := range m {
-		declarationLines = append(declarationLines, m[i].stackTrace.CallerLine())
+		declarationLines = append(declarationLines, "\t\t" + m[i].stackTrace.CallerLine())
 	}
 	decl := strings.Join(declarationLines, "\n")
 	e.StackTraceErrorf(`Invalid use of matchers
-%v expected, %v recorded:
+	%v expected, %v recorded:
 %v
-method:
-%v
-expected:
-(%s)
-got:
-(%s)
-This can happen for 2 reasons:
-1. Declaration of matcher outside When() call
-2. Mixing matchers and exact values in When() call. Is this case, consider using "Exact" matcher. 
-`, numExpected, numActual, decl, methodSig, inArgsStr, matchersString)
+	method:
+		%v
+	expected:
+		(%s)
+	got:
+		(%s)
+	This can happen for 2 reasons:
+		1. Declaration of matcher outside When() call
+		2. Mixing matchers and exact values in When() call. Is this case, consider using "Exact" matcher.`,
+		numExpected, numActual, decl, methodSig, inArgsStr, matchersString)
 }
 
 func (e *EnrichedReporter) ReportCaptorInsideVerify(call *MethodCall, m []*matcherWrapper) {
@@ -121,7 +119,7 @@ func (e *EnrichedReporter) ReportVerifyMethodError(
 		if c.WhenCall {
 			continue
 		}
-		sb.WriteString("\t" + c.StackTrace.CallerLine())
+		sb.WriteString("\t\t" + c.StackTrace.CallerLine())
 		if i != len(invocations)-1 {
 			sb.WriteString("\n")
 		}
@@ -139,7 +137,7 @@ func (e *EnrichedReporter) ReportVerifyMethodError(
 			callArgs[i] = fmt.Sprintf("%v", c.Values[i])
 		}
 		pretty := PrettyPrintMethodInvocation(tp, c.Method.Type, callArgs)
-		other.WriteString(fmt.Sprintf("\t%s at %s", pretty, c.StackTrace.CallerLine()))
+		other.WriteString(fmt.Sprintf("\t\t%s at %s", pretty, c.StackTrace.CallerLine()))
 		if j != len(recorder.calls)-1 {
 			other.WriteString("\n")
 		}
@@ -147,14 +145,13 @@ func (e *EnrichedReporter) ReportVerifyMethodError(
 
 	if len(invocations) == 0 {
 		e.StackTraceErrorf(`%v
-	%v
-However, there were other interactions with this method:
-%v
-`, err, callStr, other.String())
+		%v
+	However, there were other interactions with this method:
+%v`, err, callStr, other.String())
 	} else {
 		e.StackTraceErrorf(`%v
-	%v
-Invocations:
+		%v
+	Invocations:
 %v`, err, callStr, sb.String())
 	}
 
@@ -273,15 +270,18 @@ func PrettyPrintMethodInvocation(interfaceType reflect.Type, method reflect.Meth
 
 func (e *EnrichedReporter) ReportNoMoreInteractionsExpected(instanceType reflect.Type, calls []*MethodCall) {
 	sb := strings.Builder{}
-	for _, c := range calls {
+	for i, c := range calls {
 		args := make([]string, 0)
 		for _, v := range c.Values {
 			args = append(args, fmt.Sprintf("%v", v))
 		}
 		s := PrettyPrintMethodInvocation(instanceType, c.Method.Type, args)
-		line := fmt.Sprintf("\t%s at %s", s, c.StackTrace.CallerLine())
+		line := fmt.Sprintf("\t\t%s at %s", s, c.StackTrace.CallerLine())
 		sb.WriteString(line)
-		sb.WriteString("\n")
+		if i != len(calls)-1 {
+			sb.WriteString("\n")
+		}
+
 	}
 	e.StackTraceErrorf(`No more interactions expected, but unverified interactions found:
 %v`, sb.String())
@@ -289,11 +289,13 @@ func (e *EnrichedReporter) ReportNoMoreInteractionsExpected(instanceType reflect
 
 func (e *EnrichedReporter) ReportUnexpectedMatcherDeclaration(m []*matcherWrapper) {
 	sb := strings.Builder{}
-	for _, v := range m {
-		sb.WriteString("\t at " + v.stackTrace.CallerLine())
-		sb.WriteString("\n")
+	for i, v := range m {
+		sb.WriteString("\t\tat " + v.stackTrace.CallerLine())
+		if i != len(m)-1 {
+			sb.WriteString("\n")
+		}
 	}
 	e.StackTraceErrorf(`Unexpected matchers declaration.
 %s
-Matchers can only be used inside When() method call.`, sb.String())
+	Matchers can only be used inside When() method call.`, sb.String())
 }
