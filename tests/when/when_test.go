@@ -9,6 +9,7 @@ import (
 type WhenInterface interface {
 	Foo(a int) (int, string)
 	Bar(a int, b string, c string) (int, string)
+	NullableBar(a int, b string, c string) (*int, *string)
 	Empty() int
 	RespondWithMock() Nested
 	RespondWithSlice() []int
@@ -73,6 +74,16 @@ func TestNoMatchersAreExactOnReturn(t *testing.T) {
 	i, s := m.Bar(10, "test1", "test2")
 	r.AssertEqual(10, i)
 	r.AssertEqual("2", s)
+}
+
+func TestIncorrectNumberReturnNullable(t *testing.T) {
+	r := common.NewMockReporter(t)
+	SetUp(r)
+	m := Mock[WhenInterface]()
+	When(m.NullableBar(10, "test1", "test2")).ThenReturn(nil)
+	_, _ = m.NullableBar(10, "test1", "test2")
+	r.AssertError()
+	r.ErrorContains("invalid return values")
 }
 
 func TestNoMatchersAreExactOnAnswer(t *testing.T) {
