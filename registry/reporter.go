@@ -87,9 +87,12 @@ func (e *EnrichedReporter) ReportInvalidUseOfMatchers(instanceType reflect.Type,
 		declarationLines = append(declarationLines, "\t\t" + m[i].stackTrace.CallerLine())
 	}
 	decl := strings.Join(declarationLines, "\n")
+	expectedStr := fmt.Sprintf("%v expected, %v recorded:\n", numExpected, numActual)
+	if call.Method.Type.Type.IsVariadic() {
+		expectedStr = ""
+	}
 	e.StackTraceErrorf(`Invalid use of matchers
-	%v expected, %v recorded:
-%v
+	%s%v
 	method:
 		%v
 	expected:
@@ -99,7 +102,7 @@ func (e *EnrichedReporter) ReportInvalidUseOfMatchers(instanceType reflect.Type,
 	This can happen for 2 reasons:
 		1. Declaration of matcher outside When() call
 		2. Mixing matchers and exact values in When() call. Is this case, consider using "Exact" matcher.`,
-		numExpected, numActual, decl, methodSig, inArgsStr, matchersString)
+		expectedStr, decl, methodSig, inArgsStr, matchersString)
 }
 
 func (e *EnrichedReporter) ReportCaptorInsideVerify(call *MethodCall, m []*matcherWrapper) {
@@ -132,6 +135,9 @@ func (e *EnrichedReporter) ReportVerifyMethodError(
 
 	other := strings.Builder{}
 	for j, c := range recorder.calls {
+		if c.WhenCall {
+			continue
+		}
 		callArgs := make([]string, len(c.Values))
 		for i := range c.Values {
 			callArgs[i] = fmt.Sprintf("%v", c.Values[i])
