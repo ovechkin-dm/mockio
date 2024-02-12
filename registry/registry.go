@@ -125,7 +125,7 @@ func newRegistry() any {
 	reporter := &EnrichedReporter{&panicReporter{}}
 	return &Registry{
 		mockContext: newMockContext(reporter),
-		mapping:     make(map[any]*invocationHandler, 0),
+		mapping:     make(map[any]*invocationHandler),
 	}
 }
 

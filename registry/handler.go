@@ -19,7 +19,7 @@ type invocationHandler struct {
 func (h *invocationHandler) Handle(method *dyno.Method, values []reflect.Value) []reflect.Value {
 	h.lock.Lock()
 	defer h.lock.Unlock()
-
+	values = h.refineValues(method, values)
 	call := &MethodCall{
 		Method:     method,
 		Values:     values,
@@ -39,6 +39,9 @@ func (h *invocationHandler) DoAnswer(c *MethodCall) []reflect.Value {
 	var matched bool
 	for _, mm := range rec.methodMatches {
 		matched = true
+		if len(mm.matchers) != len(c.Values) {
+			continue
+		}
 		for argIdx, matcher := range mm.matchers {
 			if !matcher.matcher.Match(valueSliceToInterfaceSlice(c.Values), c.Values[argIdx].Interface()) {
 				matched = false
@@ -167,6 +170,9 @@ func (h *invocationHandler) DoVerifyMethod(call *MethodCall) []reflect.Value {
 		if c.Method.Type != call.Method.Type {
 			continue
 		}
+		if len(argMatchers) != len(c.Values) {
+			continue
+		}
 
 		for i := range argMatchers {
 			if !argMatchers[i].matcher.Match(valueSliceToInterfaceSlice(c.Values), c.Values[i].Interface()) {
@@ -226,8 +232,7 @@ func (h *invocationHandler) validateMatchers(call *MethodCall) bool {
 		}
 		h.ctx.getState().matchers = argMatchers
 	}
-	mt := call.Method.Type
-	if len(argMatchers) != mt.Type.NumIn() {
+	if len(argMatchers) != len(call.Values) {
 		h.ctx.reporter.ReportInvalidUseOfMatchers(h.instanceType, call, argMatchers)
 		return false
 	}
@@ -286,4 +291,20 @@ func (h *invocationHandler) VerifyNoMoreInteractions() {
 	if len(unexpected) > 0 {
 		h.ctx.reporter.ReportNoMoreInteractionsExpected(h.instanceType, unexpected)
 	}
+}
+
+func (h *invocationHandler) refineValues(method *dyno.Method, values []reflect.Value) []reflect.Value {
+	tp := method.Type.Type
+	if tp.IsVariadic() {
+		result := make([]reflect.Value, 0)
+		for i := 0; i < tp.NumIn()-1; i++ {
+			result = append(result, values[i])
+		}
+		last := values[len(values)-1]
+		for i := 0; i < last.Len(); i++ {
+			result = append(result, last.Index(i))
+		}
+		return result
+	}
+	return values
 }

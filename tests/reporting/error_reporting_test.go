@@ -10,6 +10,7 @@ import (
 type Foo interface {
 	Bar()
 	Baz(a int, b int, c int) int
+	VarArgs(a string, b ...int) int
 }
 
 func TestReportIncorrectWhenUsage(t *testing.T) {
@@ -54,6 +55,16 @@ func TestInvalidUseOfMatchers(t *testing.T) {
 	r.PrintError()
 }
 
+func TestInvalidUseOfMatchersVarArgs(t *testing.T) {
+	r := common.NewMockReporter(t)
+	SetUp(r)
+	mock := Mock[Foo]()
+	When(mock.VarArgs(AnyString(), AnyInt(), 10)).ThenReturn(10)
+	mock.VarArgs("a", 2)
+	r.AssertError()
+	r.PrintError()
+}
+
 func TestCaptorInsideVerify(t *testing.T) {
 	r := common.NewMockReporter(t)
 	SetUp(r)
@@ -72,6 +83,28 @@ func TestVerify(t *testing.T) {
 	When(mock.Baz(AnyInt(), AnyInt(), AnyInt())).ThenReturn(10)
 	_ = mock.Baz(10, 10, 11)
 	Verify(mock, Once()).Baz(AnyInt(), AnyInt(), Exact(10))
+	r.AssertError()
+	r.PrintError()
+}
+
+func TestVerifyVarArgs(t *testing.T) {
+	r := common.NewMockReporter(t)
+	SetUp(r)
+	mock := Mock[Foo]()
+	When(mock.VarArgs(AnyString(), AnyInt(), AnyInt())).ThenReturn(10)
+	_ = mock.VarArgs("a", 10, 11)
+	Verify(mock, Once()).VarArgs(AnyString(), AnyInt(), Exact(10))
+	r.AssertError()
+	r.PrintError()
+}
+
+func TestVerifyDifferentVarArgs(t *testing.T) {
+	r := common.NewMockReporter(t)
+	SetUp(r)
+	mock := Mock[Foo]()
+	When(mock.VarArgs(AnyString(), AnyInt(), AnyInt())).ThenReturn(10)
+	_ = mock.VarArgs("a", 10, 11)
+	Verify(mock, Once()).VarArgs(AnyString(), AnyInt(), AnyInt(), AnyInt())
 	r.AssertError()
 	r.PrintError()
 }
@@ -111,6 +144,18 @@ func TestNoMoreInteractions(t *testing.T) {
 	SetUp(r)
 	mock := Mock[Foo]()
 	When(mock.Baz(AnyInt(), AnyInt(), AnyInt())).ThenReturn("test", 10)
+	_ = mock.Baz(10, 10, 10)
+	_ = mock.Baz(10, 20, 10)
+	VerifyNoMoreInteractions(mock)
+	r.AssertError()
+	r.PrintError()
+}
+
+func TestNoMoreInteractionsVarArgs(t *testing.T) {
+	r := common.NewMockReporter(t)
+	SetUp(r)
+	mock := Mock[Foo]()
+	When(mock.VarArgs(AnyString(), AnyInt(), AnyInt())).ThenReturn("test", 10)
 	_ = mock.Baz(10, 10, 10)
 	_ = mock.Baz(10, 20, 10)
 	VerifyNoMoreInteractions(mock)
