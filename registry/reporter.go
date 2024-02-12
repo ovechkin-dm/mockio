@@ -193,7 +193,13 @@ func (e *EnrichedReporter) ReportInvalidReturnValues(instanceType reflect.Type, 
 		outTypesSB.WriteString("(")
 	}
 	for i := 0; i < len(ret); i++ {
-		outTypesSB.WriteString(reflect.ValueOf(ret[i]).Type().String())
+		of := reflect.ValueOf(ret[i])
+		if of.Kind() == reflect.Invalid {
+			outTypesSB.WriteString("nil")
+		} else {
+			outTypesSB.WriteString(of.Type().String())
+		}
+
 		if i != len(ret)-1 {
 			outTypesSB.WriteString(", ")
 		}
