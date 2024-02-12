@@ -9,6 +9,7 @@ import (
 
 type WhenDoubleInterface interface {
 	Foo(a int) (int, error)
+	FooNullable(a int) (*int, error)
 }
 
 func TestWhenDoubleRet(t *testing.T) {
