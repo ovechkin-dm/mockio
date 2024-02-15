@@ -56,12 +56,8 @@ jobs:
         arch: [ amd64, arm64 ]
         go: [ '1.20', '1.21', '1.22' ]
         include:
-          - os: darwin
-            runs-on: macos-latest
           - os: linux
             runs-on: ubuntu-22.04
-          - os: windows
-            runs-on: windows-latest
     steps:
       - name: Checkout scm
         uses: actions/checkout@v3
