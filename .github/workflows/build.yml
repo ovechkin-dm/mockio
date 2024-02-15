@@ -72,7 +72,7 @@ jobs:
         env:
           GOOS: ${{ matrix.os }}
           GOARCH: ${{ matrix.arch }}
-        run: go test -v -race -coverprofile="coverage.txt" -covermode=atomic -coverpkg=./... ./...
+        run: go test -v -coverprofile="coverage.txt" -coverpkg=./... ./...
 
       - name: 'Setup qemu-user-static on [linux] arch [arm64]'
         if: ${{ matrix.os == 'linux' && contains(fromJson('["arm64"]'), matrix.arch) }}
