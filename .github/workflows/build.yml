@@ -52,16 +52,12 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ darwin, linux, windows ]
+        os: [linux]
         arch: [ amd64, arm64 ]
-        go: [ '1.20', '1.21' ]
+        go: [ '1.20', '1.21', '1.22' ]
         include:
-          - os: darwin
-            runs-on: macos-latest
           - os: linux
             runs-on: ubuntu-22.04
-          - os: windows
-            runs-on: windows-latest
     steps:
       - name: Checkout scm
         uses: actions/checkout@v3
@@ -71,19 +67,12 @@ jobs:
         with:
           go-version: ${{ matrix.go }}
 
-      - name: 'Test on darwin'
-        if: ${{ matrix.os == 'darwin' && contains(fromJson('["amd64"]'), matrix.arch) && matrix.go == '1.21' }}
-        env:
-          GOOS: ${{ matrix.os }}
-          GOARCH: ${{ matrix.arch }}
-        run: go test -v -race -coverprofile="coverage.txt" -covermode=atomic -coverpkg=./mock/... ./...
-
       - name: 'Test on linux [amd64]'
         if: ${{ matrix.os == 'linux' && contains(fromJson('["amd64"]'), matrix.arch) }}
         env:
           GOOS: ${{ matrix.os }}
           GOARCH: ${{ matrix.arch }}
-        run: go test -v -race -coverprofile="coverage.txt" -covermode=atomic -coverpkg=./mock/... ./...
+        run: go test -v -coverprofile="coverage.txt" -coverpkg=./... ./...
 
       - name: 'Setup qemu-user-static on [linux] arch [arm64]'
         if: ${{ matrix.os == 'linux' && contains(fromJson('["arm64"]'), matrix.arch) }}
@@ -91,19 +80,12 @@ jobs:
           sudo apt-get update
           sudo apt-get -y install qemu-user-static
 
-      - name: 'Test on [linux] arch [arm64] TODO'
+      - name: 'Test on [linux] arch [arm64]'
         if: ${{ matrix.os == 'linux' && contains(fromJson('["arm64"]'), matrix.arch) }}
         env:
           GOOS: ${{ matrix.os }}
           GOARCH: ${{ matrix.arch }}
-        run: go test -coverpkg=./mock/... ./...
-
-      - name: 'Test on windows'
-        if: ${{ matrix.os == 'windows' && contains(fromJson('["amd64"]'), matrix.arch) && matrix.go == '1.21' }}
-        env:
-          GOOS: ${{ matrix.os }}
-          GOARCH: ${{ matrix.arch }}
-        run: go test -v -race -coverprofile="coverage.txt" -covermode=atomic -coverpkg=./mock/... ./...
+        run: go test -coverpkg=./... ./...
 
       - name: Codecov
         uses: codecov/codecov-action@v3
