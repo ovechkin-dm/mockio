@@ -2,8 +2,9 @@ package registry
 
 import (
 	"fmt"
-	"github.com/ovechkin-dm/mockio/matchers"
 	"reflect"
+
+	"github.com/ovechkin-dm/mockio/matchers"
 )
 
 func AnyMatcher[T any]() matchers.Matcher[T] {

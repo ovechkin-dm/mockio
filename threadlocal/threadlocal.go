@@ -1,8 +1,9 @@
 package threadlocal
 
 import (
-	"github.com/petermattis/goid"
 	"sync"
+
+	"github.com/petermattis/goid"
 )
 
 type ThreadLocal[T any] interface {

@@ -2,9 +2,11 @@ package when
 
 import (
 	"errors"
-	. "github.com/ovechkin-dm/mockio/mock"
-	"github.com/ovechkin-dm/mockio/tests/common"
 	"testing"
+
+	"github.com/ovechkin-dm/mockio/tests/common"
+
+	. "github.com/ovechkin-dm/mockio/mock"
 )
 
 type WhenDoubleInterface interface {

@@ -3,10 +3,11 @@ package mock
 import (
 	"context"
 	"fmt"
-	"github.com/ovechkin-dm/mockio/matchers"
-	"github.com/ovechkin-dm/mockio/registry"
 	"reflect"
 	"strings"
+
+	"github.com/ovechkin-dm/mockio/matchers"
+	"github.com/ovechkin-dm/mockio/registry"
 )
 
 // SetUp initializes the mock library with the reporter.

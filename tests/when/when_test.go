@@ -1,9 +1,11 @@
 package when
 
 import (
-	. "github.com/ovechkin-dm/mockio/mock"
-	"github.com/ovechkin-dm/mockio/tests/common"
 	"testing"
+
+	"github.com/ovechkin-dm/mockio/tests/common"
+
+	. "github.com/ovechkin-dm/mockio/mock"
 )
 
 type WhenInterface interface {
@@ -23,8 +25,7 @@ type Nested interface {
 	Foo() int
 }
 
-type WhenStruct struct {
-}
+type WhenStruct struct{}
 
 func (w *WhenStruct) foo() int {
 	return 10
@@ -143,7 +144,7 @@ func TestSliceReturn(t *testing.T) {
 	r := common.NewMockReporter(t)
 	SetUp(r)
 	m1 := Mock[WhenInterface]()
-	expected := []int{1,2,3}
+	expected := []int{1, 2, 3}
 	When(m1.RespondWithSlice()).ThenReturn(expected)
 	result := m1.RespondWithSlice()
 	r.AssertEqual(expected, result)

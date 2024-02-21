@@ -2,17 +2,17 @@ package registry
 
 import (
 	"fmt"
-	"github.com/ovechkin-dm/go-dyno/proxy"
-	"github.com/ovechkin-dm/mockio/matchers"
 	"reflect"
 	"strings"
+
+	"github.com/ovechkin-dm/go-dyno/proxy"
+
+	"github.com/ovechkin-dm/mockio/matchers"
 )
 
-type panicReporter struct {
-}
+type panicReporter struct{}
 
 func (p *panicReporter) Cleanup(f func()) {
-
 }
 
 func (p *panicReporter) Fatalf(format string, args ...any) {
@@ -64,7 +64,6 @@ func (e *EnrichedReporter) ReportUnregisteredMockVerify(t any) {
 	Example of correct verification:
 		Verify(mock, Times(10)).SomeMethod()`, t)
 	}
-
 }
 
 func (e *EnrichedReporter) ReportInvalidUseOfMatchers(instanceType reflect.Type, call *MethodCall, m []*matcherWrapper) {
@@ -84,7 +83,7 @@ func (e *EnrichedReporter) ReportInvalidUseOfMatchers(instanceType reflect.Type,
 	numActual := len(m)
 	declarationLines := make([]string, 0)
 	for i := range m {
-		declarationLines = append(declarationLines, "\t\t" + m[i].stackTrace.CallerLine())
+		declarationLines = append(declarationLines, "\t\t"+m[i].stackTrace.CallerLine())
 	}
 	decl := strings.Join(declarationLines, "\n")
 	expectedStr := fmt.Sprintf("%v expected, %v recorded:\n", numExpected, numActual)
@@ -160,7 +159,6 @@ func (e *EnrichedReporter) ReportVerifyMethodError(
 	Invocations:
 %v`, err, callStr, sb.String())
 	}
-
 }
 
 func (e *EnrichedReporter) ReportEmptyCaptor() {

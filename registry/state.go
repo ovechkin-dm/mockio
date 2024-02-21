@@ -1,12 +1,14 @@
 package registry
 
 import (
-	"github.com/ovechkin-dm/go-dyno/pkg/dyno"
-	"github.com/ovechkin-dm/mockio/matchers"
-	"github.com/ovechkin-dm/mockio/threadlocal"
 	"reflect"
 	"sync"
 	"sync/atomic"
+
+	"github.com/ovechkin-dm/go-dyno/pkg/dyno"
+
+	"github.com/ovechkin-dm/mockio/matchers"
+	"github.com/ovechkin-dm/mockio/threadlocal"
 )
 
 type fiberState struct {
