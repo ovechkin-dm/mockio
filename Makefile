@@ -1,3 +1,8 @@
+all: gofumpt import lint
+
+lint:
+	golangci-lint run ./...
+
 gofumpt:
 	gofumpt -l -w .
 
