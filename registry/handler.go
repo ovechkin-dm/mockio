@@ -2,11 +2,13 @@ package registry
 
 import (
 	"fmt"
-	"github.com/ovechkin-dm/go-dyno/pkg/dyno"
-	"github.com/ovechkin-dm/go-dyno/proxy"
-	"github.com/ovechkin-dm/mockio/matchers"
 	"reflect"
 	"sync"
+
+	"github.com/ovechkin-dm/go-dyno/pkg/dyno"
+	"github.com/ovechkin-dm/go-dyno/proxy"
+
+	"github.com/ovechkin-dm/mockio/matchers"
 )
 
 type invocationHandler struct {
@@ -139,7 +141,6 @@ func (h *invocationHandler) VerifyMethod(verifier matchers.MethodVerifier) {
 }
 
 func (h *invocationHandler) DoVerifyMethod(call *MethodCall) []reflect.Value {
-
 	matchersOk := h.validateMatchers(call)
 
 	verifyMatchersOk := true

@@ -1,10 +1,12 @@
 package reporting
 
 import (
-	. "github.com/ovechkin-dm/mockio/mock"
-	"github.com/ovechkin-dm/mockio/tests/common"
 	"sync"
 	"testing"
+
+	"github.com/ovechkin-dm/mockio/tests/common"
+
+	. "github.com/ovechkin-dm/mockio/mock"
 )
 
 type Foo interface {

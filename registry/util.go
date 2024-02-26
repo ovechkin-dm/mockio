@@ -2,17 +2,20 @@ package registry
 
 import (
 	"fmt"
-	"github.com/ovechkin-dm/go-dyno/proxy"
 	"reflect"
 	"runtime/debug"
 	"strings"
+
+	"github.com/ovechkin-dm/go-dyno/proxy"
 )
 
-const PackageName = "github.com/ovechkin-dm/mockio"
-const DynoPackageName = "github.com/ovechkin-dm/go-dyno"
-const TestPackageName = "github.com/ovechkin-dm/mockio/tests"
-const DebugPackage = "runtime/debug.Stack()"
-const GOIDPackageName = "github.com/petermattis/goid"
+const (
+	PackageName     = "github.com/ovechkin-dm/mockio"
+	DynoPackageName = "github.com/ovechkin-dm/go-dyno"
+	TestPackageName = "github.com/ovechkin-dm/mockio/tests"
+	DebugPackage    = "runtime/debug.Stack()"
+	GOIDPackageName = "github.com/petermattis/goid"
+)
 
 func createDefaultReturnValues(m reflect.Method) []reflect.Value {
 	result := make([]reflect.Value, m.Type.NumOut())

@@ -1,9 +1,11 @@
 package when
 
 import (
-	. "github.com/ovechkin-dm/mockio/mock"
-	"github.com/ovechkin-dm/mockio/tests/common"
 	"testing"
+
+	"github.com/ovechkin-dm/mockio/tests/common"
+
+	. "github.com/ovechkin-dm/mockio/mock"
 )
 
 type whenSingleInterface interface {

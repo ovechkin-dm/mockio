@@ -2,17 +2,20 @@ package registry
 
 import (
 	"fmt"
-	"github.com/ovechkin-dm/go-dyno/pkg/dyno"
-	"github.com/ovechkin-dm/mockio/matchers"
-	"github.com/ovechkin-dm/mockio/threadlocal"
-
 	"log"
 	"reflect"
 	"sync"
+
+	"github.com/ovechkin-dm/go-dyno/pkg/dyno"
+
+	"github.com/ovechkin-dm/mockio/matchers"
+	"github.com/ovechkin-dm/mockio/threadlocal"
 )
 
-var instance = threadlocal.NewThreadLocal(newRegistry)
-var lock sync.Mutex
+var (
+	instance = threadlocal.NewThreadLocal(newRegistry)
+	lock     sync.Mutex
+)
 
 type Registry struct {
 	mockContext *mockContext
@@ -62,8 +65,8 @@ func Mock[T any]() T {
 func AddMatcher[T any](m matchers.Matcher[T]) {
 	withCheck[any](func() any {
 		w := &matcherWrapper{
-			matcher: untypedMatcher(m),
-			rec:     nil,
+			matcher:    untypedMatcher(m),
+			rec:        nil,
 			stackTrace: NewStackTrace(),
 		}
 		getInstance().mockContext.getState().matchers = append(getInstance().mockContext.getState().matchers, w)
@@ -78,7 +81,7 @@ func AddCaptor[T any](c *captorImpl[T]) {
 			matcher: FunMatcher(fmt.Sprintf("Captor[%s]", tp), func(call []any, a any) bool {
 				return true
 			}),
-			rec: c,
+			rec:        c,
 			stackTrace: NewStackTrace(),
 		}
 		getInstance().mockContext.getState().matchers = append(getInstance().mockContext.getState().matchers, w)

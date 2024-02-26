@@ -1,13 +1,14 @@
 package check
 
 import (
-	. "github.com/ovechkin-dm/mockio/mock"
-	"github.com/ovechkin-dm/mockio/tests/common"
 	"testing"
+
+	"github.com/ovechkin-dm/mockio/tests/common"
+
+	. "github.com/ovechkin-dm/mockio/mock"
 )
 
-type St struct {
-}
+type St struct{}
 
 func TestNonInterfaceNotAllowed(t *testing.T) {
 	r := common.NewMockReporter(t)
@@ -15,5 +16,3 @@ func TestNonInterfaceNotAllowed(t *testing.T) {
 	_ = Mock[St]()
 	r.AssertError()
 }
-
-

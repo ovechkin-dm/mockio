@@ -16,9 +16,7 @@ func ToReturnerDouble[A any, B any](retAll matchers.ReturnerAll) matchers.Return
 	}
 }
 
-type returnerDummyImpl struct {
-
-}
+type returnerDummyImpl struct{}
 
 func (r *returnerDummyImpl) ThenReturn(values ...any) matchers.ReturnerAll {
 	return r
