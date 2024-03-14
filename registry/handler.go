@@ -270,7 +270,7 @@ func (h *invocationHandler) validateVerifyMatchers(call *MethodCall) bool {
 	argMatchers := h.ctx.getState().matchers
 	for _, a := range argMatchers {
 		if a.rec != nil {
-			h.ctx.reporter.ReportCaptorInsideVerify(call, argMatchers)
+			h.ctx.reporter.ReportCaptorInsideVerify()
 			return false
 		}
 	}

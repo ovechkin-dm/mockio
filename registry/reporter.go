@@ -7,6 +7,7 @@ import (
 
 	"github.com/ovechkin-dm/go-dyno/proxy"
 
+	"github.com/ovechkin-dm/mockio/config"
 	"github.com/ovechkin-dm/mockio/matchers"
 )
 
@@ -21,6 +22,7 @@ func (p *panicReporter) Fatalf(format string, args ...any) {
 
 type EnrichedReporter struct {
 	reporter matchers.ErrorReporter
+	cfg      *config.MockConfig
 }
 
 func (e *EnrichedReporter) Errorf(format string, args ...any) {
@@ -30,13 +32,23 @@ func (e *EnrichedReporter) Errorf(format string, args ...any) {
 func (e *EnrichedReporter) StackTraceErrorf(format string, args ...any) {
 	s := NewStackTrace()
 	result := fmt.Sprintf(format, args...)
-	st := fmt.Sprintf(`At:
+	var st string
+	if e.cfg.PrintStackTrace {
+		st = fmt.Sprintf(`At:
 	%s
 Cause:
 	%s
 Trace:
 %s
 `, s.CallerLine(), result, s.WithoutLibraryCalls().String())
+	} else {
+		st = fmt.Sprintf(`At:
+	%s
+Cause:
+	%s
+`, s.CallerLine(), result)
+	}
+
 	e.reporter.Fatalf(st)
 }
 
@@ -104,7 +116,7 @@ func (e *EnrichedReporter) ReportInvalidUseOfMatchers(instanceType reflect.Type,
 		expectedStr, decl, methodSig, inArgsStr, matchersString)
 }
 
-func (e *EnrichedReporter) ReportCaptorInsideVerify(call *MethodCall, m []*matcherWrapper) {
+func (e *EnrichedReporter) ReportCaptorInsideVerify() {
 	e.StackTraceErrorf("Unexpected use of captor. `captor.Capture()` should not be used inside `Verify` method")
 }
 
@@ -216,9 +228,10 @@ got:
 `, methodSig, outTypesSB.String())
 }
 
-func newEnrichedReporter(reporter matchers.ErrorReporter) *EnrichedReporter {
+func newEnrichedReporter(reporter matchers.ErrorReporter, cfg *config.MockConfig) *EnrichedReporter {
 	return &EnrichedReporter{
 		reporter: reporter,
+		cfg:      cfg,
 	}
 }
 

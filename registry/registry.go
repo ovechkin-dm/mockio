@@ -8,6 +8,7 @@ import (
 
 	"github.com/ovechkin-dm/go-dyno/pkg/dyno"
 
+	"github.com/ovechkin-dm/mockio/config"
 	"github.com/ovechkin-dm/mockio/matchers"
 	"github.com/ovechkin-dm/mockio/threadlocal"
 )
@@ -31,11 +32,15 @@ func getInstance() *Registry {
 	return v.(*Registry)
 }
 
-func SetUp(reporter matchers.ErrorReporter) {
+func SetUp(reporter matchers.ErrorReporter, opts ...config.Option) {
 	if reporter == nil {
 		log.Println("Warn: call to SetUp with nil reporter")
 	}
-	getInstance().mockContext = newMockContext(newEnrichedReporter(reporter))
+	cfg := config.NewConfig()
+	for _, opt := range opts {
+		opt(cfg)
+	}
+	getInstance().mockContext = newMockContext(newEnrichedReporter(reporter, cfg), cfg)
 	reporter.Cleanup(TearDown)
 }
 
@@ -125,9 +130,10 @@ func VerifyNoMoreInteractions(t any) {
 }
 
 func newRegistry() any {
-	reporter := &EnrichedReporter{&panicReporter{}}
+	reporter := newEnrichedReporter(&panicReporter{}, config.NewConfig())
+	cfg := config.NewConfig()
 	return &Registry{
-		mockContext: newMockContext(reporter),
+		mockContext: newMockContext(reporter, cfg),
 		mapping:     make(map[any]*invocationHandler),
 	}
 }

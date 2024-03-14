@@ -175,3 +175,23 @@ func TestUnexpectedMatchers(t *testing.T) {
 	r.AssertError()
 	r.PrintError()
 }
+
+func TestStackTraceDisabled(t *testing.T) {
+	r := common.NewMockReporter(t)
+	SetUp(r, WithoutStackTrace())
+	mock := Mock[Foo]()
+	WhenSingle(mock.Baz(1, 2, AnyInt())).ThenReturn(10)
+	_ = mock.Baz(1, 2, 3)
+	r.AssertError()
+	r.PrintError()
+}
+
+func TestStackTraceEnabled(t *testing.T) {
+	r := common.NewMockReporter(t)
+	SetUp(r)
+	mock := Mock[Foo]()
+	WhenSingle(mock.Baz(1, 2, AnyInt())).ThenReturn(10)
+	_ = mock.Baz(1, 2, 3)
+	r.AssertError()
+	r.PrintError()
+}
