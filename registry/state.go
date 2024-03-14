@@ -7,6 +7,7 @@ import (
 
 	"github.com/ovechkin-dm/go-dyno/pkg/dyno"
 
+	"github.com/ovechkin-dm/mockio/config"
 	"github.com/ovechkin-dm/mockio/matchers"
 	"github.com/ovechkin-dm/mockio/threadlocal"
 )
@@ -26,6 +27,7 @@ type mockContext struct {
 	reporter  *EnrichedReporter
 	lock      sync.Mutex
 	routineID int64
+	cfg       *config.MockConfig
 }
 
 type methodRecorder struct {
@@ -98,7 +100,7 @@ func (ctx *mockContext) getState() *fiberState {
 	return ctx.state.Get()
 }
 
-func newMockContext(reporter *EnrichedReporter) *mockContext {
+func newMockContext(reporter *EnrichedReporter, cfg *config.MockConfig) *mockContext {
 	return &mockContext{
 		state: threadlocal.NewThreadLocal(func() *fiberState {
 			return &fiberState{
@@ -112,6 +114,7 @@ func newMockContext(reporter *EnrichedReporter) *mockContext {
 		reporter:  reporter,
 		lock:      sync.Mutex{},
 		routineID: threadlocal.GoId(),
+		cfg:       cfg,
 	}
 }
 

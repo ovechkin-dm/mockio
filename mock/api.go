@@ -6,6 +6,7 @@ import (
 	"reflect"
 	"strings"
 
+	"github.com/ovechkin-dm/mockio/config"
 	"github.com/ovechkin-dm/mockio/matchers"
 	"github.com/ovechkin-dm/mockio/registry"
 )
@@ -31,8 +32,8 @@ import (
 //		ret := m.Foo(10)
 //		r.AssertEqual(42, ret)
 //	}
-func SetUp(t matchers.ErrorReporter) {
-	registry.SetUp(t)
+func SetUp(t matchers.ErrorReporter, opts ...config.Option) {
+	registry.SetUp(t, opts...)
 }
 
 // Mock returns a mock object that implements the specified interface or type.
