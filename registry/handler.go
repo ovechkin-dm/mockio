@@ -142,22 +142,12 @@ func (h *invocationHandler) VerifyMethod(verifier matchers.MethodVerifier) {
 
 func (h *invocationHandler) DoVerifyMethod(call *MethodCall) []reflect.Value {
 	matchersOk := h.validateMatchers(call)
-
-	verifyMatchersOk := true
-
-	if matchersOk {
-		verifyMatchersOk = h.validateVerifyMatchers(call)
-	}
-
 	argMatchers := h.ctx.getState().matchers
 
 	h.ctx.getState().matchers = make([]*matcherWrapper, 0)
 	h.ctx.getState().verifyState = false
 
 	if !matchersOk {
-		return createDefaultReturnValues(call.Method.Type)
-	}
-	if !verifyMatchersOk {
 		return createDefaultReturnValues(call.Method.Type)
 	}
 
@@ -194,6 +184,13 @@ func (h *invocationHandler) DoVerifyMethod(call *MethodCall) []reflect.Value {
 	h.ctx.getState().methodVerifier = nil
 	if err != nil {
 		h.ctx.reporter.ReportVerifyMethodError(h.instanceType, call, matchedInvocations, argMatchers, h.methods[call.Method.Num], err)
+	}
+	for i, m := range argMatchers {
+		if m.rec != nil {
+			for _, inv := range matchedInvocations {
+				argMatchers[i].rec.Record(inv, valueToInterface(inv.Values[i]))
+			}
+		}
 	}
 	return createDefaultReturnValues(call.Method.Type)
 }
@@ -260,17 +257,6 @@ func (h *invocationHandler) validateReturnValues(result []any, method reflect.Me
 		}
 
 		if !retActual.AssignableTo(retExpected) {
-			return false
-		}
-	}
-	return true
-}
-
-func (h *invocationHandler) validateVerifyMatchers(call *MethodCall) bool {
-	argMatchers := h.ctx.getState().matchers
-	for _, a := range argMatchers {
-		if a.rec != nil {
-			h.ctx.reporter.ReportCaptorInsideVerify()
 			return false
 		}
 	}

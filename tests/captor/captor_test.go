@@ -10,6 +10,7 @@ import (
 
 type iface interface {
 	Foo(i int) int
+	VoidFoo(i int, j int)
 }
 
 func TestCaptorBasic(t *testing.T) {
@@ -57,4 +58,15 @@ func TestCaptorMultiUsage(t *testing.T) {
 	m2.Foo(11)
 	r.AssertEqual(c.Values()[0], 10)
 	r.AssertEqual(c.Values()[1], 11)
+}
+
+func TestCaptorVerify(t *testing.T) {
+	r := common.NewMockReporter(t)
+	SetUp(r)
+	m := Mock[iface]()
+	c := Captor[int]()
+	m.VoidFoo(10, 20)
+	Verify(m, Once()).VoidFoo(c.Capture(), Exact(20))
+	r.AssertNoError()
+	r.AssertEqual(10, c.Last())
 }

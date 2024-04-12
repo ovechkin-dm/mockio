@@ -116,10 +116,6 @@ func (e *EnrichedReporter) ReportInvalidUseOfMatchers(instanceType reflect.Type,
 		expectedStr, decl, methodSig, inArgsStr, matchersString)
 }
 
-func (e *EnrichedReporter) ReportCaptorInsideVerify() {
-	e.StackTraceErrorf("Unexpected use of captor. `captor.Capture()` should not be used inside `Verify` method")
-}
-
 func (e *EnrichedReporter) ReportVerifyMethodError(
 	tp reflect.Type,
 	call *MethodCall,
