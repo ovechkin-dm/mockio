@@ -28,14 +28,18 @@ func createDefaultReturnValues(m reflect.Method) []reflect.Value {
 func valueSliceToInterfaceSlice(values []reflect.Value) []any {
 	result := make([]any, len(values))
 	for i := range values {
-		switch v := values[i].Interface().(type) {
-		case *proxy.DynamicStruct:
-			result[i] = v.IFaceValue
-		default:
-			result[i] = values[i].Interface()
-		}
+		result[i] = valueToInterface(values[i])
 	}
 	return result
+}
+
+func valueToInterface(value reflect.Value) any {
+	switch v := value.Interface().(type) {
+	case *proxy.DynamicStruct:
+		return v.IFaceValue
+	default:
+		return v
+	}
 }
 
 func interfaceSliceToValueSlice(values []any, m reflect.Method) []reflect.Value {
