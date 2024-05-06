@@ -112,3 +112,31 @@ func TestNoMoreInteractionsComplexSuccess(t *testing.T) {
 	VerifyNoMoreInteractions(m)
 	r.AssertNoError()
 }
+
+func TestVerifyInsideReturnerPass(t *testing.T) {
+	r := common.NewMockReporter(t)
+	SetUp(r)
+	m := Mock[iface]()
+	WhenSingle(m.Foo(AnyInt())).ThenReturn(11).Verify(Once())
+	m.Foo(10)
+	r.TriggerCleanup()
+	r.AssertNoError()
+}
+
+func TestVerifyInsideReturnerNoMoreInteractionsFail(t *testing.T) {
+	r := common.NewMockReporter(t)
+	SetUp(r)
+	m := Mock[iface]()
+	WhenSingle(m.Foo(AnyInt())).ThenReturn(11).Verify(Once())
+	VerifyNoMoreInteractions(m)
+	r.AssertError()
+}
+
+func TestVerifyInsideReturnerFail(t *testing.T) {
+	r := common.NewMockReporter(t)
+	SetUp(r)
+	m := Mock[iface]()
+	WhenSingle(m.Foo(AnyInt())).ThenReturn(11).Verify(Once())
+	r.TriggerCleanup()
+	r.AssertError()
+}

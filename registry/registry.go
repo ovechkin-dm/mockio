@@ -46,11 +46,14 @@ func SetUp(reporter matchers.ErrorReporter, opts ...config.Option) {
 
 func TearDown() {
 	reg := getInstance()
-	instance.Clear()
-
 	if reg.mockContext.reporter == nil {
-		reg.mockContext.reporter.Errorf("Cannot TearDown since SetUp function wasn't called")
+		reg.mockContext.reporter.Errorf("Cannot TriggerCleanup since SetUp function wasn't called")
+		return
 	}
+	for _, v := range reg.mapping {
+		v.TearDown()
+	}
+	instance.Clear()
 }
 
 func Mock[T any]() T {

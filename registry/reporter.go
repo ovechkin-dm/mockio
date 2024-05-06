@@ -118,7 +118,7 @@ func (e *EnrichedReporter) ReportInvalidUseOfMatchers(instanceType reflect.Type,
 
 func (e *EnrichedReporter) ReportVerifyMethodError(
 	tp reflect.Type,
-	call *MethodCall,
+	method reflect.Method,
 	invocations []*MethodCall,
 	argMatchers []*matcherWrapper,
 	recorder *methodRecorder,
@@ -138,7 +138,7 @@ func (e *EnrichedReporter) ReportVerifyMethodError(
 	for i := range argMatchers {
 		args[i] = argMatchers[i].matcher.Description()
 	}
-	callStr := PrettyPrintMethodInvocation(tp, call.Method.Type, args)
+	callStr := PrettyPrintMethodInvocation(tp, method, args)
 
 	other := strings.Builder{}
 	for j, c := range recorder.calls {
@@ -155,8 +155,12 @@ func (e *EnrichedReporter) ReportVerifyMethodError(
 			other.WriteString("\n")
 		}
 	}
+	if len(other.String()) == 0 && len(sb.String()) == 0 {
+		e.StackTraceErrorf(`%v
+		%v
+`, err, callStr)
 
-	if len(invocations) == 0 {
+	} else if len(invocations) == 0 {
 		e.StackTraceErrorf(`%v
 		%v
 	However, there were other interactions with this method:

@@ -183,7 +183,7 @@ func (h *invocationHandler) DoVerifyMethod(call *MethodCall) []reflect.Value {
 	err := h.ctx.getState().methodVerifier.Verify(verifyData)
 	h.ctx.getState().methodVerifier = nil
 	if err != nil {
-		h.ctx.reporter.ReportVerifyMethodError(h.instanceType, call, matchedInvocations, argMatchers, h.methods[call.Method.Num], err)
+		h.ctx.reporter.ReportVerifyMethodError(h.instanceType, call.Method.Type, matchedInvocations, argMatchers, h.methods[call.Method.Num], err)
 	}
 	for i, m := range argMatchers {
 		if m.rec != nil {
@@ -264,6 +264,7 @@ func (h *invocationHandler) validateReturnValues(result []any, method reflect.Me
 }
 
 func (h *invocationHandler) VerifyNoMoreInteractions() {
+	h.PostponedVerify()
 	unexpected := make([]*MethodCall, 0)
 	for _, rec := range h.methods {
 		for _, call := range rec.calls {
@@ -294,4 +295,45 @@ func (h *invocationHandler) refineValues(method *dyno.Method, values []reflect.V
 		return result
 	}
 	return values
+}
+
+func (h *invocationHandler) PostponedVerify() {
+	for _, rec := range h.methods {
+		for _, match := range rec.methodMatches {
+			if len(match.verifiers) == 0 {
+				continue
+			}
+			matchedInvocations := make([]*MethodCall, 0)
+			for _, call := range rec.calls {
+				if call.WhenCall {
+					continue
+				}
+				matches := true
+				for i := range match.matchers {
+					if !match.matchers[i].matcher.Match(valueSliceToInterfaceSlice(call.Values), call.Values[i].Interface()) {
+						matches = false
+						break
+					}
+				}
+				if matches {
+					call.Verified = true
+					matchedInvocations = append(matchedInvocations, call)
+				}
+			}
+			verifyData := &matchers.MethodVerificationData{
+				NumMethodCalls: len(matchedInvocations),
+			}
+			for _, v := range match.verifiers {
+				err := v.Verify(verifyData)
+				if err != nil {
+					h.ctx.reporter.ReportVerifyMethodError(h.instanceType, rec.methodType, matchedInvocations, match.matchers, rec, err)
+				}
+			}
+		}
+
+	}
+}
+
+func (h *invocationHandler) TearDown() {
+	h.PostponedVerify()
 }
