@@ -159,7 +159,6 @@ func (e *EnrichedReporter) ReportVerifyMethodError(
 		e.StackTraceErrorf(`%v
 		%v
 `, err, callStr)
-
 	} else if len(invocations) == 0 {
 		e.StackTraceErrorf(`%v
 		%v

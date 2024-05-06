@@ -23,11 +23,11 @@ type fiberState struct {
 }
 
 type mockContext struct {
-	state              threadlocal.ThreadLocal[*fiberState]
-	reporter           *EnrichedReporter
-	lock               sync.Mutex
-	routineID          int64
-	cfg                *config.MockConfig
+	state     threadlocal.ThreadLocal[*fiberState]
+	reporter  *EnrichedReporter
+	lock      sync.Mutex
+	routineID int64
+	cfg       *config.MockConfig
 }
 
 type methodRecorder struct {
@@ -112,10 +112,10 @@ func newMockContext(reporter *EnrichedReporter, cfg *config.MockConfig) *mockCon
 				verifyState:    false,
 			}
 		}),
-		reporter:           reporter,
-		lock:               sync.Mutex{},
-		routineID:          threadlocal.GoId(),
-		cfg:                cfg,
+		reporter:  reporter,
+		lock:      sync.Mutex{},
+		routineID: threadlocal.GoId(),
+		cfg:       cfg,
 	}
 }
 

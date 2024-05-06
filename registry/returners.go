@@ -27,7 +27,6 @@ func (r *returnerDummyImpl) ThenAnswer(f matchers.Answer) matchers.ReturnerAll {
 }
 
 func (r *returnerDummyImpl) Verify(m matchers.MethodVerifier) {
-
 }
 
 type returnerAllImpl struct {

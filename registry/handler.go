@@ -330,7 +330,6 @@ func (h *invocationHandler) PostponedVerify() {
 				}
 			}
 		}
-
 	}
 }
 

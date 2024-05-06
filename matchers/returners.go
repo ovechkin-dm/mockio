@@ -15,8 +15,6 @@ type ReturnerSingle[T any] interface {
 	// called with one argument. The function must take a variable number of
 	// arguments of type interface{} and return a value of type T.
 	ThenAnswer(func(args []any) T) ReturnerSingle[T]
-
-
 }
 
 // ReturnerDouble is an interface that provides methods to define the returned value and error of a mock function with a single argument.
