@@ -26,6 +26,9 @@ func (r *returnerDummyImpl) ThenAnswer(f matchers.Answer) matchers.ReturnerAll {
 	return r
 }
 
+func (r *returnerDummyImpl) Verify(m matchers.MethodVerifier) {
+}
+
 type returnerAllImpl struct {
 	methodMatch *methodMatch
 	ctx         *mockContext
@@ -50,6 +53,10 @@ func (r *returnerSingleImpl[T]) ThenAnswer(f func(args []any) T) matchers.Return
 	}
 }
 
+func (r *returnerSingleImpl[T]) Verify(verifier matchers.MethodVerifier) {
+	r.all.Verify(verifier)
+}
+
 type returnerDoubleImpl[A any, B any] struct {
 	all matchers.ReturnerAll
 }
@@ -70,6 +77,10 @@ func (r *returnerDoubleImpl[A, B]) ThenAnswer(f func(args []any) (A, B)) matcher
 	}
 }
 
+func (r *returnerDoubleImpl[A, B]) Verify(verifier matchers.MethodVerifier) {
+	r.all.Verify(verifier)
+}
+
 func (r *returnerAllImpl) ThenReturn(values ...any) matchers.ReturnerAll {
 	return r.ThenAnswer(makeReturnFunc(values))
 }
@@ -80,6 +91,10 @@ func (r *returnerAllImpl) ThenAnswer(f matchers.Answer) matchers.ReturnerAll {
 	}
 	r.methodMatch.addAnswer(wrapper)
 	return r
+}
+
+func (r *returnerAllImpl) Verify(verifier matchers.MethodVerifier) {
+	r.methodMatch.verifiers = append(r.methodMatch.verifiers, verifier)
 }
 
 func makeReturnFunc(values []any) matchers.Answer {

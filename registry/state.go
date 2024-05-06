@@ -43,6 +43,7 @@ type methodMatch struct {
 	lock        sync.Mutex
 	lastAnswer  *answerWrapper
 	invocations int64
+	verifiers   []matchers.MethodVerifier
 }
 
 func (m *methodMatch) popAnswer() *answerWrapper {

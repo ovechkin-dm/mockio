@@ -65,6 +65,12 @@ func (m *MockReporter) Cleanup(clean func()) {
 	m.cleanups = append(m.cleanups, clean)
 }
 
+func (m *MockReporter) TriggerCleanup() {
+	for _, clean := range m.cleanups {
+		clean()
+	}
+}
+
 func (m *MockReporter) PrintError() {
 	fmt.Println(m.reported)
 }
@@ -75,10 +81,5 @@ func NewMockReporter(t *testing.T) *MockReporter {
 		t:        t,
 		cleanups: make([]func(), 0),
 	}
-	t.Cleanup(func() {
-		for _, v := range rep.cleanups {
-			v()
-		}
-	})
 	return rep
 }
