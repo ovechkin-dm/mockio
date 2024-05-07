@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"reflect"
 
+	"github.com/ovechkin-dm/go-dyno/proxy"
+
 	"github.com/ovechkin-dm/mockio/matchers"
 )
 
@@ -39,9 +41,16 @@ func (m *matcherImpl[T]) Match(allArgs []any, actual T) bool {
 func untypedMatcher[T any](src matchers.Matcher[T]) matchers.Matcher[any] {
 	return &matcherImpl[any]{
 		f: func(args []any, a any) bool {
-			casted, ok := a.(T)
-			if !ok {
-				return false
+			var casted T
+			switch v := a.(type) {
+			case *proxy.DynamicStruct:
+				casted = proxy.UnsafeCast[T](v)
+			default:
+				c, ok := a.(T)
+				if !ok {
+					return false
+				}
+				casted = c
 			}
 			return src.Match(args, casted)
 		},

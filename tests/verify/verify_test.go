@@ -12,6 +12,10 @@ type iface interface {
 	Foo(a int) int
 }
 
+type ifaceMockArg interface {
+	MockAsArg(m iface)
+}
+
 func TestVerifySimple(t *testing.T) {
 	r := common.NewMockReporter(t)
 	SetUp(r)
@@ -139,4 +143,17 @@ func TestVerifyInsideReturnerFail(t *testing.T) {
 	WhenSingle(m.Foo(AnyInt())).ThenReturn(11).Verify(Once())
 	r.TriggerCleanup()
 	r.AssertError()
+}
+
+func TestVerifyMockAsArg(t *testing.T) {
+	r := common.NewMockReporter(t)
+	SetUp(r)
+	m := Mock[iface]()
+	m2 := Mock[ifaceMockArg]()
+
+	m2.MockAsArg(m)
+
+	Verify(m2, Once()).MockAsArg(Any[iface]())
+
+	r.AssertNoError()
 }

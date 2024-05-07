@@ -36,7 +36,7 @@ func valueSliceToInterfaceSlice(values []reflect.Value) []any {
 func valueToInterface(value reflect.Value) any {
 	switch v := value.Interface().(type) {
 	case *proxy.DynamicStruct:
-		return v.IFaceValue
+		return v.IFaceValue.Interface()
 	default:
 		return v
 	}
