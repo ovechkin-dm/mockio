@@ -45,7 +45,7 @@ func (h *invocationHandler) DoAnswer(c *MethodCall) []reflect.Value {
 			continue
 		}
 		for argIdx, matcher := range mm.matchers {
-			if !matcher.matcher.Match(valueSliceToInterfaceSlice(c.Values), c.Values[argIdx].Interface()) {
+			if !matcher.matcher.Match(valueSliceToInterfaceSlice(c.Values), valueToInterface(c.Values[argIdx])) {
 				matched = false
 				break
 			}
@@ -166,7 +166,7 @@ func (h *invocationHandler) DoVerifyMethod(call *MethodCall) []reflect.Value {
 		}
 
 		for i := range argMatchers {
-			if !argMatchers[i].matcher.Match(valueSliceToInterfaceSlice(c.Values), c.Values[i].Interface()) {
+			if !argMatchers[i].matcher.Match(valueSliceToInterfaceSlice(c.Values), valueToInterface(c.Values[i])) {
 				matches = false
 				break
 			}
@@ -310,7 +310,7 @@ func (h *invocationHandler) PostponedVerify() {
 				}
 				matches := true
 				for i := range match.matchers {
-					if !match.matchers[i].matcher.Match(valueSliceToInterfaceSlice(call.Values), call.Values[i].Interface()) {
+					if !match.matchers[i].matcher.Match(valueSliceToInterfaceSlice(call.Values), valueToInterface(call.Values[i])) {
 						matches = false
 						break
 					}

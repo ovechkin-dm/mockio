@@ -12,6 +12,10 @@ type whenSingleInterface interface {
 	Foo(a int) int
 }
 
+type whenSingleMockAsArgInterface interface {
+	MockAsArg(m whenSingleInterface) bool
+}
+
 func TestWhenSingleRet(t *testing.T) {
 	r := common.NewMockReporter(t)
 	SetUp(r)
@@ -89,4 +93,18 @@ func TestWhenSingleAnswerAndReturn(t *testing.T) {
 	r.AssertEqual(10, ret1)
 	r.AssertEqual(15, ret2)
 	r.AssertEqual(11, ret3)
+}
+
+func TestWhenSingleMockAsArg(t *testing.T) {
+	r := common.NewMockReporter(t)
+	SetUp(r)
+	m := Mock[whenSingleInterface]()
+	m2 := Mock[whenSingleMockAsArgInterface]()
+
+	WhenSingle(m2.MockAsArg(Any[whenSingleInterface]())).ThenReturn(true)
+
+	res := m2.MockAsArg(m)
+
+	r.AssertEqual(true, res)
+	r.AssertNoError()
 }
