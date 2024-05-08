@@ -124,7 +124,7 @@ func AnyOfType[T any](t T) T {
 //	WhenSingle(myMock.MyOtherMethod(Exact(42))).ThenReturn("baz")
 func Exact[T comparable](value T) T {
 	desc := fmt.Sprintf("Exact(%v)", value)
-	m := registry.FunMatcher(desc, func(m []any, actual any) bool {
+	m := registry.FunMatcher(desc, func(m []any, actual T) bool {
 		return value == actual
 	})
 	registry.AddMatcher(m)
@@ -144,7 +144,7 @@ func Exact[T comparable](value T) T {
 //	WhenSingle(myMock.MyOtherMethod(Equal(42))).ThenReturn("baz")
 func Equal[T any](value T) T {
 	desc := fmt.Sprintf("Equal(%v)", value)
-	m := registry.FunMatcher(desc, func(m []any, actual any) bool {
+	m := registry.FunMatcher[T](desc, func(m []any, actual T) bool {
 		return reflect.DeepEqual(value, actual)
 	})
 	registry.AddMatcher(m)
@@ -164,7 +164,7 @@ func Equal[T any](value T) T {
 //	WhenSingle(myMock.MyOtherMethod(NotEqual(42))).ThenReturn("baz")
 func NotEqual[T any](value T) T {
 	desc := fmt.Sprintf("NotEqual(%v)", value)
-	m := registry.FunMatcher(desc, func(m []any, actual any) bool {
+	m := registry.FunMatcher[T](desc, func(m []any, actual T) bool {
 		return !reflect.DeepEqual(value, actual)
 	})
 	registry.AddMatcher(m)
@@ -205,7 +205,7 @@ func OneOf[T any](values ...T) T {
 // CreateMatcher returns a Matcher that matches values of type T using the provided Matcher implementation.
 // The provided Matcher implementation must implement the Matcher interface.
 func CreateMatcher[T any](description string, f func(allArgs []any, actual T) bool) matchers.Matcher[T] {
-	m := registry.FunMatcher(description, f)
+	m := registry.FunMatcher[T](description, f)
 	return m
 }
 
