@@ -1,6 +1,7 @@
 package mocking
 
 import (
+	"errors"
 	"testing"
 
 	"github.com/ovechkin-dm/mockio/tests/common"
@@ -17,6 +18,10 @@ type OtherIface interface {
 
 type CallingIface interface {
 	GetMocked(appClient OtherIface) OtherIface
+}
+
+type SingleArgIface interface {
+	SingleArgMethod(other OtherIface) error
 }
 
 func TestMockWithMockedArg(t *testing.T) {
@@ -48,4 +53,13 @@ func TestByteArrayArgs(t *testing.T) {
 	WhenSingle(myMock.DoSomething(myBytes)).ThenReturn("test")
 	result := myMock.DoSomething(myBytes)
 	r.AssertEqual(result, "test")
+}
+
+func TestNilArgs(t *testing.T) {
+	r := common.NewMockReporter(t)
+	SetUp(r)
+	myMock := Mock[SingleArgIface]()
+	WhenSingle(myMock.SingleArgMethod(Any[OtherIface]())).ThenReturn(errors.New("test"))
+	result := myMock.SingleArgMethod(nil)
+	r.AssertEqual(result.Error(), "test")
 }

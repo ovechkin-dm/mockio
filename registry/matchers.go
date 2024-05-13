@@ -42,6 +42,9 @@ func untypedMatcher[T any](src matchers.Matcher[T]) matchers.Matcher[any] {
 	return &matcherImpl[any]{
 		f: func(args []any, a any) bool {
 			var casted T
+			if a == nil {
+				return src.Match(args, casted)
+			}
 			switch v := a.(type) {
 			case *proxy.DynamicStruct:
 				casted = proxy.UnsafeCast[T](v)
