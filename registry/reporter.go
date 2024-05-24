@@ -5,8 +5,6 @@ import (
 	"reflect"
 	"strings"
 
-	"github.com/ovechkin-dm/go-dyno/proxy"
-
 	"github.com/ovechkin-dm/mockio/config"
 	"github.com/ovechkin-dm/mockio/matchers"
 )
@@ -66,16 +64,11 @@ func (e *EnrichedReporter) ReportIncorrectWhenUsage() {
 }
 
 func (e *EnrichedReporter) ReportUnregisteredMockVerify(t any) {
-	switch t.(type) {
-	case *proxy.DynamicStruct:
-		e.StackTraceErrorf(`Argument passed to Verify() is a mock from different goroutine.
-	Make sure you made call to Mock() and Verify() from the same goroutine.`)
-	default:
-		e.StackTraceErrorf(`Argument passed to Verify() is %v and is not a mock.
+	e.StackTraceErrorf(`Argument passed to Verify() is %v and is not a mock, or a mock created in a different goroutine.
 	Make sure you place the parenthesis correctly.
 	Example of correct verification:
 		Verify(mock, Times(10)).SomeMethod()`, t)
-	}
+
 }
 
 func (e *EnrichedReporter) ReportInvalidUseOfMatchers(instanceType reflect.Type, call *MethodCall, m []*matcherWrapper) {

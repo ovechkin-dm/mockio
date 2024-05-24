@@ -6,14 +6,12 @@ import (
 	"sync"
 
 	"github.com/ovechkin-dm/go-dyno/pkg/dyno"
-	"github.com/ovechkin-dm/go-dyno/proxy"
-
 	"github.com/ovechkin-dm/mockio/matchers"
 )
 
 type invocationHandler struct {
 	ctx          *mockContext
-	methods      []*methodRecorder
+	methods      map[string]*methodRecorder
 	lock         sync.Mutex
 	instanceType reflect.Type
 }
@@ -30,12 +28,12 @@ func (h *invocationHandler) Handle(method *dyno.Method, values []reflect.Value) 
 	if h.ctx.getState().verifyState {
 		return h.DoVerifyMethod(call)
 	}
-	h.methods[method.Num].calls = append(h.methods[method.Num].calls, call)
+	h.methods[method.Name].calls = append(h.methods[method.Name].calls, call)
 	return h.DoAnswer(call)
 }
 
 func (h *invocationHandler) DoAnswer(c *MethodCall) []reflect.Value {
-	rec := h.methods[c.Method.Num]
+	rec := h.methods[c.Method.Name]
 	h.ctx.getState().whenHandler = h
 	h.ctx.getState().whenCall = c
 	var matched bool
@@ -116,7 +114,7 @@ func (h *invocationHandler) When() matchers.ReturnerAll {
 		return NewEmptyReturner()
 	}
 
-	rec := h.methods[whenCall.Method.Num]
+	rec := h.methods[whenCall.Method.Name]
 
 	argMatchers := h.ctx.getState().matchers
 
@@ -151,7 +149,7 @@ func (h *invocationHandler) DoVerifyMethod(call *MethodCall) []reflect.Value {
 		return createDefaultReturnValues(call.Method.Type)
 	}
 
-	rec := h.methods[call.Method.Num]
+	rec := h.methods[call.Method.Name]
 	matchedInvocations := make([]*MethodCall, 0)
 	for _, c := range rec.calls {
 		if c.WhenCall {
@@ -183,7 +181,7 @@ func (h *invocationHandler) DoVerifyMethod(call *MethodCall) []reflect.Value {
 	err := h.ctx.getState().methodVerifier.Verify(verifyData)
 	h.ctx.getState().methodVerifier = nil
 	if err != nil {
-		h.ctx.reporter.ReportVerifyMethodError(h.instanceType, call.Method.Type, matchedInvocations, argMatchers, h.methods[call.Method.Num], err)
+		h.ctx.reporter.ReportVerifyMethodError(h.instanceType, call.Method.Type, matchedInvocations, argMatchers, h.methods[call.Method.Name], err)
 	}
 	for i, m := range argMatchers {
 		if m.rec != nil {
@@ -197,9 +195,9 @@ func (h *invocationHandler) DoVerifyMethod(call *MethodCall) []reflect.Value {
 
 func newHandler[T any](holder *mockContext) *invocationHandler {
 	tp := reflect.TypeOf(new(T)).Elem()
-	recorders := make([]*methodRecorder, tp.NumMethod())
-	for i := range recorders {
-		recorders[i] = &methodRecorder{
+	recorders := make(map[string]*methodRecorder)
+	for i := 0; i < tp.NumMethod(); i++ {
+		recorders[tp.Method(i).Name] = &methodRecorder{
 			methodMatches: make([]*methodMatch, 0),
 			calls:         make([]*MethodCall, 0),
 			methodType:    tp.Method(i),
@@ -250,12 +248,6 @@ func (h *invocationHandler) validateReturnValues(result []any, method reflect.Me
 		if retActual == nil {
 			return false
 		}
-		switch v := result[i].(type) {
-		case *proxy.DynamicStruct:
-			retActual = v.IFaceValue.Type()
-		default:
-		}
-
 		if !retActual.AssignableTo(retExpected) {
 			return false
 		}
