@@ -6,6 +6,7 @@ import (
 	"sync"
 
 	"github.com/ovechkin-dm/go-dyno/pkg/dyno"
+
 	"github.com/ovechkin-dm/mockio/matchers"
 )
 

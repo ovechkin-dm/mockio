@@ -68,7 +68,6 @@ func (e *EnrichedReporter) ReportUnregisteredMockVerify(t any) {
 	Make sure you place the parenthesis correctly.
 	Example of correct verification:
 		Verify(mock, Times(10)).SomeMethod()`, t)
-
 }
 
 func (e *EnrichedReporter) ReportInvalidUseOfMatchers(instanceType reflect.Type, call *MethodCall, m []*matcherWrapper) {
