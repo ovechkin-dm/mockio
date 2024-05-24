@@ -40,6 +40,10 @@ type ChildIface interface {
 	Bar(int) int
 }
 
+type PrivateIface interface {
+	privateMethod() bool
+}
+
 func TestMockWithMockedArg(t *testing.T) {
 	r := common.NewMockReporter(t)
 	SetUp(r)
@@ -107,4 +111,16 @@ func TestMockCasting(t *testing.T) {
 	source := casted.(ParentIface)
 	result := source.Foo(1)
 	r.AssertEqual(result, 1)
+}
+
+func TestMockPrivate(t *testing.T) {
+	r := common.NewMockReporter(t)
+	SetUp(r)
+	myMock := Mock[PrivateIface]()
+	WhenSingle(myMock.privateMethod()).ThenReturn(true)
+	var casted any = myMock
+	source := casted.(PrivateIface)
+	result := source.privateMethod()
+	r.AssertNoError()
+	r.AssertEqual(result, true)
 }
