@@ -5,8 +5,6 @@ import (
 	"reflect"
 	"runtime/debug"
 	"strings"
-
-	"github.com/ovechkin-dm/go-dyno/proxy"
 )
 
 const (
@@ -34,27 +32,17 @@ func valueSliceToInterfaceSlice(values []reflect.Value) []any {
 }
 
 func valueToInterface(value reflect.Value) any {
-	switch v := value.Interface().(type) {
-	case *proxy.DynamicStruct:
-		return v.IFaceValue.Interface()
-	default:
-		return v
-	}
+	return value.Interface()
 }
 
 func interfaceSliceToValueSlice(values []any, m reflect.Method) []reflect.Value {
 	result := make([]reflect.Value, len(values))
 	for i := range values {
-		switch v := values[i].(type) {
-		case *proxy.DynamicStruct:
-			result[i] = v.IFaceValue
-		default:
-			retV := reflect.New(m.Type.Out(i)).Elem()
-			if values[i] != nil {
-				retV.Set(reflect.ValueOf(values[i]))
-			}
-			result[i] = retV
+		retV := reflect.New(m.Type.Out(i)).Elem()
+		if values[i] != nil {
+			retV.Set(reflect.ValueOf(values[i]))
 		}
+		result[i] = retV
 	}
 	return result
 }
