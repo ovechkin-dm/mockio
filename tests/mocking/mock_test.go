@@ -118,8 +118,9 @@ func TestMockPrivate(t *testing.T) {
 	SetUp(r)
 	myMock := Mock[PrivateIface]()
 	WhenSingle(myMock.privateMethod()).ThenReturn(true)
-	var casted any = myMock.(PrivateIface)
+	var casted any = myMock
 	source := casted.(PrivateIface)
-	source.privateMethod()
+	result := source.privateMethod()
 	r.AssertNoError()
+	r.AssertEqual(result, true)
 }
