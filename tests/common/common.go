@@ -18,6 +18,10 @@ func (m *MockReporter) Fatalf(format string, args ...any) {
 	m.reported = fmt.Sprintf(format, args...)
 }
 
+func (m *MockReporter) Errorf(format string, args ...any) {
+	m.reported = fmt.Sprintf(format, args...)
+}
+
 func (m *MockReporter) IsError() bool {
 	return m.reported != ""
 }
