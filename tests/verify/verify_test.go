@@ -158,7 +158,7 @@ func TestVerifyMockAsArg(t *testing.T) {
 	r.AssertNoError()
 }
 
-func TestPostponedVerify(t *testing.T) {
+func TestPostponedVerifyNotFailingImmediately(t *testing.T) {
 	r := common.NewMockReporter(t)
 	SetUp(r)
 	m := Mock[iface]()
