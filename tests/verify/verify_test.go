@@ -157,3 +157,14 @@ func TestVerifyMockAsArg(t *testing.T) {
 
 	r.AssertNoError()
 }
+
+func TestPostponedVerify(t *testing.T) {
+	r := common.NewMockReporter(t)
+	SetUp(r)
+	m := Mock[iface]()
+	WhenSingle(m.Foo(12)).ThenReturn(11).Verify(Once())
+	m.Foo(10)
+	r.TriggerCleanup()
+	r.AssertError()
+	r.AssertEqual(r.GetErrorCount(), 1)
+}
