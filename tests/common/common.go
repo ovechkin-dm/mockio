@@ -9,9 +9,9 @@ import (
 )
 
 type MockReporter struct {
-	reported string
-	t        *testing.T
-	cleanups []func()
+	reported   string
+	t          *testing.T
+	cleanups   []func()
 	fatalCount int
 	errorCount int
 }
