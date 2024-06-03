@@ -9,13 +9,21 @@ import (
 )
 
 type MockReporter struct {
-	reported string
-	t        *testing.T
-	cleanups []func()
+	reported   string
+	t          *testing.T
+	cleanups   []func()
+	fatalCount int
+	errorCount int
 }
 
 func (m *MockReporter) Fatalf(format string, args ...any) {
 	m.reported = fmt.Sprintf(format, args...)
+	m.fatalCount++
+}
+
+func (m *MockReporter) Errorf(format string, args ...any) {
+	m.reported = fmt.Sprintf(format, args...)
+	m.errorCount++
 }
 
 func (m *MockReporter) IsError() bool {
@@ -73,6 +81,14 @@ func (m *MockReporter) TriggerCleanup() {
 
 func (m *MockReporter) PrintError() {
 	fmt.Println(m.reported)
+}
+
+func (m *MockReporter) GetFatalCount() int {
+	return m.fatalCount
+}
+
+func (m *MockReporter) GetErrorCount() int {
+	return m.errorCount
 }
 
 func NewMockReporter(t *testing.T) *MockReporter {

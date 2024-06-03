@@ -182,7 +182,15 @@ func (h *invocationHandler) DoVerifyMethod(call *MethodCall) []reflect.Value {
 	err := h.ctx.getState().methodVerifier.Verify(verifyData)
 	h.ctx.getState().methodVerifier = nil
 	if err != nil {
-		h.ctx.reporter.ReportVerifyMethodError(h.instanceType, call.Method.Type, matchedInvocations, argMatchers, h.methods[call.Method.Name], err)
+		h.ctx.reporter.ReportVerifyMethodError(
+			true,
+			h.instanceType,
+			call.Method.Type,
+			matchedInvocations,
+			argMatchers,
+			h.methods[call.Method.Name],
+			err,
+		)
 	}
 	for i, m := range argMatchers {
 		if m.rec != nil {
@@ -257,7 +265,7 @@ func (h *invocationHandler) validateReturnValues(result []any, method reflect.Me
 }
 
 func (h *invocationHandler) VerifyNoMoreInteractions() {
-	h.PostponedVerify()
+	h.PostponedVerify(true)
 	unexpected := make([]*MethodCall, 0)
 	for _, rec := range h.methods {
 		for _, call := range rec.calls {
@@ -290,7 +298,7 @@ func (h *invocationHandler) refineValues(method *dyno.Method, values []reflect.V
 	return values
 }
 
-func (h *invocationHandler) PostponedVerify() {
+func (h *invocationHandler) PostponedVerify(fatal bool) {
 	for _, rec := range h.methods {
 		for _, match := range rec.methodMatches {
 			if len(match.verifiers) == 0 {
@@ -319,7 +327,15 @@ func (h *invocationHandler) PostponedVerify() {
 			for _, v := range match.verifiers {
 				err := v.Verify(verifyData)
 				if err != nil {
-					h.ctx.reporter.ReportVerifyMethodError(h.instanceType, rec.methodType, matchedInvocations, match.matchers, rec, err)
+					h.ctx.reporter.ReportVerifyMethodError(
+						fatal,
+						h.instanceType,
+						rec.methodType,
+						matchedInvocations,
+						match.matchers,
+						rec,
+						err,
+					)
 				}
 			}
 		}
@@ -327,5 +343,5 @@ func (h *invocationHandler) PostponedVerify() {
 }
 
 func (h *invocationHandler) TearDown() {
-	h.PostponedVerify()
+	h.PostponedVerify(false)
 }

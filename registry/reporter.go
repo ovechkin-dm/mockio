@@ -18,16 +18,24 @@ func (p *panicReporter) Fatalf(format string, args ...any) {
 	panic(fmt.Sprintf(format, args...))
 }
 
+func (p *panicReporter) Errorf(format string, args ...any) {
+	panic(fmt.Sprintf(format, args...))
+}
+
 type EnrichedReporter struct {
 	reporter matchers.ErrorReporter
 	cfg      *config.MockConfig
 }
 
 func (e *EnrichedReporter) Errorf(format string, args ...any) {
-	e.reporter.Fatalf(format, args...)
+	e.reporter.Errorf(format, args...)
 }
 
-func (e *EnrichedReporter) StackTraceErrorf(format string, args ...any) {
+func (e *EnrichedReporter) StackTraceFatalf(format string, args ...any) {
+	e.StackTraceErr(true, format, args...)
+}
+
+func (e *EnrichedReporter) StackTraceErr(fatal bool, format string, args ...any) {
 	s := NewStackTrace()
 	result := fmt.Sprintf(format, args...)
 	var st string
@@ -46,25 +54,32 @@ Cause:
 	%s
 `, s.CallerLine(), result)
 	}
-
-	e.reporter.Fatalf(st)
+	if fatal {
+		e.Fatalf(st)
+	} else {
+		e.reporter.Errorf(st)
+	}
 }
 
 func (e *EnrichedReporter) FailNow(err error) {
-	e.Errorf(err.Error())
+	e.Fatalf(err.Error())
 }
 
 func (e *EnrichedReporter) Fatal(format string) {
-	e.reporter.Fatalf(format)
+	e.Fatalf(format)
+}
+
+func (e *EnrichedReporter) Fatalf(format string, args ...any) {
+	e.reporter.Fatalf(format, args...)
 }
 
 func (e *EnrichedReporter) ReportIncorrectWhenUsage() {
-	e.StackTraceErrorf(`When() requires an argument which has to be 'a method call on a mock'.
+	e.StackTraceFatalf(`When() requires an argument which has to be 'a method call on a mock'.
 	For example: When(mock.GetArticles()).ThenReturn(articles)`)
 }
 
 func (e *EnrichedReporter) ReportUnregisteredMockVerify(t any) {
-	e.StackTraceErrorf(`Argument passed to Verify() is %v and is not a mock, or a mock created in a different goroutine.
+	e.StackTraceFatalf(`Argument passed to Verify() is %v and is not a mock, or a mock created in a different goroutine.
 	Make sure you place the parenthesis correctly.
 	Example of correct verification:
 		Verify(mock, Times(10)).SomeMethod()`, t)
@@ -94,7 +109,7 @@ func (e *EnrichedReporter) ReportInvalidUseOfMatchers(instanceType reflect.Type,
 	if call.Method.Type.Type.IsVariadic() {
 		expectedStr = ""
 	}
-	e.StackTraceErrorf(`Invalid use of matchers
+	e.StackTraceFatalf(`Invalid use of matchers
 	%s%v
 	method:
 		%v
@@ -109,6 +124,7 @@ func (e *EnrichedReporter) ReportInvalidUseOfMatchers(instanceType reflect.Type,
 }
 
 func (e *EnrichedReporter) ReportVerifyMethodError(
+	fatal bool,
 	tp reflect.Type,
 	method reflect.Method,
 	invocations []*MethodCall,
@@ -148,16 +164,16 @@ func (e *EnrichedReporter) ReportVerifyMethodError(
 		}
 	}
 	if len(other.String()) == 0 && len(sb.String()) == 0 {
-		e.StackTraceErrorf(`%v
+		e.StackTraceErr(fatal, `%v
 		%v
 `, err, callStr)
 	} else if len(invocations) == 0 {
-		e.StackTraceErrorf(`%v
+		e.StackTraceErr(fatal, `%v
 		%v
 	However, there were other interactions with this method:
 %v`, err, callStr, other.String())
 	} else {
-		e.StackTraceErrorf(`%v
+		e.StackTraceErr(fatal, `%v
 		%v
 	Invocations:
 %v`, err, callStr, sb.String())
@@ -165,11 +181,11 @@ func (e *EnrichedReporter) ReportVerifyMethodError(
 }
 
 func (e *EnrichedReporter) ReportEmptyCaptor() {
-	e.StackTraceErrorf("no values were captured for captor")
+	e.StackTraceFatalf("no values were captured for captor")
 }
 
 func (e *EnrichedReporter) ReportInvalidCaptorValue(expectedType reflect.Type, actualType reflect.Type) {
-	e.StackTraceErrorf("captor contains unexpected type")
+	e.StackTraceFatalf("captor contains unexpected type")
 }
 
 func (e *EnrichedReporter) ReportInvalidReturnValues(instanceType reflect.Type, method reflect.Method, ret []any) {
@@ -211,7 +227,7 @@ func (e *EnrichedReporter) ReportInvalidReturnValues(instanceType reflect.Type, 
 
 	methodSig := prettyPrintMethodSignature(instanceType, method)
 
-	e.StackTraceErrorf(`invalid return values
+	e.StackTraceFatalf(`invalid return values
 expected:
 	%v
 got:
@@ -297,7 +313,7 @@ func (e *EnrichedReporter) ReportNoMoreInteractionsExpected(instanceType reflect
 		}
 
 	}
-	e.StackTraceErrorf(`No more interactions expected, but unverified interactions found:
+	e.StackTraceFatalf(`No more interactions expected, but unverified interactions found:
 %v`, sb.String())
 }
 
@@ -309,7 +325,7 @@ func (e *EnrichedReporter) ReportUnexpectedMatcherDeclaration(m []*matcherWrappe
 			sb.WriteString("\n")
 		}
 	}
-	e.StackTraceErrorf(`Unexpected matchers declaration.
+	e.StackTraceFatalf(`Unexpected matchers declaration.
 %s
 	Matchers can only be used inside When() method call.`, sb.String())
 }
