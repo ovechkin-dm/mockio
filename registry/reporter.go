@@ -93,14 +93,14 @@ func (e *EnrichedReporter) ReportInvalidUseOfMatchers(instanceType reflect.Type,
 		matcherArgs[i] = m[i].matcher.Description()
 	}
 	matchersString := strings.Join(matcherArgs, ",")
-	tp := call.Method.Type.Type
+	tp := call.Method.Type
 	inArgs := make([]string, 0)
-	methodSig := prettyPrintMethodSignature(instanceType, call.Method.Type)
+	methodSig := prettyPrintMethodSignature(instanceType, call.Method)
 	for i := 0; i < tp.NumIn(); i++ {
 		inArgs = append(inArgs, tp.In(i).String())
 	}
 	inArgsStr := strings.Join(inArgs, ",")
-	numExpected := call.Method.Type.Type.NumIn()
+	numExpected := call.Method.Type.NumIn()
 	numActual := len(m)
 	declarationLines := make([]string, 0)
 	for i := range m {
@@ -108,7 +108,7 @@ func (e *EnrichedReporter) ReportInvalidUseOfMatchers(instanceType reflect.Type,
 	}
 	decl := strings.Join(declarationLines, "\n")
 	expectedStr := fmt.Sprintf("%v expected, %v recorded:\n", numExpected, numActual)
-	if call.Method.Type.Type.IsVariadic() {
+	if call.Method.Type.IsVariadic() {
 		expectedStr = ""
 	}
 	e.StackTraceFatalf(`Invalid use of matchers
@@ -160,7 +160,7 @@ func (e *EnrichedReporter) ReportVerifyMethodError(
 		for i := range c.Values {
 			callArgs[i] = fmt.Sprintf("%v", c.Values[i])
 		}
-		pretty := PrettyPrintMethodInvocation(tp, c.Method.Type, callArgs)
+		pretty := PrettyPrintMethodInvocation(tp, c.Method, callArgs)
 		other.WriteString(fmt.Sprintf("\t\t%s at %s", pretty, c.StackTrace.CallerLine()))
 		if j != len(recorder.calls)-1 {
 			other.WriteString("\n")
@@ -308,7 +308,7 @@ func (e *EnrichedReporter) ReportNoMoreInteractionsExpected(fatal bool, instance
 		for _, v := range c.Values {
 			args = append(args, fmt.Sprintf("%v", v))
 		}
-		s := PrettyPrintMethodInvocation(instanceType, c.Method.Type, args)
+		s := PrettyPrintMethodInvocation(instanceType, c.Method, args)
 		line := fmt.Sprintf("\t\t%s at %s", s, c.StackTrace.CallerLine())
 		sb.WriteString(line)
 		if i != len(calls)-1 {
