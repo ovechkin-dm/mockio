@@ -5,8 +5,6 @@ import (
 	"reflect"
 	"sync"
 
-	"github.com/ovechkin-dm/go-dyno/pkg/dyno"
-
 	"github.com/ovechkin-dm/mockio/matchers"
 )
 
@@ -17,7 +15,7 @@ type invocationHandler struct {
 	instanceType reflect.Type
 }
 
-func (h *invocationHandler) Handle(method *dyno.Method, values []reflect.Value) []reflect.Value {
+func (h *invocationHandler) Handle(method reflect.Method, values []reflect.Value) []reflect.Value {
 	h.lock.Lock()
 	defer h.lock.Unlock()
 	values = h.refineValues(method, values)
@@ -60,7 +58,7 @@ func (h *invocationHandler) DoAnswer(c *MethodCall) []reflect.Value {
 
 			ansWrapper := mm.popAnswer()
 			if ansWrapper == nil {
-				return createDefaultReturnValues(c.Method.Type)
+				return createDefaultReturnValues(c.Method)
 			}
 
 			retValues := ansWrapper.ans(ifaces)
@@ -68,16 +66,16 @@ func (h *invocationHandler) DoAnswer(c *MethodCall) []reflect.Value {
 			h.ctx.getState().whenAnswer = ansWrapper
 			h.ctx.getState().whenMethodMatch = mm
 
-			if !h.validateReturnValues(retValues, c.Method.Type) {
-				h.ctx.reporter.ReportInvalidReturnValues(h.instanceType, c.Method.Type, retValues)
-				return createDefaultReturnValues(c.Method.Type)
+			if !h.validateReturnValues(retValues, c.Method) {
+				h.ctx.reporter.ReportInvalidReturnValues(h.instanceType, c.Method, retValues)
+				return createDefaultReturnValues(c.Method)
 			}
 
-			result := interfaceSliceToValueSlice(retValues, c.Method.Type)
+			result := interfaceSliceToValueSlice(retValues, c.Method)
 			return result
 		}
 	}
-	return createDefaultReturnValues(c.Method.Type)
+	return createDefaultReturnValues(c.Method)
 }
 
 func (h *invocationHandler) When() matchers.ReturnerAll {
@@ -148,7 +146,7 @@ func (h *invocationHandler) DoVerifyMethod(call *MethodCall) []reflect.Value {
 	h.ctx.getState().verifyState = false
 
 	if !matchersOk {
-		return createDefaultReturnValues(call.Method.Type)
+		return createDefaultReturnValues(call.Method)
 	}
 
 	rec := h.methods[call.Method.Name]
@@ -186,7 +184,7 @@ func (h *invocationHandler) DoVerifyMethod(call *MethodCall) []reflect.Value {
 		h.ctx.reporter.ReportVerifyMethodError(
 			true,
 			h.instanceType,
-			call.Method.Type,
+			call.Method,
 			matchedInvocations,
 			argMatchers,
 			h.methods[call.Method.Name],
@@ -201,7 +199,7 @@ func (h *invocationHandler) DoVerifyMethod(call *MethodCall) []reflect.Value {
 			}
 		}
 	}
-	return createDefaultReturnValues(call.Method.Type)
+	return createDefaultReturnValues(call.Method)
 }
 
 func newHandler[T any](holder *mockContext) *invocationHandler {
@@ -285,8 +283,8 @@ func (h *invocationHandler) VerifyNoMoreInteractions(tearDown bool) {
 	}
 }
 
-func (h *invocationHandler) refineValues(method *dyno.Method, values []reflect.Value) []reflect.Value {
-	tp := method.Type.Type
+func (h *invocationHandler) refineValues(method reflect.Method, values []reflect.Value) []reflect.Value {
+	tp := method.Type
 	if tp.IsVariadic() {
 		result := make([]reflect.Value, 0)
 		for i := 0; i < tp.NumIn()-1; i++ {

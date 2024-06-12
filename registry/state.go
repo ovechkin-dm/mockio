@@ -5,8 +5,6 @@ import (
 	"sync"
 	"sync/atomic"
 
-	"github.com/ovechkin-dm/go-dyno/pkg/dyno"
-
 	"github.com/ovechkin-dm/mockio/config"
 	"github.com/ovechkin-dm/mockio/matchers"
 	"github.com/ovechkin-dm/mockio/threadlocal"
@@ -121,7 +119,7 @@ func newMockContext(reporter *EnrichedReporter, cfg *config.MockConfig) *mockCon
 }
 
 type MethodCall struct {
-	Method     *dyno.Method
+	Method     reflect.Method
 	Values     []reflect.Value
 	WhenCall   bool
 	Verified   bool

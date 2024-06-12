@@ -59,7 +59,7 @@ func TearDown() {
 func Mock[T any]() T {
 	return withCheck[T](func() T {
 		handler := newHandler[T](getInstance().mockContext)
-		t, err := dyno.Dynamic[T](handler)
+		t, err := dyno.Dynamic[T](handler.Handle)
 		if err != nil {
 			getInstance().mockContext.reporter.FailNow(fmt.Errorf("error creating mock: %w", err))
 			var zero T
