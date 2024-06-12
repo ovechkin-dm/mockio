@@ -266,8 +266,8 @@ func (h *invocationHandler) validateReturnValues(result []any, method reflect.Me
 	return true
 }
 
-func (h *invocationHandler) VerifyNoMoreInteractions() {
-	h.PostponedVerify()
+func (h *invocationHandler) VerifyNoMoreInteractions(tearDown bool) {
+	h.PostponedVerify(tearDown)
 	unexpected := make([]*MethodCall, 0)
 	for _, rec := range h.methods {
 		for _, call := range rec.calls {
@@ -279,8 +279,9 @@ func (h *invocationHandler) VerifyNoMoreInteractions() {
 			}
 		}
 	}
+	reportFatal := !tearDown
 	if len(unexpected) > 0 {
-		h.ctx.reporter.ReportNoMoreInteractionsExpected(h.ctx.getState().ReportFatal(), h.instanceType, unexpected)
+		h.ctx.reporter.ReportNoMoreInteractionsExpected(reportFatal, h.instanceType, unexpected)
 	}
 }
 
@@ -300,7 +301,7 @@ func (h *invocationHandler) refineValues(method *dyno.Method, values []reflect.V
 	return values
 }
 
-func (h *invocationHandler) PostponedVerify() {
+func (h *invocationHandler) PostponedVerify(tearDown bool) {
 	for _, rec := range h.methods {
 		for _, match := range rec.methodMatches {
 			if len(match.verifiers) == 0 {
@@ -330,11 +331,11 @@ func (h *invocationHandler) PostponedVerify() {
 				err := v.Verify(verifyData)
 				if err != nil {
 					var stackTrace *StackTrace
-					if h.ctx.getState().tearDownState {
+					if tearDown {
 						stackTrace = match.stackTrace
 					}
 					h.ctx.reporter.ReportVerifyMethodError(
-						h.ctx.getState().ReportFatal(),
+						!tearDown,
 						h.instanceType,
 						rec.methodType,
 						matchedInvocations,
@@ -350,15 +351,14 @@ func (h *invocationHandler) PostponedVerify() {
 }
 
 func (h *invocationHandler) TearDown() {
-	h.ctx.getState().tearDownState = true
 	if h.ctx.cfg.StrictVerify {
 		for _, m := range h.methods {
 			for _, mm := range m.methodMatches {
 				mm.verifiers = append(mm.verifiers, matchers.AtLeastOnce())
 			}
 		}
-		h.VerifyNoMoreInteractions()
+		h.VerifyNoMoreInteractions(true)
 	} else {
-		h.PostponedVerify()
+		h.PostponedVerify(true)
 	}
 }

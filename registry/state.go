@@ -20,12 +20,8 @@ type fiberState struct {
 	whenCall        *MethodCall
 	whenAnswer      *answerWrapper
 	whenMethodMatch *methodMatch
-	tearDownState   bool
 }
 
-func (f *fiberState) ReportFatal() bool {
-	return !f.tearDownState
-}
 
 type mockContext struct {
 	state     threadlocal.ThreadLocal[*fiberState]
@@ -116,7 +112,6 @@ func newMockContext(reporter *EnrichedReporter, cfg *config.MockConfig) *mockCon
 				whenCall:       nil,
 				methodVerifier: nil,
 				verifyState:    false,
-				tearDownState:  false,
 			}
 		}),
 		reporter:  reporter,

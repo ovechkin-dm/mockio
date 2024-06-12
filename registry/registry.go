@@ -127,7 +127,7 @@ func VerifyNoMoreInteractions(t any) {
 			getInstance().mockContext.reporter.ReportUnregisteredMockVerify(t)
 			return nil
 		}
-		handler.VerifyNoMoreInteractions()
+		handler.VerifyNoMoreInteractions(false)
 		return nil
 	})
 }
