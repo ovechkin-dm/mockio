@@ -22,7 +22,6 @@ type fiberState struct {
 	whenMethodMatch *methodMatch
 }
 
-
 type mockContext struct {
 	state     threadlocal.ThreadLocal[*fiberState]
 	reporter  *EnrichedReporter
