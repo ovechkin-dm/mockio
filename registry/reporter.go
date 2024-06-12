@@ -32,11 +32,13 @@ func (e *EnrichedReporter) Errorf(format string, args ...any) {
 }
 
 func (e *EnrichedReporter) StackTraceFatalf(format string, args ...any) {
-	e.StackTraceErr(true, format, args...)
+	e.StackTraceErrorf(nil, true, format, args...)
 }
 
-func (e *EnrichedReporter) StackTraceErr(fatal bool, format string, args ...any) {
-	s := NewStackTrace()
+func (e *EnrichedReporter) StackTraceErrorf(s *StackTrace, fatal bool, format string, args ...any) {
+	if s == nil {
+		s = NewStackTrace()
+	}
 	result := fmt.Sprintf(format, args...)
 	var st string
 	if e.cfg.PrintStackTrace {
@@ -131,6 +133,7 @@ func (e *EnrichedReporter) ReportVerifyMethodError(
 	argMatchers []*matcherWrapper,
 	recorder *methodRecorder,
 	err error,
+	stackTrace *StackTrace,
 ) {
 	sb := strings.Builder{}
 	for i, c := range invocations {
@@ -164,16 +167,16 @@ func (e *EnrichedReporter) ReportVerifyMethodError(
 		}
 	}
 	if len(other.String()) == 0 && len(sb.String()) == 0 {
-		e.StackTraceErr(fatal, `%v
+		e.StackTraceErrorf(stackTrace, fatal, `%v
 		%v
 `, err, callStr)
 	} else if len(invocations) == 0 {
-		e.StackTraceErr(fatal, `%v
+		e.StackTraceErrorf(stackTrace, fatal, `%v
 		%v
 	However, there were other interactions with this method:
 %v`, err, callStr, other.String())
 	} else {
-		e.StackTraceErr(fatal, `%v
+		e.StackTraceErrorf(stackTrace, fatal, `%v
 		%v
 	Invocations:
 %v`, err, callStr, sb.String())
@@ -298,7 +301,7 @@ func PrettyPrintMethodInvocation(interfaceType reflect.Type, method reflect.Meth
 	return sb.String()
 }
 
-func (e *EnrichedReporter) ReportNoMoreInteractionsExpected(instanceType reflect.Type, calls []*MethodCall) {
+func (e *EnrichedReporter) ReportNoMoreInteractionsExpected(fatal bool, instanceType reflect.Type, calls []*MethodCall) {
 	sb := strings.Builder{}
 	for i, c := range calls {
 		args := make([]string, 0)
@@ -313,7 +316,7 @@ func (e *EnrichedReporter) ReportNoMoreInteractionsExpected(instanceType reflect
 		}
 
 	}
-	e.StackTraceFatalf(`No more interactions expected, but unverified interactions found:
+	e.StackTraceErrorf(nil, fatal, `No more interactions expected, but unverified interactions found:
 %v`, sb.String())
 }
 

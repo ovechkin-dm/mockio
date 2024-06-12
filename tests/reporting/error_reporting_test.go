@@ -4,6 +4,7 @@ import (
 	"sync"
 	"testing"
 
+	"github.com/ovechkin-dm/mockio/mockopts"
 	"github.com/ovechkin-dm/mockio/tests/common"
 
 	. "github.com/ovechkin-dm/mockio/mock"
@@ -178,7 +179,7 @@ func TestUnexpectedMatchers(t *testing.T) {
 
 func TestStackTraceDisabled(t *testing.T) {
 	r := common.NewMockReporter(t)
-	SetUp(r, WithoutStackTrace())
+	SetUp(r, mockopts.WithoutStackTrace())
 	mock := Mock[Foo]()
 	WhenSingle(mock.Baz(1, 2, AnyInt())).ThenReturn(10)
 	_ = mock.Baz(1, 2, 3)

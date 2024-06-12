@@ -20,6 +20,11 @@ type fiberState struct {
 	whenCall        *MethodCall
 	whenAnswer      *answerWrapper
 	whenMethodMatch *methodMatch
+	tearDownState   bool
+}
+
+func (f *fiberState) ReportFatal() bool {
+	return !f.tearDownState
 }
 
 type mockContext struct {
@@ -44,6 +49,7 @@ type methodMatch struct {
 	lastAnswer  *answerWrapper
 	invocations int64
 	verifiers   []matchers.MethodVerifier
+	stackTrace  *StackTrace
 }
 
 func (m *methodMatch) popAnswer() *answerWrapper {
@@ -110,6 +116,7 @@ func newMockContext(reporter *EnrichedReporter, cfg *config.MockConfig) *mockCon
 				whenCall:       nil,
 				methodVerifier: nil,
 				verifyState:    false,
+				tearDownState:  false,
 			}
 		}),
 		reporter:  reporter,
