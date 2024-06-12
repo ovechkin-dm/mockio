@@ -24,6 +24,14 @@ type MyInterface interface {
 	Test(m *MyStruct) int
 }
 
+type SliceInterface interface {
+	Test(m []int) int
+}
+
+type MapInterface interface {
+	Test(m map[int]int) int
+}
+
 func TestAny(t *testing.T) {
 	r := common.NewMockReporter(t)
 	SetUp(r)
@@ -140,6 +148,168 @@ func TestDeepEqual(t *testing.T) {
 	WhenSingle(m.Test(&s1)).ThenReturn(9)
 	result := m.Test(&s2)
 	r.AssertEqual(result, 9)
+}
+
+func TestNilMatch(t *testing.T) {
+	r := common.NewMockReporter(t)
+	SetUp(r)
+	m := Mock[Iface]()
+	WhenSingle(m.Test(Nil[any]())).ThenReturn(true)
+	ret := m.Test(nil)
+	r.AssertEqual(true, ret)
+}
+
+func TestNilNoMatch(t *testing.T) {
+	r := common.NewMockReporter(t)
+	SetUp(r)
+	m := Mock[Iface]()
+	WhenSingle(m.Test(Nil[any]())).ThenReturn(true)
+	ret := m.Test(10)
+	r.AssertEqual(false, ret)
+}
+
+func TestSubstringMatch(t *testing.T) {
+	r := common.NewMockReporter(t)
+	SetUp(r)
+	m := Mock[Iface]()
+	WhenSingle(m.Test(Substring("test"))).ThenReturn(true)
+	ret := m.Test("123test123")
+	r.AssertEqual(true, ret)
+}
+
+func TestSubstringNoMatch(t *testing.T) {
+	r := common.NewMockReporter(t)
+	SetUp(r)
+	m := Mock[Iface]()
+	WhenSingle(m.Test(Substring("test321"))).ThenReturn(true)
+	ret := m.Test("123test123")
+	r.AssertEqual(false, ret)
+}
+
+func TestNotNilMatch(t *testing.T) {
+	r := common.NewMockReporter(t)
+	SetUp(r)
+	m := Mock[Iface]()
+	WhenSingle(m.Test(NotNil[any]())).ThenReturn(true)
+	ret := m.Test(10)
+	r.AssertEqual(true, ret)
+}
+
+func TestNotNilNoMatch(t *testing.T) {
+	r := common.NewMockReporter(t)
+	SetUp(r)
+	m := Mock[Iface]()
+	WhenSingle(m.Test(NotNil[any]())).ThenReturn(true)
+	ret := m.Test(nil)
+	r.AssertEqual(false, ret)
+}
+
+func TestRegexMatch(t *testing.T) {
+	r := common.NewMockReporter(t)
+	SetUp(r)
+	m := Mock[Iface]()
+	WhenSingle(m.Test(Regex("test"))).ThenReturn(true)
+	ret := m.Test("123test123")
+	r.AssertEqual(true, ret)
+}
+
+func TestRegexNoMatch(t *testing.T) {
+	r := common.NewMockReporter(t)
+	SetUp(r)
+	m := Mock[Iface]()
+	WhenSingle(m.Test(Regex("test321"))).ThenReturn(true)
+	ret := m.Test("123test123")
+	r.AssertEqual(false, ret)
+}
+
+func TestSliceLenMatch(t *testing.T) {
+	r := common.NewMockReporter(t)
+	SetUp(r)
+	m := Mock[SliceInterface]()
+	WhenSingle(m.Test(SliceLen[int](3))).ThenReturn(3)
+	ret := m.Test([]int{1, 2, 3})
+	r.AssertEqual(3, ret)
+}
+
+func TestSliceLenNoMatch(t *testing.T) {
+	r := common.NewMockReporter(t)
+	SetUp(r)
+	m := Mock[SliceInterface]()
+	WhenSingle(m.Test(SliceLen[int](4))).ThenReturn(3)
+	ret := m.Test([]int{1, 2, 3})
+	r.AssertEqual(0, ret)
+}
+
+func TestMapLenMatch(t *testing.T) {
+	r := common.NewMockReporter(t)
+	SetUp(r)
+	m := Mock[MapInterface]()
+	WhenSingle(m.Test(MapLen[int, int](3))).ThenReturn(3)
+	ret := m.Test(map[int]int{1: 1, 2: 2, 3: 3})
+	r.AssertEqual(3, ret)
+}
+
+func TestMapLenNoMatch(t *testing.T) {
+	r := common.NewMockReporter(t)
+	SetUp(r)
+	m := Mock[MapInterface]()
+	WhenSingle(m.Test(MapLen[int, int](3))).ThenReturn(3)
+	ret := m.Test(map[int]int{1: 1, 2: 2, 3: 3, 4: 4})
+	r.AssertEqual(0, ret)
+}
+
+func TestSliceContainsMatch(t *testing.T) {
+	r := common.NewMockReporter(t)
+	SetUp(r)
+	m := Mock[SliceInterface]()
+	WhenSingle(m.Test(SliceContains[int](3))).ThenReturn(3)
+	ret := m.Test([]int{1, 2, 3})
+	r.AssertEqual(3, ret)
+}
+
+func TestSliceContainsNoMatch(t *testing.T) {
+	r := common.NewMockReporter(t)
+	SetUp(r)
+	m := Mock[SliceInterface]()
+	WhenSingle(m.Test(SliceContains[int](4))).ThenReturn(3)
+	ret := m.Test([]int{1, 2, 3})
+	r.AssertEqual(0, ret)
+}
+
+func TestMapContainsMatch(t *testing.T) {
+	r := common.NewMockReporter(t)
+	SetUp(r)
+	m := Mock[MapInterface]()
+	WhenSingle(m.Test(MapContains[int, int](3))).ThenReturn(3)
+	ret := m.Test(map[int]int{1: 1, 2: 2, 3: 3})
+	r.AssertEqual(3, ret)
+}
+
+func TestMapContainsNoMatch(t *testing.T) {
+	r := common.NewMockReporter(t)
+	SetUp(r)
+	m := Mock[MapInterface]()
+	WhenSingle(m.Test(MapContains[int, int](4))).ThenReturn(3)
+	ret := m.Test(map[int]int{1: 1, 2: 2, 3: 3})
+	r.AssertEqual(0, ret)
+}
+
+func TestSliceEqualUnorderedMatch(t *testing.T) {
+	r := common.NewMockReporter(t)
+	SetUp(r)
+	m := Mock[SliceInterface]()
+	WhenSingle(m.Test(SliceEqualUnordered[int]([]int{1, 2, 3}))).ThenReturn(3)
+	ret := m.Test([]int{3, 2, 1})
+	r.AssertEqual(3, ret)
+}
+
+func TestSliceEqualUnorderedNoMatch(t *testing.T) {
+	r := common.NewMockReporter(t)
+	SetUp(r)
+	m := Mock[SliceInterface]()
+	WhenSingle(m.Test(SliceEqualUnordered[int]([]int{1, 2, 3}))).ThenReturn(3)
+	ret := m.Test([]int{3, 2, 1, 4})
+	r.AssertEqual(0, ret)
 }
 
 func TestUnexpectedUseOfMatchers(t *testing.T) {

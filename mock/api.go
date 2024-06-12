@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"reflect"
+	"regexp"
 	"strings"
 
 	"github.com/ovechkin-dm/mockio/config"
@@ -110,6 +111,166 @@ func AnyContext() context.Context {
 // Used for automatic type inference
 func AnyOfType[T any](t T) T {
 	return Any[T]()
+}
+
+// Nil returns matcher that matches nil argument.
+// Example usage:
+//
+//	WhenSingle(myMock.MyMethod(Nil[string]())).ThenReturn("bar")
+func Nil[T any]() T {
+	m := registry.FunMatcher[T]("Nil", func(m []any, actual T) bool {
+		var d any = actual
+		return d == nil
+	})
+	registry.AddMatcher(m)
+	var t T
+	return t
+}
+
+// NotNil returns matcher that matches non-nil argument.
+// Example usage:
+//
+//	WhenSingle(myMock.MyMethod(NotNil[string]())).ThenReturn("bar")
+func NotNil[T any]() T {
+	m := registry.FunMatcher[T]("NotNil", func(m []any, actual T) bool {
+		var d any = actual
+		return d != nil
+	})
+	registry.AddMatcher(m)
+	var t T
+	return t
+}
+
+// Regex returns matcher that matches string against provided pattern.
+// Example usage:
+//
+//	WhenSingle(myMock.MyMethod(Regex[string]("foo"))).ThenReturn("bar")
+func Regex(pattern string) string {
+	re, err := regexp.Compile(pattern)
+	desc := fmt.Sprintf("Regex(%v)", pattern)
+	if err != nil {
+		desc = fmt.Sprintf("InvalidRegex(%v)", pattern)
+	}
+	m := registry.FunMatcher(desc, func(m []any, actual string) bool {
+		return err == nil && re.MatchString(actual)
+	})
+	registry.AddMatcher(m)
+	return ""
+}
+
+// Substring returns matcher that matches any string that contains specified substring.
+// Example usage:
+//
+//	WhenSingle(myMock.MyMethod(Substring("foo"))).ThenReturn("bar")
+func Substring(value string) string {
+	desc := fmt.Sprintf("Substring(%v)", value)
+	m := registry.FunMatcher(desc, func(m []any, actual string) bool {
+		return strings.Contains(actual, value)
+	})
+	registry.AddMatcher(m)
+	return ""
+}
+
+// SliceLen returns matcher that matches any slice of length n.
+// Example usage:
+//
+//	WhenSingle(myMock.MyMethod(SliceLen(10))).ThenReturn("bar")
+func SliceLen[T any](value int) []T {
+	desc := fmt.Sprintf("SliceLen(%v)", value)
+	m := registry.FunMatcher(desc, func(m []any, actual []T) bool {
+		return len(actual) == value
+	})
+	registry.AddMatcher(m)
+	var t []T
+	return t
+}
+
+// MapLen returns matcher that matches any map of length n.
+// Example usage:
+//
+//	WhenSingle(myMock.MyMethod(MapLen(10))).ThenReturn("bar")
+func MapLen[K comparable, V any](value int) map[K]V {
+	desc := fmt.Sprintf("MapLen(%v)", value)
+	m := registry.FunMatcher(desc, func(m []any, actual map[K]V) bool {
+		return len(actual) == value
+	})
+	registry.AddMatcher(m)
+	var t map[K]V
+	return t
+}
+
+// SliceContains returns matcher that matches any slice that contains specified values.
+// Example usage:
+//
+//	WhenSingle(myMock.MyMethod(SliceContains("foo", "bar"))).ThenReturn("baz")
+func SliceContains[T any](values ...T) []T {
+	desc := fmt.Sprintf("SliceContains(%v)", values)
+	m := registry.FunMatcher(desc, func(m []any, actual []T) bool {
+		amap := make(map[any]struct{})
+		for _, v := range actual {
+			amap[v] = struct{}{}
+		}
+		for _, v := range values {
+			_, ok := amap[v]
+			if !ok {
+				return false
+			}
+		}
+		return true
+	})
+	registry.AddMatcher(m)
+	var t []T
+	return t
+}
+
+// MapContains returns matcher that matches any map that contains specified keys.
+// Example usage:
+//
+//	WhenSingle(myMock.MyMethod(MapContains("foo", "bar"))).ThenReturn("baz")
+func MapContains[K comparable, V any](values ...K) map[K]V {
+	desc := fmt.Sprintf("MapContains(%v)", values)
+	m := registry.FunMatcher(desc, func(m []any, actual map[K]V) bool {
+		for _, v := range values {
+			_, ok := actual[v]
+			if !ok {
+				return false
+			}
+		}
+		return true
+	})
+	registry.AddMatcher(m)
+	var t map[K]V
+	return t
+}
+
+// SliceEqualUnordered returns matcher that matches slice with same values without taking order of elements into account.
+// Example usage:
+//
+//	WhenSingle(myMock.MyMethod(SliceEqualUnordered([]int{2,1}))).ThenReturn("baz")
+func SliceEqualUnordered[T any](values []T) []T {
+	desc := fmt.Sprintf("EqualUnordered(%v)", values)
+	vmap := make(map[any]struct{})
+	for _, v := range values {
+		vmap[v] = struct{}{}
+	}
+	m := registry.FunMatcher(desc, func(m []any, actual []T) bool {
+		if len(vmap) != len(values) {
+			return false
+		}
+		if len(actual) != len(values) {
+			return false
+		}
+		for _, v := range actual {
+			_, ok := vmap[v]
+			if !ok {
+				return false
+			}
+		}
+		return true
+	})
+	registry.AddMatcher(m)
+	var t []T
+	return t
 }
 
 // Exact returns a matcher that matches values of type T that are equal to the provided value.
