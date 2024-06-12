@@ -3,6 +3,7 @@ package verify
 import (
 	"testing"
 
+	"github.com/ovechkin-dm/mockio/mockopts"
 	"github.com/ovechkin-dm/mockio/tests/common"
 
 	. "github.com/ovechkin-dm/mockio/mock"
@@ -167,4 +168,22 @@ func TestPostponedVerifyNotFailingImmediately(t *testing.T) {
 	r.TriggerCleanup()
 	r.AssertError()
 	r.AssertEqual(r.GetErrorCount(), 1)
+}
+
+func TestStrictVerifyUnwantedInvocation(t *testing.T) {
+	r := common.NewMockReporter(t)
+	SetUp(r, mockopts.StrictVerify())
+	m := Mock[iface]()
+	m.Foo(12)
+	r.TriggerCleanup()
+	r.AssertError()
+}
+
+func TestStrictVerifyUnverifiedStub(t *testing.T) {
+	r := common.NewMockReporter(t)
+	SetUp(r, mockopts.StrictVerify())
+	m := Mock[iface]()
+	WhenSingle(m.Foo(12)).ThenReturn(11)
+	r.TriggerCleanup()
+	r.AssertError()
 }

@@ -44,6 +44,7 @@ type methodMatch struct {
 	lastAnswer  *answerWrapper
 	invocations int64
 	verifiers   []matchers.MethodVerifier
+	stackTrace  *StackTrace
 }
 
 func (m *methodMatch) popAnswer() *answerWrapper {

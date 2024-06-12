@@ -124,6 +124,7 @@ func (h *invocationHandler) When() matchers.ReturnerAll {
 		matchers:   argMatchers,
 		unanswered: make([]*answerWrapper, 0),
 		answered:   make([]*answerWrapper, 0),
+		stackTrace: NewStackTrace(),
 	}
 	rec.methodMatches = append(rec.methodMatches, m)
 	return NewReturnerAll(h.ctx, m)
@@ -190,6 +191,7 @@ func (h *invocationHandler) DoVerifyMethod(call *MethodCall) []reflect.Value {
 			argMatchers,
 			h.methods[call.Method.Name],
 			err,
+			nil,
 		)
 	}
 	for i, m := range argMatchers {
@@ -264,8 +266,8 @@ func (h *invocationHandler) validateReturnValues(result []any, method reflect.Me
 	return true
 }
 
-func (h *invocationHandler) VerifyNoMoreInteractions() {
-	h.PostponedVerify(true)
+func (h *invocationHandler) VerifyNoMoreInteractions(tearDown bool) {
+	h.PostponedVerify(tearDown)
 	unexpected := make([]*MethodCall, 0)
 	for _, rec := range h.methods {
 		for _, call := range rec.calls {
@@ -277,8 +279,9 @@ func (h *invocationHandler) VerifyNoMoreInteractions() {
 			}
 		}
 	}
+	reportFatal := !tearDown
 	if len(unexpected) > 0 {
-		h.ctx.reporter.ReportNoMoreInteractionsExpected(h.instanceType, unexpected)
+		h.ctx.reporter.ReportNoMoreInteractionsExpected(reportFatal, h.instanceType, unexpected)
 	}
 }
 
@@ -298,7 +301,7 @@ func (h *invocationHandler) refineValues(method *dyno.Method, values []reflect.V
 	return values
 }
 
-func (h *invocationHandler) PostponedVerify(fatal bool) {
+func (h *invocationHandler) PostponedVerify(tearDown bool) {
 	for _, rec := range h.methods {
 		for _, match := range rec.methodMatches {
 			if len(match.verifiers) == 0 {
@@ -327,14 +330,19 @@ func (h *invocationHandler) PostponedVerify(fatal bool) {
 			for _, v := range match.verifiers {
 				err := v.Verify(verifyData)
 				if err != nil {
+					var stackTrace *StackTrace
+					if tearDown {
+						stackTrace = match.stackTrace
+					}
 					h.ctx.reporter.ReportVerifyMethodError(
-						fatal,
+						!tearDown,
 						h.instanceType,
 						rec.methodType,
 						matchedInvocations,
 						match.matchers,
 						rec,
 						err,
+						stackTrace,
 					)
 				}
 			}
@@ -343,5 +351,14 @@ func (h *invocationHandler) PostponedVerify(fatal bool) {
 }
 
 func (h *invocationHandler) TearDown() {
-	h.PostponedVerify(false)
+	if h.ctx.cfg.StrictVerify {
+		for _, m := range h.methods {
+			for _, mm := range m.methodMatches {
+				mm.verifiers = append(mm.verifiers, matchers.AtLeastOnce())
+			}
+		}
+		h.VerifyNoMoreInteractions(true)
+	} else {
+		h.PostponedVerify(true)
+	}
 }
