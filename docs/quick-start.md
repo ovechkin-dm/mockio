@@ -31,6 +31,7 @@ Now we can create a mock for the `Greeter` interface, and test it's method `Gree
 
 ```go
 func TestGreet(t *testing.T) {
+    SetUp(t)
     m := Mock[Greeter]()
     WhenSingle(m.Greet("John")).ThenReturn("Hello, John!")
     if m.Greet("John") != "Hello, John!" {
@@ -55,12 +56,14 @@ type Greeter interface {
 }
 
 func TestGreet(t *testing.T) {
+	SetUp(t)
 	m := Mock[Greeter]()
 	WhenSingle(m.Greet("John")).ThenReturn("Hello, John!")
 	if m.Greet("John") != "Hello, John!" {
 		t.Fail()
 	}
 }
+
 ```
 
 That's it! You have created a mock for the `Greeter` interface without any code generation.

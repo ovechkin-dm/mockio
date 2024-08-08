@@ -1,4 +1,4 @@
 github.com/ovechkin-dm/go-dyno v0.2.0 h1:KAh6OFiXYWZZpItdBJDILiklmmov0Txk+O8GFqH785g=
 github.com/ovechkin-dm/go-dyno v0.2.0/go.mod h1:CcJNuo7AbePMoRNpM3i1jC1Rp9kHEMyWozNdWzR+0ys=
-github.com/petermattis/goid v0.0.0-20230904192822-1876fd5063bc h1:8bQZVK1X6BJR/6nYUPxQEP+ReTsceJTKizeuwjWOPUA=
-github.com/petermattis/goid v0.0.0-20230904192822-1876fd5063bc/go.mod h1:pxMtw7cyUw6B2bRH0ZBANSPg+AoSud1I1iyJHI69jH4=
+github.com/petermattis/goid v0.0.0-20240716203034-badd1c0974d6 h1:DUDJI8T/9NcGbbL+AWk6vIYlmQ8ZBS8LZqVre6zbkPQ=
+github.com/petermattis/goid v0.0.0-20240716203034-badd1c0974d6/go.mod h1:pxMtw7cyUw6B2bRH0ZBANSPg+AoSud1I1iyJHI69jH4=
