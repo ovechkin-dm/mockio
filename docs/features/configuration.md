@@ -18,7 +18,7 @@ func TestSimple(t *testing.T) {
 
 ```
 
-## StrictVerify()
+## StrictVerify
 **StrictVerify** adds extra checks on each test teardown. 
 It will fail the test if there are any unverified calls.
 It will also fail the test if there are any calls that were not expected.
@@ -84,7 +84,7 @@ func TestSimple(t *testing.T) {
 }
 ```
 
-## WithoutStackTrace()
+## WithoutStackTrace
 **WithoutStackTrace** option disables stack trace printing in case of test failure.
 
 Consider the following example:

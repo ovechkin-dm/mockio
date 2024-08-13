@@ -52,7 +52,6 @@ markdown_extensions:
 
 nav:
   - Home: index.md
-  - Quick start: quick-start.md
   - Features:
       - Configuration: features/configuration.md
       - Matchers: features/matchers.md
