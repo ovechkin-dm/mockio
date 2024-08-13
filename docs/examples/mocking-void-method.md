@@ -1,1 +1,0 @@
-# Mocking void function

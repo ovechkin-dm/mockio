@@ -53,19 +53,14 @@ markdown_extensions:
 nav:
   - Home: index.md
   - Features:
-      - Configuration: features/configuration.md
-      - Matchers: features/matchers.md
       - Method stubbing: features/method-stubbing.md
-      - Argument captors: features/captors.md
-      - Error reporting: features/error-reporting.md
+      - Matchers: features/matchers.md
       - Verification: features/verification.md
+      - Configuration: features/configuration.md
+      - Argument captors: features/captors.md
       - Parallel execution: features/parallel-execution.md
-      - Limitations: features/limitations.md
-  - Examples:
-      - Custom matcher: examples/custom-matcher.md
-      - Mock within a mock: examples/mock-within-mock.md
-      - Mocking void method: examples/mocking-void-method.md
-
+      - Error reporting: features/error-reporting.md
+  - Limitations: limitations.md
 
 extra_css:
   - stylesheets/extra.css
