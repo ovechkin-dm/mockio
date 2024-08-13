@@ -29,7 +29,7 @@ When(1)
 Output:
 ```
 At:
-	demo/error_reporting_test.go:22 +0xad
+	/demo/error_reporting_test.go:22 +0xad
 Cause:
 	When() requires an argument which has to be 'a method call on a mock'.
 	For example: When(mock.GetArticles()).ThenReturn(articles)
@@ -55,7 +55,7 @@ wg.Wait()
 Output:
 ```
 At:
-	demo/error_reporting_test.go:35 +0xc5
+	/demo/error_reporting_test.go:35 +0xc5
 Cause:
 	Argument passed to Verify() is {<nil> DynamicProxy[reporting.Foo] <nil>} and is not a mock, or a mock created in a different goroutine.
 	Make sure you place the parenthesis correctly.
@@ -74,7 +74,7 @@ Verify(100, Once())
 Output:
 ```
 At:
-	demo/error_reporting_test.go:46 +0x105
+	/demo/error_reporting_test.go:46 +0x105
 Cause:
 	Argument passed to Verify() is 100 and is not a mock, or a mock created in a different goroutine.
 	Make sure you place the parenthesis correctly.
@@ -93,12 +93,12 @@ When(mock.Baz(AnyInt(), AnyInt(), 10)).ThenReturn(10)
 Output:
 ```
 At:
-	demo/error_reporting_test.go:55 +0x110
+	/demo/error_reporting_test.go:55 +0x110
 Cause:
 	Invalid use of matchers
 	3 expected, 2 recorded:
-		demo/error_reporting_test.go:55 +0xab
-		demo/error_reporting_test.go:55 +0xbc
+		/demo/error_reporting_test.go:55 +0xab
+		/demo/error_reporting_test.go:55 +0xbc
 	method:
 		Foo.Baz(int, int, int) int
 	expected:
@@ -123,12 +123,12 @@ Verify(mock, Once()).Baz(AnyInt(), AnyInt(), Exact(10))
 Output:
 ```
 At:
-	demo/error_reporting_test.go:88 +0x262
+	/demo/error_reporting_test.go:88 +0x262
 Cause:
 	expected num method calls: 1, got : 0
 		Foo.Baz(Any[int], Any[int], Exact(10))
 	However, there were other interactions with this method:
-		Foo.Baz(10, 10, 11) at demo/error_reporting_test.go:87 +0x193
+		Foo.Baz(10, 10, 11) at /demo/error_reporting_test.go:87 +0x193
 ```
 
 ### Number of method calls
@@ -144,12 +144,12 @@ Verify(mock, Times(20)).Baz(AnyInt(), AnyInt(), AnyInt())
 Output:
 ```
 At:
-	demo/error_reporting_test.go:121 +0x25a
+	/demo/error_reporting_test.go:121 +0x25a
 Cause:
 	expected num method calls: 20, got : 1
 		Foo.Baz(Any[int], Any[int], Any[int])
 	Invocations:
-		demo/error_reporting_test.go:120 +0x191
+		/demo/error_reporting_test.go:120 +0x191
 ```
 
 ### Empty captor
@@ -164,7 +164,7 @@ _ = c.Last()
 Output:
 ```
 At:
-	demo/error_reporting_test.go:130 +0x92
+	/demo/error_reporting_test.go:130 +0x92
 Cause:
 	no values were captured for captor
 ```
@@ -180,7 +180,7 @@ When(mock.Baz(AnyInt(), AnyInt(), AnyInt())).ThenReturn(10, 20)
 Output:
 ```
 At:
-	demo/error_reporting_test.go:140 +0x1a7
+	/demo/error_reporting_test.go:140 +0x1a7
 Cause:
 	invalid return values
 expected:
@@ -203,11 +203,11 @@ VerifyNoMoreInteractions(mock)
 Output:
 ```
 At:
-	demo/mockio/registry/registry.go:130 +0x45
+	/demo/mockio/registry/registry.go:130 +0x45
 Cause:
 	No more interactions expected, but unverified interactions found:
-		Foo.Baz(10, 10, 10) at demo/error_reporting_test.go:150 +0x1a8
-		Foo.Baz(10, 20, 10) at demo/error_reporting_test.go:151 +0x1c6
+		Foo.Baz(10, 10, 10) at /demo/error_reporting_test.go:150 +0x1a8
+		Foo.Baz(10, 20, 10) at /demo/error_reporting_test.go:151 +0x1c6
 ```
 
 ### Unexpected matcher declaration
@@ -222,11 +222,11 @@ Verify(mock, Once()).Baz(10, 10, 10)
 
 ```go
 At:
-	demo/error_reporting_test.go:175 +0x23f
+	/demo/error_reporting_test.go:175 +0x23f
 Cause:
 	Unexpected matchers declaration.
-		at demo/error_reporting_test.go:174 +0x185
-		at demo/error_reporting_test.go:174 +0x196
-		at demo/error_reporting_test.go:174 +0x1a7
+		at /demo/error_reporting_test.go:174 +0x185
+		at /demo/error_reporting_test.go:174 +0x196
+		at /demo/error_reporting_test.go:174 +0x1a7
 	Matchers can only be used inside When() method call.
 ```
