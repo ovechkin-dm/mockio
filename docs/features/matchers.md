@@ -2,8 +2,6 @@
 MockIO library provides a lot of ways to match arguments of the method calls.
 Matchers are used to define the expected arguments of the method calls.
 
-## Test template
-
 We will use the following interface for the examples:
 ```go
 package main
@@ -26,7 +24,7 @@ func TestSimple(t *testing.T) {
 }
 ```
 
-## Any\[T]()
+## Any
 The `Any[T]()` matcher matches any value of the type `T`.
 
 This test will succeed:
@@ -41,7 +39,7 @@ func TestSimple(t *testing.T) {
 }
 ```
 
-## AnyInt()
+## AnyInt
 The `AnyInt()` matcher matches any integer value. 
 
 This test will succeed:
@@ -67,7 +65,7 @@ func TestSimple(t *testing.T) {
 }
 ```
 
-## AnyString()
+## AnyString
 The `AnyString()` matcher matches any string value.
 
 This test will succeed:
@@ -93,7 +91,7 @@ func TestSimple(t *testing.T) {
 }
 ```
 
-## AnyInterface()
+## AnyInterface
 The `AnyInterface()` matcher matches any value of any type.
 
 This test will succeed:
@@ -101,7 +99,7 @@ This test will succeed:
 func TestSimple(t *testing.T) {
     SetUp(t)
     greeter := Mock[Greeter]()
-    When(greeter.Greet(Any[interface{}]())).ThenReturn("hello world")
+    When(greeter.Greet(AnyInterface())).ThenReturn("hello world")
     if greeter.Greet("John") != "hello world" {
         t.Error("Expected 'hello world'")
     }
@@ -113,14 +111,14 @@ This test will also succeed:
 func TestSimple(t *testing.T) {
     SetUp(t)
     greeter := Mock[Greeter]()
-    When(greeter.Greet(Any[interface{}]())).ThenReturn("hello world")
+    When(greeter.Greet(AnyInterface())).ThenReturn("hello world")
     if greeter.Greet(10) != "hello world" {
         t.Error("Expected 'hello world'")
     }
 }
 ```
 
-## AnyContext()
+## AnyContext
 The `AnyContext()` matcher matches any context.Context value.
 
 This test will succeed:
@@ -128,14 +126,14 @@ This test will succeed:
 func TestSimple(t *testing.T) {
     SetUp(t)
     greeter := Mock[Greeter]()
-    When(greeter.Greet(Any[context.Context]())).ThenReturn("hello world")
+    When(greeter.Greet(AnyContext())).ThenReturn("hello world")
     if greeter.Greet(context.Background()) != "hello world" {
         t.Error("Expected 'hello world'")
     }
 }
 ```
 
-## AnyOfType\[T](t T)
+## AnyOfType
 The `AnyOfType[T](t T)` matcher matches any value of the type `T` or its subtype. It is useful for type inference.
 
 This test will succeed:
@@ -151,7 +149,7 @@ func TestSimple(t *testing.T) {
 ```
 Note that when we are using AnyOfType, we don't need to specify the type explicitly.
 
-##  Nil\[T\]()
+##  Nil
 The `Nil[T]()` matcher matches any nil value of the type `T`.
 
 This test will succeed:
@@ -166,7 +164,7 @@ func TestSimple(t *testing.T) {
 }
 ```
 
-## NotNil\[T\]()
+## NotNil
 The `NotNil[T]()` matcher matches any non-nil value of the type `T`.
 
 This test will succeed:
@@ -193,7 +191,7 @@ func TestSimple(t *testing.T) {
 }
 ```
 
-## Regex(pattern string)
+## Regex
 The `Regex(pattern string)` matcher matches any string that matches the regular expression `pattern`.
 
 This test will succeed:
@@ -208,7 +206,7 @@ func TestSimple(t *testing.T) {
 }
 ```
 
-## Substring(sub string)
+## Substring
 The `Substring(sub string)` matcher matches any string that contains the substring `sub`.
 
 This test will succeed:
@@ -223,7 +221,7 @@ func TestSimple(t *testing.T) {
 }
 ```
 
-## SliceLen(length int)
+## SliceLen
 The `SliceLen(length int)` matcher matches any slice with the length `length`.
 
 This test will succeed:
@@ -250,7 +248,7 @@ func TestSimple(t *testing.T) {
 }
 ```
 
-## MapLen(length int)
+## MapLen
 The `MapLen(length int)` matcher matches any map with the length `length`.
 
 This test will succeed:
@@ -277,7 +275,7 @@ func TestSimple(t *testing.T) {
 }
 ```
 
-## SliceContains\[T](values ...T)
+## SliceContains
 The `SliceContains[T any](values ...T)` matcher matches any slice that contains all the values `values`.
 
 This test will succeed:
@@ -304,7 +302,7 @@ func TestSimple(t *testing.T) {
 }
 ```
 
-## MapContains\[K comparable, V](keys ...K)
+## MapContains
 The `MapContains[K any, V any](keys ...K)` matcher matches any map that contains all the keys `keys`.
  
 This test will succeed:
@@ -331,7 +329,7 @@ func TestSimple(t *testing.T) {
 }
 ```
 
-## SliceEqualUnordered\[T](values \[]T)
+## SliceEqualUnordered
 
 The `SliceEqualUnordered[T any](values []T)` matcher matches any slice that contains the same elements as `values`, but in any order.
 
@@ -372,7 +370,7 @@ func TestSimple(t *testing.T) {
 	world1 := "world"
 	When(greeter.Greet(Exact(&world1))).ThenReturn("hello world")
 	if greeter.Greet(&world1) != "hello world" {
-		t.Error("Expected hello world")
+		t.Error("Expected 'hello world'")
 	}
 }
 ```
@@ -385,8 +383,79 @@ func TestSimple(t *testing.T) {
 	world1 := "world"
 	world2 := "world"
 	When(greeter.Greet(Exact(&world1))).ThenReturn("hello world")
-	if greeter.Greet(world2) != "hello world" {
-		t.Error("Expected hello world")
+	if greeter.Greet(&world2) != "hello world" {
+		t.Error("Expected 'hello world'")
 	}
 }
 ```
+
+## Equal
+
+The `Equal` matcher matches any value that is equal to the expected value. `Equal` uses `reflect.DeepEqual` to compare values.
+
+This test will succeed, because `reflect.DeepEqual` compares values by their content:
+```go
+func TestSimple(t *testing.T) {
+	SetUp(t)
+	greeter := Mock[Greeter]()
+	world1 := "world"
+	world2 := "world"
+	When(greeter.Greet(Equal(&world1))).ThenReturn("hello world")
+	if greeter.Greet(&world2) != "hello world" {
+		t.Error("Expected 'hello world'")
+	}
+}
+```
+
+## NotEqual
+
+The `NotEqual` matcher matches any value that is not equal to the expected value. `NotEqual` uses `reflect.DeepEqual` to compare values.
+
+This test will succeed:
+```go
+func TestSimple(t *testing.T) {
+    SetUp(t)
+    greeter := Mock[Greeter]()
+    When(greeter.Greet(NotEqual("John"))).ThenReturn("hello world")
+    if greeter.Greet("world") != "hello world" {
+        t.Error("Expected 'hello John'")
+    }
+}
+
+```
+
+## OneOf 
+
+The `OneOf` matcher matches any value that is equal to one of the expected values. `OneOf` uses `reflect.DeepEqual` to compare values.
+
+This test will succeed:
+```go
+func TestSimple(t *testing.T) {
+	SetUp(t)
+	greeter := Mock[Greeter]()
+	When(greeter.Greet(OneOf("John", "Jane"))).ThenReturn("hello John or Jane")
+	if greeter.Greet("Jane") != "hello John or Jane" {
+		t.Error("expected 'hello John or Jane'")
+	}
+}
+```
+## Custom matcher
+
+Here is an example of a custom matcher that matches odd numbers only:
+
+```go
+func TestSimple(t *testing.T) {
+	SetUp(t)
+	greeter := Mock[Greeter]()
+	odd := CreateMatcher[int]("odd", func(args []any, v int) bool {
+		return v%2 == 1
+	})
+	When(greeter.Greet(Match(odd))).ThenReturn("hello odd number")
+	if greeter.Greet(1) != "hello odd number" {
+		t.Error("expected ''hello odd number''")
+	}
+}
+```
+
+For more examples on custom matchers see `Examples` section.
+

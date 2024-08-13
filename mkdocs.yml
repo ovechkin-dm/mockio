@@ -11,18 +11,18 @@ theme:
   icon:
     logo: fontawesome/brands/golang
   palette:
-    - media: "(prefers-color-scheme: light)"
-      scheme: default
-      primary: purple
-      toggle:
-        icon: material/brightness-7
-        name: Switch to dark mode
     - media: "(prefers-color-scheme: dark)"
       scheme: slate
       primary: purple
       toggle:
         icon: material/brightness-4
         name: Switch to light mode
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: purple
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
   features:
     - content.code.annotate
     - content.code.copy
@@ -55,10 +55,9 @@ nav:
   - Quick start: quick-start.md
   - Features:
       - Configuration: features/configuration.md
-      - Method stubbing: features/method-stubbing.md
       - Matchers: features/matchers.md
+      - Method stubbing: features/method-stubbing.md
       - Argument captors: features/captors.md
-      - Answering: features/answering.md
       - Error reporting: features/error-reporting.md
       - Verification: features/verification.md
       - Parallel execution: features/parallel-execution.md
