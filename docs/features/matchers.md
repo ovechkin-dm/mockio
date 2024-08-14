@@ -20,7 +20,6 @@ func TestSimple(t *testing.T) {
 	greeter := Mock[Greeter]()
 	When(greeter.Greet("Jane")).ThenReturn("hello world")
 	greeter.Greet("John")
-	VerifyNoMoreInteractions(greeter)
 }
 ```
 

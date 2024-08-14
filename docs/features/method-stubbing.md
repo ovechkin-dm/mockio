@@ -16,18 +16,6 @@ When(mock.SomeMethod(AnyInt())).ThenReturn("some value")
 
 This is basic usage of method stubbing. But there are also some useful extensions to this API.
 
-## ThenReturn
-
-You can chain multiple `ThenReturn` calls to return different values on subsequent calls:
-
-```go
-When(mock.SomeMethod(AnyInt())).
-    ThenReturn("first value").
-    ThenReturn("second value")
-```
-
-Calling `SomeMethod` first time will return `"first value"`, second time `"second value"`, and so on.
-
 ## When
 
 `When` is a function that allows you to stub a method.
@@ -109,6 +97,18 @@ WhenSingle(mock.Bar(AnyInt())).ThenAnswer(func(args []any) string {
 
 When `Bar` method is called with argument `42`, it will return `"Hello, 42"`.
 
+## ThenReturn
+
+You can chain multiple `ThenReturn` calls to return different values on subsequent calls:
+
+```go
+When(mock.SomeMethod(AnyInt())).
+    ThenReturn("first value").
+    ThenReturn("second value")
+```
+
+Calling `SomeMethod` first time will return `"first value"`, second time `"second value"`, and so on.
+
 ## Implicit `Exact` matchers
 
 Consider following interface:
@@ -135,4 +135,3 @@ For example, this will not work:
 ```go
 When(mock.Bar(1, Exact(2))).ThenReturn("some value")
 ```
-
