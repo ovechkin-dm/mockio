@@ -1,4 +1,4 @@
-github.com/ovechkin-dm/go-dyno v0.2.1-0.20240822134124-cc512c3231c5 h1:daPQFGcevt5LA1z5tC+CF9dCeHMyesZFhe7wvFmTNxg=
-github.com/ovechkin-dm/go-dyno v0.2.1-0.20240822134124-cc512c3231c5/go.mod h1:CcJNuo7AbePMoRNpM3i1jC1Rp9kHEMyWozNdWzR+0ys=
-github.com/petermattis/goid v0.0.0-20230904192822-1876fd5063bc h1:8bQZVK1X6BJR/6nYUPxQEP+ReTsceJTKizeuwjWOPUA=
-github.com/petermattis/goid v0.0.0-20230904192822-1876fd5063bc/go.mod h1:pxMtw7cyUw6B2bRH0ZBANSPg+AoSud1I1iyJHI69jH4=
+github.com/ovechkin-dm/go-dyno v0.2.1-0.20240822135013-3086cdf03c3e h1:B3l3UQM8XA7D8BFpH5pQ/8yrdw65Ye6sU6bDQXr9r4s=
+github.com/ovechkin-dm/go-dyno v0.2.1-0.20240822135013-3086cdf03c3e/go.mod h1:CcJNuo7AbePMoRNpM3i1jC1Rp9kHEMyWozNdWzR+0ys=
+github.com/petermattis/goid v0.0.0-20240813172612-4fcff4a6cae7 h1:Dx7Ovyv/SFnMFw3fD4oEoeorXc6saIiQ23LrGLth0Gw=
+github.com/petermattis/goid v0.0.0-20240813172612-4fcff4a6cae7/go.mod h1:pxMtw7cyUw6B2bRH0ZBANSPg+AoSud1I1iyJHI69jH4=
