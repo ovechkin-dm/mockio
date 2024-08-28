@@ -72,7 +72,7 @@ extra_javascript:
 plugins:
   - glightbox
   - mike:
-      alias_type: symlink
+      alias_type: copy
       canonical_version: latest
   - open-in-new-tab
   - search
