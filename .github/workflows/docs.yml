@@ -1,0 +1,30 @@
+name: docs
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+permissions:
+  contents: write
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-python@v4
+        with:
+          python-version: 3.x
+      - uses: actions/cache@v2
+        with:
+          key: ${{ github.ref }}
+          path: .cache
+      - run: sudo apt-get install -y libcairo2-dev libfreetype6-dev libffi-dev libjpeg-dev libpng-dev libz-dev
+      - run: pip install -r docs/requirements.txt
+        env:
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
+      - name: Setup git
+        run: |
+          git config --global user.name mockio-actions
+          git config --global user.email mockio-actions@ovechkin-dm.github.io
+          git fetch origin gh-pages --depth=1
+      - name: Deploy docs
+        run: "mike deploy --push --update-aliases $(echo ${{ github.ref_name }} | cut -d'.' -f1-2 | xargs printf '%s.0' ) latest"
