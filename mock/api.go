@@ -286,6 +286,12 @@ func SliceEqualUnordered[T any](values []T) []T {
 func Exact[T comparable](value T) T {
 	desc := fmt.Sprintf("Exact(%v)", value)
 	m := registry.FunMatcher(desc, func(m []any, actual T) bool {
+		if !reflect.ValueOf(value).Comparable() {
+			return false
+		}
+		if !reflect.ValueOf(actual).Comparable() {
+			return false
+		}
 		return value == actual
 	})
 	registry.AddMatcher(m)
