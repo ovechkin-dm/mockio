@@ -374,8 +374,7 @@ func OneOf[T any](values ...T) T {
 	return t
 }
 
-// CreateMatcher returns a Matcher that matches values of type T using the provided Matcher implementation.
-// The provided Matcher implementation must implement the Matcher interface.
+// CreateMatcher returns a func that creates a custom matcher on invocation.
 func CreateMatcher[T any](description string, f func(allArgs []any, actual T) bool) func() T {
 	return func() T {
 		m := registry.FunMatcher[T](description, f)
