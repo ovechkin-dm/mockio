@@ -12,6 +12,10 @@ type Iface interface {
 	Test(i interface{}) bool
 }
 
+type Greeter interface {
+	Greet(name any) string
+}
+
 type St struct {
 	value int
 }
@@ -319,4 +323,12 @@ func TestUnexpectedUseOfMatchers(t *testing.T) {
 	m.Test(AnyString())
 	Verify(m, Once()).Test("test")
 	r.AssertErrorContains(r.GetError(), "Unexpected matchers declaration")
+}
+
+func TestExactNotComparable(t *testing.T) {
+	SetUp(t)
+	greeter := Mock[Greeter]()
+	var data any = []int{1, 2}
+	When(greeter.Greet(Exact(data))).ThenReturn("hello world")
+	greeter.Greet(data)
 }
