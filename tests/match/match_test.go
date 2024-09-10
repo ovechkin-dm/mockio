@@ -110,11 +110,11 @@ func TestNonEqualStruct(t *testing.T) {
 func TestCustomMatcher(t *testing.T) {
 	r := common.NewMockReporter(t)
 	SetUp(r)
-	evenm := CreateMatcher[int]("even", func(allArgs []any, actual int) bool {
+	even := CreateMatcher[int]("even", func(allArgs []any, actual int) bool {
 		return actual%2 == 0
 	})
 	m := Mock[Iface]()
-	WhenSingle(m.Test(Match(evenm))).ThenReturn(true)
+	WhenSingle(m.Test(even())).ThenReturn(true)
 	ret1 := m.Test(10)
 	ret2 := m.Test(11)
 	r.AssertEqual(ret1, true)
