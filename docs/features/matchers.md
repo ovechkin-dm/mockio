@@ -449,7 +449,7 @@ func TestSimple(t *testing.T) {
 	odd := CreateMatcher[int]("odd", func(args []any, v int) bool {
 		return v%2 == 1
 	})
-	When(greeter.Greet(Match(odd))).ThenReturn("hello odd number")
+	When(greeter.Greet(odd())).ThenReturn("hello odd number")
 	if greeter.Greet(1) != "hello odd number" {
 		t.Error("expected ''hello odd number''")
 	}
