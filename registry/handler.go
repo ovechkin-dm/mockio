@@ -225,7 +225,7 @@ func (h *invocationHandler) validateMatchers(call *MethodCall) bool {
 		ifaces := valueSliceToInterfaceSlice(call.Values)
 		for _, v := range ifaces {
 			cur := v
-			desc := fmt.Sprintf("Equal[%s]", reflect.TypeOf(v).String())
+			desc := fmt.Sprintf("Equal(%v)", v)
 			fm := FunMatcher(desc, func(call []any, a any) bool {
 				return reflect.DeepEqual(cur, a)
 			})
