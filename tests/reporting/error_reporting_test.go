@@ -196,3 +196,13 @@ func TestStackTraceEnabled(t *testing.T) {
 	r.AssertError()
 	r.PrintError()
 }
+
+func TestImplicitMatchersLogValue(t *testing.T) {
+	r := common.NewMockReporter(t)
+	SetUp(r)
+	mock := Mock[Foo]()
+	WhenSingle(mock.Baz(1, 2, 3)).ThenReturn(10).Verify(Once())
+	r.TriggerCleanup()
+	r.AssertError()
+	r.PrintError()
+}
