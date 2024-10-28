@@ -187,3 +187,9 @@ func TestStrictVerifyUnverifiedStub(t *testing.T) {
 	r.TriggerCleanup()
 	r.AssertError()
 }
+
+func TestVerifyNeverInReturner(t *testing.T) {
+	SetUp(t, mockopts.StrictVerify())
+	m := Mock[iface]()
+	WhenSingle(m.Foo(12)).Verify(Never())
+}
