@@ -352,7 +352,9 @@ func (h *invocationHandler) TearDown() {
 	if h.ctx.cfg.StrictVerify {
 		for _, m := range h.methods {
 			for _, mm := range m.methodMatches {
-				mm.verifiers = append(mm.verifiers, matchers.AtLeastOnce())
+				if len(mm.verifiers) == 0 {
+					mm.verifiers = append(mm.verifiers, matchers.AtLeastOnce())
+				}
 			}
 		}
 		h.VerifyNoMoreInteractions(true)
