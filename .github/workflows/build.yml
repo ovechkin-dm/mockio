@@ -24,9 +24,9 @@ jobs:
           go-version-file: go.mod
 
       - name: Lint
-        uses: golangci/golangci-lint-action@v4
+        uses: golangci/golangci-lint-action@v7
         with:
-          version: v1.56.2
+          version: v2.0.2
 
   CodeQL:
     needs: Lint
