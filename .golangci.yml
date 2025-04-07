@@ -1,27 +1,26 @@
+version: "2"
 run:
-  timeout: "10m"
+  timeout: 10m
 linters:
-  disable-all: true
+  default: none
   enable:
-    # Format
-    - "gofumpt" # Gofumpt checks whether code was gofumpt-ed. Which is a superset of gofmt that handles some cases that gofmt missed.
-    - "gci" # Gci controls Go package import order and makes it always deterministic.
-    - "asciicheck" # Checks that all code identifiers does not have non-ASCII symbols in the name.
-    - "bidichk" # Checks for dangerous unicode character sequences.
-    # Error
-    - "errcheck"
-    # Simplify
-    - "gosimple"
-    - "govet"
-    - "ineffassign"
-    - "staticcheck"
-    - "unused"
-linters-settings:
-  gci:
-    sections:
-      - standard
-      - default
-      - prefix(github.com/ovechkin-dm/mockio)
-      - blank
-      - dot
-      - alias
+    - asciicheck
+    - bidichk
+    - errcheck
+    - govet
+    - ineffassign
+    - staticcheck
+    - unused
+formatters:
+  enable:
+    - gci
+    - gofumpt
+  settings:
+    gci:
+      sections:
+        - standard
+        - default
+        - prefix(github.com/ovechkin-dm/mockio)
+        - blank
+        - dot
+        - alias
