@@ -4,9 +4,9 @@ import (
 	"errors"
 	"testing"
 
-	"github.com/ovechkin-dm/mockio/tests/common"
+	"github.com/ovechkin-dm/mockio/v2/tests/common"
 
-	. "github.com/ovechkin-dm/mockio/mock"
+	. "github.com/ovechkin-dm/mockio/v2/mock"
 )
 
 type WhenDoubleInterface interface {
@@ -16,8 +16,8 @@ type WhenDoubleInterface interface {
 
 func TestWhenDoubleRet(t *testing.T) {
 	r := common.NewMockReporter(t)
-	SetUp(r)
-	m := Mock[WhenDoubleInterface]()
+	ctrl := NewMockController(r)
+	m := Mock[WhenDoubleInterface](ctrl)
 	WhenDouble(m.Foo(Any[int]())).ThenReturn(42, nil)
 	ret, _ := m.Foo(10)
 	r.AssertEqual(42, ret)
@@ -25,8 +25,8 @@ func TestWhenDoubleRet(t *testing.T) {
 
 func TestWhenDoubleAnswer(t *testing.T) {
 	r := common.NewMockReporter(t)
-	SetUp(r)
-	m := Mock[WhenDoubleInterface]()
+	ctrl := NewMockController(r)
+	m := Mock[WhenDoubleInterface](ctrl)
 	WhenDouble(m.Foo(Any[int]())).ThenAnswer(func(args []any) (int, error) {
 		return 42, nil
 	})
@@ -36,8 +36,8 @@ func TestWhenDoubleAnswer(t *testing.T) {
 
 func TestWhenDoubleAnswerWithArgs(t *testing.T) {
 	r := common.NewMockReporter(t)
-	SetUp(r)
-	m := Mock[WhenDoubleInterface]()
+	ctrl := NewMockController(r)
+	m := Mock[WhenDoubleInterface](ctrl)
 	WhenDouble(m.Foo(Any[int]())).ThenAnswer(func(args []any) (int, error) {
 		return args[0].(int) + 1, nil
 	})
@@ -47,8 +47,8 @@ func TestWhenDoubleAnswerWithArgs(t *testing.T) {
 
 func TestWhenDoubleMultiAnswer(t *testing.T) {
 	r := common.NewMockReporter(t)
-	SetUp(r)
-	m := Mock[WhenDoubleInterface]()
+	ctrl := NewMockController(r)
+	m := Mock[WhenDoubleInterface](ctrl)
 	WhenDouble(m.Foo(Any[int]())).
 		ThenAnswer(func(args []any) (int, error) {
 			return args[0].(int) + 1, nil
@@ -64,8 +64,8 @@ func TestWhenDoubleMultiAnswer(t *testing.T) {
 
 func TestWhenDoubleMultiReturn(t *testing.T) {
 	r := common.NewMockReporter(t)
-	SetUp(r)
-	m := Mock[WhenDoubleInterface]()
+	ctrl := NewMockController(r)
+	m := Mock[WhenDoubleInterface](ctrl)
 	WhenDouble(m.Foo(Any[int]())).
 		ThenReturn(10, nil).
 		ThenReturn(11, nil)
@@ -77,8 +77,8 @@ func TestWhenDoubleMultiReturn(t *testing.T) {
 
 func TestWhenDoubleAnswerAndReturn(t *testing.T) {
 	r := common.NewMockReporter(t)
-	SetUp(r)
-	m := Mock[WhenDoubleInterface]()
+	ctrl := NewMockController(r)
+	m := Mock[WhenDoubleInterface](ctrl)
 	WhenDouble(m.Foo(Any[int]())).
 		ThenReturn(10, nil).
 		ThenAnswer(func(args []any) (int, error) {
@@ -95,8 +95,8 @@ func TestWhenDoubleAnswerAndReturn(t *testing.T) {
 
 func TestWhenDoubleReturnError(t *testing.T) {
 	r := common.NewMockReporter(t)
-	SetUp(r)
-	m := Mock[WhenDoubleInterface]()
+	ctrl := NewMockController(r)
+	m := Mock[WhenDoubleInterface](ctrl)
 	WhenDouble(m.Foo(Any[int]())).
 		ThenReturn(1, errors.New("err"))
 	ret, err := m.Foo(12)
@@ -106,8 +106,8 @@ func TestWhenDoubleReturnError(t *testing.T) {
 
 func TestWhenDoubleAnswerError(t *testing.T) {
 	r := common.NewMockReporter(t)
-	SetUp(r)
-	m := Mock[WhenDoubleInterface]()
+	ctrl := NewMockController(r)
+	m := Mock[WhenDoubleInterface](ctrl)
 	WhenDouble(m.Foo(Any[int]())).
 		ThenAnswer(func(args []any) (int, error) {
 			return 0, errors.New("err")

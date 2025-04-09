@@ -1,7 +1,7 @@
 package registry
 
 import (
-	"github.com/ovechkin-dm/mockio/matchers"
+	"github.com/ovechkin-dm/mockio/v2/matchers"
 )
 
 func ToReturnerSingle[T any](retAll matchers.ReturnerAll) matchers.ReturnerSingle[T] {

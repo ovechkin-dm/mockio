@@ -5,8 +5,8 @@ import (
 	"reflect"
 	"strings"
 
-	"github.com/ovechkin-dm/mockio/config"
-	"github.com/ovechkin-dm/mockio/matchers"
+	"github.com/ovechkin-dm/mockio/v2/config"
+	"github.com/ovechkin-dm/mockio/v2/matchers"
 )
 
 type panicReporter struct{}

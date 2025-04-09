@@ -4,9 +4,9 @@ import (
 	"errors"
 	"testing"
 
-	"github.com/ovechkin-dm/mockio/tests/common"
+	"github.com/ovechkin-dm/mockio/v2/tests/common"
 
-	. "github.com/ovechkin-dm/mockio/mock"
+	. "github.com/ovechkin-dm/mockio/v2/mock"
 )
 
 type ByteArrInterface interface {
@@ -46,9 +46,9 @@ type PrivateIface interface {
 
 func TestMockWithMockedArg(t *testing.T) {
 	r := common.NewMockReporter(t)
-	SetUp(r)
-	callingMock := Mock[CallingIface]()
-	otherMock := Mock[OtherIface]()
+	ctrl := NewMockController(r)
+	callingMock := Mock[CallingIface](ctrl)
+	otherMock := Mock[OtherIface](ctrl)
 	WhenSingle(callingMock.GetMocked(Exact(otherMock))).ThenReturn(otherMock)
 	res := callingMock.GetMocked(otherMock)
 	Verify(callingMock, Times(1)).GetMocked(Exact(otherMock))
@@ -59,8 +59,8 @@ func TestMockWithMockedArg(t *testing.T) {
 
 func TestByteArrayArgs(t *testing.T) {
 	r := common.NewMockReporter(t)
-	SetUp(r)
-	myMock := Mock[ByteArrInterface]()
+	ctrl := NewMockController(r)
+	myMock := Mock[ByteArrInterface](ctrl)
 	myBytes := [16]byte{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16}
 	WhenSingle(myMock.DoSomething(myBytes)).ThenReturn("test")
 	result := myMock.DoSomething(myBytes)
@@ -69,8 +69,8 @@ func TestByteArrayArgs(t *testing.T) {
 
 func TestNilArgs(t *testing.T) {
 	r := common.NewMockReporter(t)
-	SetUp(r)
-	myMock := Mock[SingleArgIface]()
+	ctrl := NewMockController(r)
+	myMock := Mock[SingleArgIface](ctrl)
 	WhenSingle(myMock.SingleArgMethod(Any[OtherIface]())).ThenReturn(errors.New("test"))
 	result := myMock.SingleArgMethod(nil)
 	r.AssertEqual(result.Error(), "test")
@@ -78,8 +78,8 @@ func TestNilArgs(t *testing.T) {
 
 func TestMultiMethodOrder(t *testing.T) {
 	r := common.NewMockReporter(t)
-	SetUp(r)
-	myMock := Mock[MultiMethod]()
+	ctrl := NewMockController(r)
+	myMock := Mock[MultiMethod](ctrl)
 	WhenSingle(myMock.One(1)).ThenReturn(1)
 	WhenSingle(myMock.Two(2)).ThenReturn(2)
 	WhenSingle(myMock.Three(3)).ThenReturn(3)
@@ -92,8 +92,8 @@ func TestMultiMethodOrder(t *testing.T) {
 
 func TestMockSimpleCasting(t *testing.T) {
 	r := common.NewMockReporter(t)
-	SetUp(r)
-	myMock := Mock[OtherIface]()
+	ctrl := NewMockController(r)
+	myMock := Mock[OtherIface](ctrl)
 	WhenSingle(myMock.SomeMethod()).ThenReturn(true)
 	var casted any = myMock
 	source := casted.(OtherIface)
@@ -103,8 +103,8 @@ func TestMockSimpleCasting(t *testing.T) {
 
 func TestMockCasting(t *testing.T) {
 	r := common.NewMockReporter(t)
-	SetUp(r)
-	myMock := Mock[ChildIface]()
+	ctrl := NewMockController(r)
+	myMock := Mock[ChildIface](ctrl)
 	WhenSingle(myMock.Foo(1)).ThenReturn(1)
 	WhenSingle(myMock.Bar(1)).ThenReturn(2)
 	var casted any = myMock
@@ -115,8 +115,8 @@ func TestMockCasting(t *testing.T) {
 
 func TestMockPrivate(t *testing.T) {
 	r := common.NewMockReporter(t)
-	SetUp(r)
-	myMock := Mock[PrivateIface]()
+	ctrl := NewMockController(r)
+	myMock := Mock[PrivateIface](ctrl)
 	WhenSingle(myMock.privateMethod()).ThenReturn(true)
 	var casted any = myMock
 	source := casted.(PrivateIface)

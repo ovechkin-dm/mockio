@@ -10,7 +10,7 @@ import (
 const (
 	PackageName     = "github.com/ovechkin-dm/mockio"
 	DynoPackageName = "github.com/ovechkin-dm/go-dyno"
-	TestPackageName = "github.com/ovechkin-dm/mockio/tests"
+	TestPackageName = "github.com/ovechkin-dm/mockio/v2/tests"
 	DebugPackage    = "runtime/debug.Stack()"
 	GOIDPackageName = "github.com/petermattis/goid"
 )

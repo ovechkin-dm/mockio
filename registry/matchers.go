@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"reflect"
 
-	"github.com/ovechkin-dm/mockio/matchers"
+	"github.com/ovechkin-dm/mockio/v2/matchers"
 )
 
 func AnyMatcher[T any]() matchers.Matcher[T] {
