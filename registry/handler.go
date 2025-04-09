@@ -14,7 +14,7 @@ type invocationHandler struct {
 	instanceType reflect.Type
 	lock         sync.Mutex
 	controller   *matchers.MockController
-	reporter 	 *EnrichedReporter
+	reporter     *EnrichedReporter
 }
 
 func (h *invocationHandler) Handle(method reflect.Method, values []reflect.Value) []reflect.Value {
@@ -35,7 +35,7 @@ func (h *invocationHandler) Handle(method reflect.Method, values []reflect.Value
 
 func (h *invocationHandler) DoAnswer(c *MethodCall) []reflect.Value {
 	rec := h.methods[c.Method.Name]
-	h.ctx.getState().whenHandler = h	
+	h.ctx.getState().whenHandler = h
 	h.ctx.getState().whenCall = c
 	var matched bool
 	for _, mm := range rec.methodMatches {
@@ -362,9 +362,9 @@ func (h *invocationHandler) TearDown() {
 }
 
 func newInvocationHandler(
-	ctx *mockContext, 
-	methods map[string]*methodRecorder, 
-	instanceType reflect.Type, 
+	ctx *mockContext,
+	methods map[string]*methodRecorder,
+	instanceType reflect.Type,
 	controller *matchers.MockController,
 ) *invocationHandler {
 	handler := &invocationHandler{
@@ -374,6 +374,6 @@ func newInvocationHandler(
 		lock:         sync.Mutex{},
 		controller:   controller,
 		reporter:     newEnrichedReporter(controller.Reporter, controller.Config),
-	}	
+	}
 	return handler
 }

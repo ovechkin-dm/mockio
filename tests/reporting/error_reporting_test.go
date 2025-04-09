@@ -16,13 +16,13 @@ type Foo interface {
 	VarArgs(a string, b ...int) int
 }
 
-func TestReportIncorrectWhenUsage(t *testing.T) {	
+func TestReportIncorrectWhenUsage(t *testing.T) {
 	defer func() {
 		if err := recover(); err == nil {
 			t.Errorf("Expected panic but got none")
 		}
 	}()
-	When(1)	
+	When(1)
 }
 
 func TestVerifyFromDifferentGoroutine(t *testing.T) {
@@ -31,7 +31,7 @@ func TestVerifyFromDifferentGoroutine(t *testing.T) {
 	mock := Mock[Foo](ctrl)
 	wg := sync.WaitGroup{}
 	wg.Add(1)
-	go func() {		
+	go func() {
 		Verify(mock, Once())
 		wg.Done()
 	}()
@@ -39,7 +39,7 @@ func TestVerifyFromDifferentGoroutine(t *testing.T) {
 	r.AssertNoError()
 }
 
-func TestReportVerifyNotAMock(t *testing.T) {	
+func TestReportVerifyNotAMock(t *testing.T) {
 	defer func() {
 		if err := recover(); err == nil {
 			t.Errorf("Expected panic but got none")
@@ -128,7 +128,7 @@ func TestEmptyCaptor(t *testing.T) {
 		if err := recover(); err == nil {
 			t.Errorf("Expected panic but got none")
 		}
-	}()	
+	}()
 	c := Captor[int]()
 	_ = c.Last()
 }

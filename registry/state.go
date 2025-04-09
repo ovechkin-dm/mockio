@@ -3,7 +3,8 @@ package registry
 import (
 	"reflect"
 	"sync"
-	"sync/atomic"	
+	"sync/atomic"
+
 	"github.com/ovechkin-dm/mockio/v2/matchers"
 	"github.com/ovechkin-dm/mockio/v2/threadlocal"
 )
@@ -19,7 +20,7 @@ type fiberState struct {
 }
 
 type mockContext struct {
-	state     threadlocal.ThreadLocal[*fiberState]	
+	state     threadlocal.ThreadLocal[*fiberState]
 	lock      sync.Mutex
 	routineID int64
 }
@@ -106,7 +107,7 @@ func newMockContext() *mockContext {
 				methodVerifier: nil,
 				verifyState:    false,
 			}
-		}),		
+		}),
 		lock:      sync.Mutex{},
 		routineID: threadlocal.GoId(),
 	}

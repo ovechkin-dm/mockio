@@ -16,9 +16,9 @@ type capturedValue[T any] struct {
 }
 
 type captorImpl[T any] struct {
-	values []*capturedValue[T]
-	ctx    *mockContext
-	lock   sync.Mutex
+	values   []*capturedValue[T]
+	ctx      *mockContext
+	lock     sync.Mutex
 	reporter *EnrichedReporter
 }
 

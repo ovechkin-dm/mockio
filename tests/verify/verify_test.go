@@ -172,7 +172,7 @@ func TestPostponedVerifyNotFailingImmediately(t *testing.T) {
 
 func TestStrictVerifyUnwantedInvocation(t *testing.T) {
 	r := common.NewMockReporter(t)
-	ctrl := NewMockController(r, mockopts.StrictVerify())	
+	ctrl := NewMockController(r, mockopts.StrictVerify())
 	m := Mock[iface](ctrl)
 	m.Foo(12)
 	r.TriggerCleanup()
@@ -181,7 +181,7 @@ func TestStrictVerifyUnwantedInvocation(t *testing.T) {
 
 func TestStrictVerifyUnverifiedStub(t *testing.T) {
 	r := common.NewMockReporter(t)
-	ctrl := NewMockController(r, mockopts.StrictVerify())	
+	ctrl := NewMockController(r, mockopts.StrictVerify())
 	m := Mock[iface](ctrl)
 	WhenSingle(m.Foo(12)).ThenReturn(11)
 	r.TriggerCleanup()

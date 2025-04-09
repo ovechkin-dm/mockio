@@ -40,7 +40,7 @@ func (e *EnrichedReporter) StackTraceErrorf(s *StackTrace, fatal bool, format st
 		s = NewStackTrace()
 	}
 	result := fmt.Sprintf(format, args...)
-	var st string	
+	var st string
 	if e.cfg.PrintStackTrace {
 		st = fmt.Sprintf(`At:
 	%s

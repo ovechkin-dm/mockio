@@ -2,7 +2,6 @@ package matchers
 
 import "github.com/ovechkin-dm/mockio/v2/config"
 
-
 type MockController struct {
 	Reporter ErrorReporter
 	Config   *config.MockConfig
@@ -19,5 +18,5 @@ func NewMockController(reporter ErrorReporter, opts ...config.Option) *MockContr
 	return &MockController{
 		Reporter: reporter,
 		Config:   cfg,
-	}	
+	}
 }

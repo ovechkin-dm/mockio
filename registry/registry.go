@@ -7,12 +7,13 @@ import (
 
 	"github.com/ovechkin-dm/go-dyno/pkg/dyno"
 	"github.com/ovechkin-dm/go-dyno/pkg/dynoopts"
+
 	"github.com/ovechkin-dm/mockio/v2/config"
 	"github.com/ovechkin-dm/mockio/v2/matchers"
 	"github.com/ovechkin-dm/mockio/v2/threadlocal"
 )
 
-var instance = threadlocal.NewThreadLocal(newRegistry)	
+var instance = threadlocal.NewThreadLocal(newRegistry)
 
 type Registry struct {
 	mockContext *mockContext
@@ -25,9 +26,10 @@ func getInstance() *Registry {
 		v = newRegistry()
 		v.mockContext = newMockContext()
 		instance.Set(v)
-	}	
+	}
 	return v
 }
+
 func Mock[T any](ctrl *matchers.MockController) T {
 	handler := newHandler[T](getInstance().mockContext, ctrl)
 	ctrl.Reporter.Cleanup(handler.TearDown)
