@@ -5,14 +5,16 @@ import (
 	"reflect"
 	"sync"
 
-	"github.com/ovechkin-dm/mockio/matchers"
+	"github.com/ovechkin-dm/mockio/v2/matchers"
 )
 
 type invocationHandler struct {
 	ctx          *mockContext
 	methods      map[string]*methodRecorder
-	lock         sync.Mutex
 	instanceType reflect.Type
+	lock         sync.Mutex
+	controller   *matchers.MockController
+	reporter 	 *EnrichedReporter
 }
 
 func (h *invocationHandler) Handle(method reflect.Method, values []reflect.Value) []reflect.Value {
@@ -33,7 +35,7 @@ func (h *invocationHandler) Handle(method reflect.Method, values []reflect.Value
 
 func (h *invocationHandler) DoAnswer(c *MethodCall) []reflect.Value {
 	rec := h.methods[c.Method.Name]
-	h.ctx.getState().whenHandler = h
+	h.ctx.getState().whenHandler = h	
 	h.ctx.getState().whenCall = c
 	var matched bool
 	for _, mm := range rec.methodMatches {
@@ -67,7 +69,7 @@ func (h *invocationHandler) DoAnswer(c *MethodCall) []reflect.Value {
 			h.ctx.getState().whenMethodMatch = mm
 
 			if !h.validateReturnValues(retValues, c.Method) {
-				h.ctx.reporter.ReportInvalidReturnValues(h.instanceType, c.Method, retValues)
+				h.reporter.ReportInvalidReturnValues(h.instanceType, c.Method, retValues)
 				return createDefaultReturnValues(c.Method)
 			}
 
@@ -87,7 +89,7 @@ func (h *invocationHandler) When() matchers.ReturnerAll {
 	whenMethodMatch := h.ctx.getState().whenMethodMatch
 
 	if whenCall == nil {
-		h.ctx.reporter.ReportIncorrectWhenUsage()
+		h.reporter.ReportIncorrectWhenUsage()
 		return nil
 	}
 	whenCall.WhenCall = true
@@ -134,7 +136,7 @@ func (h *invocationHandler) VerifyMethod(verifier matchers.MethodVerifier) {
 	h.ctx.getState().verifyState = true
 	h.ctx.getState().methodVerifier = verifier
 	if len(h.ctx.getState().matchers) != 0 {
-		h.ctx.reporter.ReportUnexpectedMatcherDeclaration(h.ctx.getState().matchers)
+		h.reporter.ReportUnexpectedMatcherDeclaration(h.ctx.getState().matchers)
 	}
 }
 
@@ -181,7 +183,7 @@ func (h *invocationHandler) DoVerifyMethod(call *MethodCall) []reflect.Value {
 	err := h.ctx.getState().methodVerifier.Verify(verifyData)
 	h.ctx.getState().methodVerifier = nil
 	if err != nil {
-		h.ctx.reporter.ReportVerifyMethodError(
+		h.reporter.ReportVerifyMethodError(
 			true,
 			h.instanceType,
 			call.Method,
@@ -202,7 +204,7 @@ func (h *invocationHandler) DoVerifyMethod(call *MethodCall) []reflect.Value {
 	return createDefaultReturnValues(call.Method)
 }
 
-func newHandler[T any](holder *mockContext) *invocationHandler {
+func newHandler[T any](holder *mockContext, ctrl *matchers.MockController) *invocationHandler {
 	tp := reflect.TypeOf(new(T)).Elem()
 	recorders := make(map[string]*methodRecorder)
 	for i := 0; i < tp.NumMethod(); i++ {
@@ -212,11 +214,7 @@ func newHandler[T any](holder *mockContext) *invocationHandler {
 			methodType:    tp.Method(i),
 		}
 	}
-	return &invocationHandler{
-		ctx:          holder,
-		methods:      recorders,
-		instanceType: tp,
-	}
+	return newInvocationHandler(holder, recorders, tp, ctrl)
 }
 
 func (h *invocationHandler) validateMatchers(call *MethodCall) bool {
@@ -238,7 +236,7 @@ func (h *invocationHandler) validateMatchers(call *MethodCall) bool {
 		h.ctx.getState().matchers = argMatchers
 	}
 	if len(argMatchers) != len(call.Values) {
-		h.ctx.reporter.ReportInvalidUseOfMatchers(h.instanceType, call, argMatchers)
+		h.reporter.ReportInvalidUseOfMatchers(h.instanceType, call, argMatchers)
 		return false
 	}
 	return true
@@ -279,7 +277,7 @@ func (h *invocationHandler) VerifyNoMoreInteractions(tearDown bool) {
 	}
 	reportFatal := !tearDown
 	if len(unexpected) > 0 {
-		h.ctx.reporter.ReportNoMoreInteractionsExpected(reportFatal, h.instanceType, unexpected)
+		h.reporter.ReportNoMoreInteractionsExpected(reportFatal, h.instanceType, unexpected)
 	}
 }
 
@@ -332,7 +330,7 @@ func (h *invocationHandler) PostponedVerify(tearDown bool) {
 					if tearDown {
 						stackTrace = match.stackTrace
 					}
-					h.ctx.reporter.ReportVerifyMethodError(
+					h.reporter.ReportVerifyMethodError(
 						!tearDown,
 						h.instanceType,
 						rec.methodType,
@@ -349,7 +347,7 @@ func (h *invocationHandler) PostponedVerify(tearDown bool) {
 }
 
 func (h *invocationHandler) TearDown() {
-	if h.ctx.cfg.StrictVerify {
+	if h.controller.Config.StrictVerify {
 		for _, m := range h.methods {
 			for _, mm := range m.methodMatches {
 				if len(mm.verifiers) == 0 {
@@ -361,4 +359,21 @@ func (h *invocationHandler) TearDown() {
 	} else {
 		h.PostponedVerify(true)
 	}
+}
+
+func newInvocationHandler(
+	ctx *mockContext, 
+	methods map[string]*methodRecorder, 
+	instanceType reflect.Type, 
+	controller *matchers.MockController,
+) *invocationHandler {
+	handler := &invocationHandler{
+		ctx:          ctx,
+		methods:      methods,
+		instanceType: instanceType,
+		lock:         sync.Mutex{},
+		controller:   controller,
+		reporter:     newEnrichedReporter(controller.Reporter, controller.Config),
+	}	
+	return handler
 }

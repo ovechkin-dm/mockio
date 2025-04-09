@@ -3,10 +3,10 @@ package verify
 import (
 	"testing"
 
-	"github.com/ovechkin-dm/mockio/mockopts"
-	"github.com/ovechkin-dm/mockio/tests/common"
+	"github.com/ovechkin-dm/mockio/v2/mockopts"
+	"github.com/ovechkin-dm/mockio/v2/tests/common"
 
-	. "github.com/ovechkin-dm/mockio/mock"
+	. "github.com/ovechkin-dm/mockio/v2/mock"
 )
 
 type iface interface {
@@ -19,8 +19,8 @@ type ifaceMockArg interface {
 
 func TestVerifySimple(t *testing.T) {
 	r := common.NewMockReporter(t)
-	SetUp(r)
-	m := Mock[iface]()
+	ctrl := NewMockController(r)
+	m := Mock[iface](ctrl)
 	WhenSingle(m.Foo(Any[int]())).ThenReturn(10)
 	m.Foo(10)
 	Verify(m, Once()).Foo(10)
@@ -29,8 +29,8 @@ func TestVerifySimple(t *testing.T) {
 
 func TestVerifyAny(t *testing.T) {
 	r := common.NewMockReporter(t)
-	SetUp(r)
-	m := Mock[iface]()
+	ctrl := NewMockController(r)
+	m := Mock[iface](ctrl)
 	WhenSingle(m.Foo(Any[int]())).ThenReturn(10)
 	m.Foo(10)
 	Verify(m, Once()).Foo(Any[int]())
@@ -39,8 +39,8 @@ func TestVerifyAny(t *testing.T) {
 
 func TestVerifyMultipleAny(t *testing.T) {
 	r := common.NewMockReporter(t)
-	SetUp(r)
-	m := Mock[iface]()
+	ctrl := NewMockController(r)
+	m := Mock[iface](ctrl)
 	WhenSingle(m.Foo(Any[int]())).ThenReturn(10)
 	m.Foo(10)
 	m.Foo(11)
@@ -50,8 +50,8 @@ func TestVerifyMultipleAny(t *testing.T) {
 
 func TestVerifyNever(t *testing.T) {
 	r := common.NewMockReporter(t)
-	SetUp(r)
-	m := Mock[iface]()
+	ctrl := NewMockController(r)
+	m := Mock[iface](ctrl)
 	WhenSingle(m.Foo(Any[int]())).ThenReturn(10)
 	m.Foo(10)
 	m.Foo(11)
@@ -61,8 +61,8 @@ func TestVerifyNever(t *testing.T) {
 
 func TestVerifyNeverFails(t *testing.T) {
 	r := common.NewMockReporter(t)
-	SetUp(r)
-	m := Mock[iface]()
+	ctrl := NewMockController(r)
+	m := Mock[iface](ctrl)
 	WhenSingle(m.Foo(Any[int]())).ThenReturn(10)
 	m.Foo(10)
 	m.Foo(11)
@@ -72,8 +72,8 @@ func TestVerifyNeverFails(t *testing.T) {
 
 func TestNoMoreInteractionsFails(t *testing.T) {
 	r := common.NewMockReporter(t)
-	SetUp(r)
-	m := Mock[iface]()
+	ctrl := NewMockController(r)
+	m := Mock[iface](ctrl)
 	WhenSingle(m.Foo(Any[int]())).ThenReturn(10)
 	m.Foo(10)
 	VerifyNoMoreInteractions(m)
@@ -82,8 +82,8 @@ func TestNoMoreInteractionsFails(t *testing.T) {
 
 func TestNoMoreInteractionsSuccess(t *testing.T) {
 	r := common.NewMockReporter(t)
-	SetUp(r)
-	m := Mock[iface]()
+	ctrl := NewMockController(r)
+	m := Mock[iface](ctrl)
 	WhenSingle(m.Foo(Any[int]())).ThenReturn(10)
 	m.Foo(10)
 	Verify(m, Once()).Foo(10)
@@ -93,8 +93,8 @@ func TestNoMoreInteractionsSuccess(t *testing.T) {
 
 func TestNoMoreInteractionsComplexFail(t *testing.T) {
 	r := common.NewMockReporter(t)
-	SetUp(r)
-	m := Mock[iface]()
+	ctrl := NewMockController(r)
+	m := Mock[iface](ctrl)
 	WhenSingle(m.Foo(10)).ThenReturn(10)
 	WhenSingle(m.Foo(11)).ThenReturn(10)
 	m.Foo(10)
@@ -106,8 +106,8 @@ func TestNoMoreInteractionsComplexFail(t *testing.T) {
 
 func TestNoMoreInteractionsComplexSuccess(t *testing.T) {
 	r := common.NewMockReporter(t)
-	SetUp(r)
-	m := Mock[iface]()
+	ctrl := NewMockController(r)
+	m := Mock[iface](ctrl)
 	WhenSingle(m.Foo(10)).ThenReturn(10)
 	WhenSingle(m.Foo(11)).ThenReturn(10)
 	m.Foo(10)
@@ -120,8 +120,8 @@ func TestNoMoreInteractionsComplexSuccess(t *testing.T) {
 
 func TestVerifyInsideReturnerPass(t *testing.T) {
 	r := common.NewMockReporter(t)
-	SetUp(r)
-	m := Mock[iface]()
+	ctrl := NewMockController(r)
+	m := Mock[iface](ctrl)
 	WhenSingle(m.Foo(AnyInt())).ThenReturn(11).Verify(Once())
 	m.Foo(10)
 	r.TriggerCleanup()
@@ -130,8 +130,8 @@ func TestVerifyInsideReturnerPass(t *testing.T) {
 
 func TestVerifyInsideReturnerNoMoreInteractionsFail(t *testing.T) {
 	r := common.NewMockReporter(t)
-	SetUp(r)
-	m := Mock[iface]()
+	ctrl := NewMockController(r)
+	m := Mock[iface](ctrl)
 	WhenSingle(m.Foo(AnyInt())).ThenReturn(11).Verify(Once())
 	VerifyNoMoreInteractions(m)
 	r.AssertError()
@@ -139,8 +139,8 @@ func TestVerifyInsideReturnerNoMoreInteractionsFail(t *testing.T) {
 
 func TestVerifyInsideReturnerFail(t *testing.T) {
 	r := common.NewMockReporter(t)
-	SetUp(r)
-	m := Mock[iface]()
+	ctrl := NewMockController(r)
+	m := Mock[iface](ctrl)
 	WhenSingle(m.Foo(AnyInt())).ThenReturn(11).Verify(Once())
 	r.TriggerCleanup()
 	r.AssertError()
@@ -148,9 +148,9 @@ func TestVerifyInsideReturnerFail(t *testing.T) {
 
 func TestVerifyMockAsArg(t *testing.T) {
 	r := common.NewMockReporter(t)
-	SetUp(r)
-	m := Mock[iface]()
-	m2 := Mock[ifaceMockArg]()
+	ctrl := NewMockController(r)
+	m := Mock[iface](ctrl)
+	m2 := Mock[ifaceMockArg](ctrl)
 
 	m2.MockAsArg(m)
 
@@ -161,8 +161,8 @@ func TestVerifyMockAsArg(t *testing.T) {
 
 func TestPostponedVerifyNotFailingImmediately(t *testing.T) {
 	r := common.NewMockReporter(t)
-	SetUp(r)
-	m := Mock[iface]()
+	ctrl := NewMockController(r)
+	m := Mock[iface](ctrl)
 	WhenSingle(m.Foo(12)).ThenReturn(11).Verify(Once())
 	m.Foo(10)
 	r.TriggerCleanup()
@@ -172,8 +172,8 @@ func TestPostponedVerifyNotFailingImmediately(t *testing.T) {
 
 func TestStrictVerifyUnwantedInvocation(t *testing.T) {
 	r := common.NewMockReporter(t)
-	SetUp(r, mockopts.StrictVerify())
-	m := Mock[iface]()
+	ctrl := NewMockController(r, mockopts.StrictVerify())	
+	m := Mock[iface](ctrl)
 	m.Foo(12)
 	r.TriggerCleanup()
 	r.AssertError()
@@ -181,15 +181,15 @@ func TestStrictVerifyUnwantedInvocation(t *testing.T) {
 
 func TestStrictVerifyUnverifiedStub(t *testing.T) {
 	r := common.NewMockReporter(t)
-	SetUp(r, mockopts.StrictVerify())
-	m := Mock[iface]()
+	ctrl := NewMockController(r, mockopts.StrictVerify())	
+	m := Mock[iface](ctrl)
 	WhenSingle(m.Foo(12)).ThenReturn(11)
 	r.TriggerCleanup()
 	r.AssertError()
 }
 
 func TestVerifyNeverInReturner(t *testing.T) {
-	SetUp(t, mockopts.StrictVerify())
-	m := Mock[iface]()
+	ctrl := NewMockController(t, mockopts.StrictVerify())
+	m := Mock[iface](ctrl)
 	WhenSingle(m.Foo(12)).Verify(Never())
 }

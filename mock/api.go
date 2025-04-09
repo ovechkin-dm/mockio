@@ -7,35 +7,10 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/ovechkin-dm/mockio/config"
-	"github.com/ovechkin-dm/mockio/matchers"
-	"github.com/ovechkin-dm/mockio/registry"
+	"github.com/ovechkin-dm/mockio/v2/config"
+	"github.com/ovechkin-dm/mockio/v2/matchers"
+	"github.com/ovechkin-dm/mockio/v2/registry"
 )
-
-// SetUp initializes the mock library with the reporter.
-// Example usage:
-//
-//	package simple
-//
-//	import (
-//		. "github.com/ovechkin-dm/mockio/mock"
-//		"testing"
-//	)
-//
-//	type myInterface interface {
-//		Foo(a int) int
-//	}
-//
-//	func TestSimple(t *testing.T) {
-//		SetUp(t)
-//		m := Mock[myInterface]()
-//		WhenSingle(m.Foo(Any[int]())).ThenReturn(42)
-//		ret := m.Foo(10)
-//		r.AssertEqual(42, ret)
-//	}
-func SetUp(t matchers.ErrorReporter, opts ...config.Option) {
-	registry.SetUp(t, opts...)
-}
 
 // Mock returns a mock object that implements the specified interface or type.
 // The returned object can be used to set up mock behaviors for its methods.
@@ -62,8 +37,8 @@ func SetUp(t matchers.ErrorReporter, opts ...config.Option) {
 //	   // Verify that the mock was called with the correct arguments
 //	   Verify(myMock, Times(1)).MyMethod(Any[string](), Any[int]())
 //	}
-func Mock[T any]() T {
-	return registry.Mock[T]()
+func Mock[T any](ctrl *matchers.MockController) T {
+	return registry.Mock[T](ctrl)
 }
 
 // Any returns a mock value of type T that matches any value of type T.
@@ -441,7 +416,7 @@ func Captor[T any]() matchers.ArgumentCaptor[T] {
 //	package simple
 //
 //	import (
-//		. "github.com/ovechkin-dm/mockio/mock"
+//		. "github.com/ovechkin-dm/mockio/v2/mock"
 //		"testing"
 //	)
 //
@@ -546,4 +521,8 @@ func Never() matchers.MethodVerifier {
 //	VerifyNoMoreInteractions(mockObj)
 func VerifyNoMoreInteractions(value any) {
 	registry.VerifyNoMoreInteractions(value)
+}
+
+func NewMockController(t matchers.ErrorReporter, opts ...config.Option) *matchers.MockController {
+	return matchers.NewMockController(t, opts...)
 }

@@ -19,6 +19,7 @@ type captorImpl[T any] struct {
 	values []*capturedValue[T]
 	ctx    *mockContext
 	lock   sync.Mutex
+	reporter *EnrichedReporter
 }
 
 func (c *captorImpl[T]) Capture() T {
@@ -30,7 +31,7 @@ func (c *captorImpl[T]) Capture() T {
 func (c *captorImpl[T]) Last() T {
 	values := c.Values()
 	if len(values) == 0 {
-		c.ctx.reporter.ReportEmptyCaptor()
+		c.reporter.ReportEmptyCaptor()
 		var t T
 		return t
 	}
@@ -53,7 +54,7 @@ func (c *captorImpl[T]) Record(call *MethodCall, value any) {
 	t, ok := value.(T)
 	if !ok {
 		tp := reflect.TypeOf(new(T)).Elem()
-		c.ctx.reporter.ReportInvalidCaptorValue(tp, reflect.TypeOf(value))
+		c.reporter.ReportInvalidCaptorValue(tp, reflect.TypeOf(value))
 		return
 	}
 	cv := &capturedValue[T]{

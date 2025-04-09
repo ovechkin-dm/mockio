@@ -5,8 +5,8 @@ import (
 	"reflect"
 	"strings"
 
-	"github.com/ovechkin-dm/mockio/config"
-	"github.com/ovechkin-dm/mockio/matchers"
+	"github.com/ovechkin-dm/mockio/v2/config"
+	"github.com/ovechkin-dm/mockio/v2/matchers"
 )
 
 type panicReporter struct{}
@@ -40,7 +40,7 @@ func (e *EnrichedReporter) StackTraceErrorf(s *StackTrace, fatal bool, format st
 		s = NewStackTrace()
 	}
 	result := fmt.Sprintf(format, args...)
-	var st string
+	var st string	
 	if e.cfg.PrintStackTrace {
 		st = fmt.Sprintf(`At:
 	%s

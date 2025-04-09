@@ -4,9 +4,9 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/ovechkin-dm/mockio/tests/common"
+	"github.com/ovechkin-dm/mockio/v2/tests/common"
 
-	. "github.com/ovechkin-dm/mockio/mock"
+	. "github.com/ovechkin-dm/mockio/v2/mock"
 )
 
 type myInterface interface {
@@ -15,8 +15,8 @@ type myInterface interface {
 
 func TestNewMockInOtherFiber(t *testing.T) {
 	r := common.NewMockReporter(t)
-	SetUp(r)
-	m := Mock[myInterface]()
+	ctrl := NewMockController(r)
+	m := Mock[myInterface](ctrl)
 	wg := sync.WaitGroup{}
 	wg.Add(1)
 	WhenSingle(m.Foo(Any[int]())).ThenReturn(42)

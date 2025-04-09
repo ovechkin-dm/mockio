@@ -3,9 +3,9 @@ package returners
 import (
 	"testing"
 
-	"github.com/ovechkin-dm/mockio/tests/common"
+	"github.com/ovechkin-dm/mockio/v2/tests/common"
 
-	. "github.com/ovechkin-dm/mockio/mock"
+	. "github.com/ovechkin-dm/mockio/v2/mock"
 )
 
 type iface interface {
@@ -15,8 +15,8 @@ type iface interface {
 
 func TestReturnSimple(t *testing.T) {
 	r := common.NewMockReporter(t)
-	SetUp(r)
-	m := Mock[iface]()
+	ctrl := NewMockController(r)
+	m := Mock[iface](ctrl)
 	WhenSingle(m.Test(10)).ThenReturn(true)
 	ret := m.Test(10)
 	r.AssertEqual(true, ret)
@@ -24,8 +24,8 @@ func TestReturnSimple(t *testing.T) {
 
 func TestAnswerSimple(t *testing.T) {
 	r := common.NewMockReporter(t)
-	SetUp(r)
-	m := Mock[iface]()
+	ctrl := NewMockController(r)
+	m := Mock[iface](ctrl)
 	WhenSingle(m.Test(10)).ThenAnswer(func(args []any) bool {
 		return args[0].(int) > 0
 	})
@@ -37,8 +37,8 @@ func TestAnswerSimple(t *testing.T) {
 
 func TestMultiReturn(t *testing.T) {
 	r := common.NewMockReporter(t)
-	SetUp(r)
-	m := Mock[iface]()
+	ctrl := NewMockController(r)
+	m := Mock[iface](ctrl)
 	WhenSingle(m.Foo(10)).
 		ThenReturn(1).
 		ThenReturn(2)
@@ -52,8 +52,8 @@ func TestMultiReturn(t *testing.T) {
 
 func TestMultiAnswer(t *testing.T) {
 	r := common.NewMockReporter(t)
-	SetUp(r)
-	m := Mock[iface]()
+	ctrl := NewMockController(r)
+	m := Mock[iface](ctrl)
 	WhenSingle(m.Foo(10)).
 		ThenAnswer(func(args []any) int {
 			return 1
@@ -71,8 +71,8 @@ func TestMultiAnswer(t *testing.T) {
 
 func TestReturnBetweenCalls(t *testing.T) {
 	r := common.NewMockReporter(t)
-	SetUp(r)
-	m := Mock[iface]()
+	ctrl := NewMockController(r)
+	m := Mock[iface](ctrl)
 	ret := WhenSingle(m.Foo(10))
 	ret.ThenReturn(1)
 	r1 := m.Foo(10)
@@ -86,8 +86,8 @@ func TestReturnBetweenCalls(t *testing.T) {
 
 func TestReturnWrongType(t *testing.T) {
 	r := common.NewMockReporter(t)
-	SetUp(r)
-	m := Mock[iface]()
+	ctrl := NewMockController(r)
+	m := Mock[iface](ctrl)
 	When(m.Test(Any[any]())).ThenReturn(10)
 	m.Test(10)
 	r.AssertError()

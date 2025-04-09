@@ -1,7 +1,7 @@
 package mockopts
 
 import (
-	"github.com/ovechkin-dm/mockio/config"
+	"github.com/ovechkin-dm/mockio/v2/config"
 )
 
 // WithoutStackTrace enables stack trace printing for mock errors.
