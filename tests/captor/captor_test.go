@@ -3,9 +3,9 @@ package captor
 import (
 	"testing"
 
-	"github.com/ovechkin-dm/mockio/tests/common"
+	"github.com/ovechkin-dm/mockio/v2/tests/common"
 
-	. "github.com/ovechkin-dm/mockio/mock"
+	. "github.com/ovechkin-dm/mockio/v2/mock"
 )
 
 type iface interface {
@@ -15,8 +15,8 @@ type iface interface {
 
 func TestCaptorBasic(t *testing.T) {
 	r := common.NewMockReporter(t)
-	SetUp(r)
-	m := Mock[iface]()
+	ctrl := NewMockController(r)
+	m := Mock[iface](ctrl)
 	c := Captor[int]()
 	WhenSingle(m.Foo(c.Capture())).ThenReturn(10)
 	m.Foo(11)
@@ -25,8 +25,8 @@ func TestCaptorBasic(t *testing.T) {
 
 func TestCaptorMatches(t *testing.T) {
 	r := common.NewMockReporter(t)
-	SetUp(r)
-	m := Mock[iface]()
+	ctrl := NewMockController(r)
+	m := Mock[iface](ctrl)
 	c := Captor[int]()
 	WhenSingle(m.Foo(c.Capture())).ThenReturn(10)
 	ans := m.Foo(11)
@@ -35,8 +35,8 @@ func TestCaptorMatches(t *testing.T) {
 
 func TestCaptorMultiCalls(t *testing.T) {
 	r := common.NewMockReporter(t)
-	SetUp(r)
-	m := Mock[iface]()
+	ctrl := NewMockController(r)
+	m := Mock[iface](ctrl)
 	c := Captor[int]()
 	WhenSingle(m.Foo(c.Capture())).ThenReturn(10)
 	m.Foo(11)
@@ -48,9 +48,9 @@ func TestCaptorMultiCalls(t *testing.T) {
 
 func TestCaptorMultiUsage(t *testing.T) {
 	r := common.NewMockReporter(t)
-	SetUp(r)
-	m1 := Mock[iface]()
-	m2 := Mock[iface]()
+	ctrl := NewMockController(r)
+	m1 := Mock[iface](ctrl)
+	m2 := Mock[iface](ctrl)
 	c := Captor[int]()
 	WhenSingle(m1.Foo(c.Capture())).ThenReturn(10)
 	WhenSingle(m2.Foo(c.Capture())).ThenReturn(10)
@@ -62,8 +62,8 @@ func TestCaptorMultiUsage(t *testing.T) {
 
 func TestCaptorVerify(t *testing.T) {
 	r := common.NewMockReporter(t)
-	SetUp(r)
-	m := Mock[iface]()
+	ctrl := NewMockController(r)
+	m := Mock[iface](ctrl)
 	c := Captor[int]()
 	m.VoidFoo(10, 20)
 	Verify(m, Once()).VoidFoo(c.Capture(), Exact(20))

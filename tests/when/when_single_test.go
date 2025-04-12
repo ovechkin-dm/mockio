@@ -3,9 +3,9 @@ package when
 import (
 	"testing"
 
-	"github.com/ovechkin-dm/mockio/tests/common"
+	"github.com/ovechkin-dm/mockio/v2/tests/common"
 
-	. "github.com/ovechkin-dm/mockio/mock"
+	. "github.com/ovechkin-dm/mockio/v2/mock"
 )
 
 type whenSingleInterface interface {
@@ -18,8 +18,8 @@ type whenSingleMockAsArgInterface interface {
 
 func TestWhenSingleRet(t *testing.T) {
 	r := common.NewMockReporter(t)
-	SetUp(r)
-	m := Mock[whenSingleInterface]()
+	ctrl := NewMockController(r)
+	m := Mock[whenSingleInterface](ctrl)
 	WhenSingle(m.Foo(Any[int]())).ThenReturn(42)
 	ret := m.Foo(10)
 	r.AssertEqual(42, ret)
@@ -27,8 +27,8 @@ func TestWhenSingleRet(t *testing.T) {
 
 func TestWhenSingleAnswer(t *testing.T) {
 	r := common.NewMockReporter(t)
-	SetUp(r)
-	m := Mock[whenSingleInterface]()
+	ctrl := NewMockController(r)
+	m := Mock[whenSingleInterface](ctrl)
 	WhenSingle(m.Foo(Any[int]())).ThenAnswer(func(args []any) int {
 		return 42
 	})
@@ -38,8 +38,8 @@ func TestWhenSingleAnswer(t *testing.T) {
 
 func TestWhenSingleAnswerWithArgs(t *testing.T) {
 	r := common.NewMockReporter(t)
-	SetUp(r)
-	m := Mock[whenSingleInterface]()
+	ctrl := NewMockController(r)
+	m := Mock[whenSingleInterface](ctrl)
 	WhenSingle(m.Foo(Any[int]())).ThenAnswer(func(args []any) int {
 		return args[0].(int) + 1
 	})
@@ -49,8 +49,8 @@ func TestWhenSingleAnswerWithArgs(t *testing.T) {
 
 func TestWhenSingleMultiAnswer(t *testing.T) {
 	r := common.NewMockReporter(t)
-	SetUp(r)
-	m := Mock[whenSingleInterface]()
+	ctrl := NewMockController(r)
+	m := Mock[whenSingleInterface](ctrl)
 	WhenSingle(m.Foo(Any[int]())).
 		ThenAnswer(func(args []any) int {
 			return args[0].(int) + 1
@@ -66,8 +66,8 @@ func TestWhenSingleMultiAnswer(t *testing.T) {
 
 func TestWhenSingleMultiReturn(t *testing.T) {
 	r := common.NewMockReporter(t)
-	SetUp(r)
-	m := Mock[whenSingleInterface]()
+	ctrl := NewMockController(r)
+	m := Mock[whenSingleInterface](ctrl)
 	WhenSingle(m.Foo(Any[int]())).
 		ThenReturn(10).
 		ThenReturn(11)
@@ -79,8 +79,8 @@ func TestWhenSingleMultiReturn(t *testing.T) {
 
 func TestWhenSingleAnswerAndReturn(t *testing.T) {
 	r := common.NewMockReporter(t)
-	SetUp(r)
-	m := Mock[whenSingleInterface]()
+	ctrl := NewMockController(r)
+	m := Mock[whenSingleInterface](ctrl)
 	WhenSingle(m.Foo(Any[int]())).
 		ThenReturn(10).
 		ThenAnswer(func(args []any) int {
@@ -97,9 +97,9 @@ func TestWhenSingleAnswerAndReturn(t *testing.T) {
 
 func TestWhenSingleMockAsArg(t *testing.T) {
 	r := common.NewMockReporter(t)
-	SetUp(r)
-	m := Mock[whenSingleInterface]()
-	m2 := Mock[whenSingleMockAsArgInterface]()
+	ctrl := NewMockController(r)
+	m := Mock[whenSingleInterface](ctrl)
+	m2 := Mock[whenSingleMockAsArgInterface](ctrl)
 
 	WhenSingle(m2.MockAsArg(Any[whenSingleInterface]())).ThenReturn(true)
 

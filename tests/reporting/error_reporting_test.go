@@ -4,10 +4,10 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/ovechkin-dm/mockio/mockopts"
-	"github.com/ovechkin-dm/mockio/tests/common"
+	"github.com/ovechkin-dm/mockio/v2/mockopts"
+	"github.com/ovechkin-dm/mockio/v2/tests/common"
 
-	. "github.com/ovechkin-dm/mockio/mock"
+	. "github.com/ovechkin-dm/mockio/v2/mock"
 )
 
 type Foo interface {
@@ -17,41 +17,41 @@ type Foo interface {
 }
 
 func TestReportIncorrectWhenUsage(t *testing.T) {
-	r := common.NewMockReporter(t)
-	SetUp(r)
+	defer func() {
+		if err := recover(); err == nil {
+			t.Errorf("Expected panic but got none")
+		}
+	}()
 	When(1)
-	r.AssertError()
-	r.PrintError()
 }
 
-func TestReportVerifyFromDifferentGoroutine(t *testing.T) {
+func TestVerifyFromDifferentGoroutine(t *testing.T) {
 	r := common.NewMockReporter(t)
-	SetUp(r)
-	mock := Mock[Foo]()
+	ctrl := NewMockController(r)
+	mock := Mock[Foo](ctrl)
 	wg := sync.WaitGroup{}
 	wg.Add(1)
 	go func() {
-		SetUp(r)
 		Verify(mock, Once())
 		wg.Done()
 	}()
 	wg.Wait()
-	r.AssertError()
-	r.PrintError()
+	r.AssertNoError()
 }
 
 func TestReportVerifyNotAMock(t *testing.T) {
-	r := common.NewMockReporter(t)
-	SetUp(r)
+	defer func() {
+		if err := recover(); err == nil {
+			t.Errorf("Expected panic but got none")
+		}
+	}()
 	Verify(100, Once())
-	r.AssertError()
-	r.PrintError()
 }
 
 func TestInvalidUseOfMatchers(t *testing.T) {
 	r := common.NewMockReporter(t)
-	SetUp(r)
-	mock := Mock[Foo]()
+	ctrl := NewMockController(r)
+	mock := Mock[Foo](ctrl)
 	When(mock.Baz(AnyInt(), AnyInt(), 10)).ThenReturn(10)
 	mock.Baz(1, 2, 3)
 	r.AssertError()
@@ -60,8 +60,8 @@ func TestInvalidUseOfMatchers(t *testing.T) {
 
 func TestInvalidUseOfMatchersVarArgs(t *testing.T) {
 	r := common.NewMockReporter(t)
-	SetUp(r)
-	mock := Mock[Foo]()
+	ctrl := NewMockController(r)
+	mock := Mock[Foo](ctrl)
 	When(mock.VarArgs(AnyString(), AnyInt(), 10)).ThenReturn(10)
 	mock.VarArgs("a", 2)
 	r.AssertError()
@@ -70,8 +70,8 @@ func TestInvalidUseOfMatchersVarArgs(t *testing.T) {
 
 func TestCaptorInsideVerify(t *testing.T) {
 	r := common.NewMockReporter(t)
-	SetUp(r)
-	mock := Mock[Foo]()
+	ctrl := NewMockController(r)
+	mock := Mock[Foo](ctrl)
 	When(mock.Baz(AnyInt(), AnyInt(), AnyInt())).ThenReturn(10)
 	c := Captor[int]()
 	Verify(mock, Once()).Baz(AnyInt(), AnyInt(), c.Capture())
@@ -81,8 +81,8 @@ func TestCaptorInsideVerify(t *testing.T) {
 
 func TestVerify(t *testing.T) {
 	r := common.NewMockReporter(t)
-	SetUp(r)
-	mock := Mock[Foo]()
+	ctrl := NewMockController(r)
+	mock := Mock[Foo](ctrl)
 	When(mock.Baz(AnyInt(), AnyInt(), AnyInt())).ThenReturn(10)
 	_ = mock.Baz(10, 10, 11)
 	Verify(mock, Once()).Baz(AnyInt(), AnyInt(), Exact(10))
@@ -92,8 +92,8 @@ func TestVerify(t *testing.T) {
 
 func TestVerifyVarArgs(t *testing.T) {
 	r := common.NewMockReporter(t)
-	SetUp(r)
-	mock := Mock[Foo]()
+	ctrl := NewMockController(r)
+	mock := Mock[Foo](ctrl)
 	When(mock.VarArgs(AnyString(), AnyInt(), AnyInt())).ThenReturn(10)
 	_ = mock.VarArgs("a", 10, 11)
 	Verify(mock, Once()).VarArgs(AnyString(), AnyInt(), Exact(10))
@@ -103,8 +103,8 @@ func TestVerifyVarArgs(t *testing.T) {
 
 func TestVerifyDifferentVarArgs(t *testing.T) {
 	r := common.NewMockReporter(t)
-	SetUp(r)
-	mock := Mock[Foo]()
+	ctrl := NewMockController(r)
+	mock := Mock[Foo](ctrl)
 	When(mock.VarArgs(AnyString(), AnyInt(), AnyInt())).ThenReturn(10)
 	_ = mock.VarArgs("a", 10, 11)
 	Verify(mock, Once()).VarArgs(AnyString(), AnyInt(), AnyInt(), AnyInt())
@@ -114,8 +114,8 @@ func TestVerifyDifferentVarArgs(t *testing.T) {
 
 func TestVerifyTimes(t *testing.T) {
 	r := common.NewMockReporter(t)
-	SetUp(r)
-	mock := Mock[Foo]()
+	ctrl := NewMockController(r)
+	mock := Mock[Foo](ctrl)
 	When(mock.Baz(AnyInt(), AnyInt(), AnyInt())).ThenReturn(10)
 	_ = mock.Baz(10, 10, 10)
 	Verify(mock, Times(20)).Baz(AnyInt(), AnyInt(), AnyInt())
@@ -124,18 +124,19 @@ func TestVerifyTimes(t *testing.T) {
 }
 
 func TestEmptyCaptor(t *testing.T) {
-	r := common.NewMockReporter(t)
-	SetUp(r)
+	defer func() {
+		if err := recover(); err == nil {
+			t.Errorf("Expected panic but got none")
+		}
+	}()
 	c := Captor[int]()
 	_ = c.Last()
-	r.AssertError()
-	r.PrintError()
 }
 
 func TestInvalidReturnValues(t *testing.T) {
 	r := common.NewMockReporter(t)
-	SetUp(r)
-	mock := Mock[Foo]()
+	ctrl := NewMockController(r)
+	mock := Mock[Foo](ctrl)
 	When(mock.Baz(AnyInt(), AnyInt(), AnyInt())).ThenReturn("test", 10)
 	_ = mock.Baz(10, 10, 10)
 	r.AssertError()
@@ -144,8 +145,8 @@ func TestInvalidReturnValues(t *testing.T) {
 
 func TestNoMoreInteractions(t *testing.T) {
 	r := common.NewMockReporter(t)
-	SetUp(r)
-	mock := Mock[Foo]()
+	ctrl := NewMockController(r)
+	mock := Mock[Foo](ctrl)
 	When(mock.Baz(AnyInt(), AnyInt(), AnyInt())).ThenReturn("test", 10)
 	_ = mock.Baz(10, 10, 10)
 	_ = mock.Baz(10, 20, 10)
@@ -156,8 +157,8 @@ func TestNoMoreInteractions(t *testing.T) {
 
 func TestNoMoreInteractionsVarArgs(t *testing.T) {
 	r := common.NewMockReporter(t)
-	SetUp(r)
-	mock := Mock[Foo]()
+	ctrl := NewMockController(r)
+	mock := Mock[Foo](ctrl)
 	When(mock.VarArgs(AnyString(), AnyInt(), AnyInt())).ThenReturn("test", 10)
 	_ = mock.Baz(10, 10, 10)
 	_ = mock.Baz(10, 20, 10)
@@ -168,8 +169,8 @@ func TestNoMoreInteractionsVarArgs(t *testing.T) {
 
 func TestUnexpectedMatchers(t *testing.T) {
 	r := common.NewMockReporter(t)
-	SetUp(r)
-	mock := Mock[Foo]()
+	ctrl := NewMockController(r)
+	mock := Mock[Foo](ctrl)
 	When(mock.Baz(AnyInt(), AnyInt(), AnyInt())).ThenReturn(10)
 	mock.Baz(AnyInt(), AnyInt(), AnyInt())
 	Verify(mock, Once()).Baz(10, 10, 10)
@@ -179,8 +180,8 @@ func TestUnexpectedMatchers(t *testing.T) {
 
 func TestStackTraceDisabled(t *testing.T) {
 	r := common.NewMockReporter(t)
-	SetUp(r, mockopts.WithoutStackTrace())
-	mock := Mock[Foo]()
+	ctrl := NewMockController(r, mockopts.WithoutStackTrace())
+	mock := Mock[Foo](ctrl)
 	WhenSingle(mock.Baz(1, 2, AnyInt())).ThenReturn(10)
 	_ = mock.Baz(1, 2, 3)
 	r.AssertError()
@@ -189,8 +190,8 @@ func TestStackTraceDisabled(t *testing.T) {
 
 func TestStackTraceEnabled(t *testing.T) {
 	r := common.NewMockReporter(t)
-	SetUp(r)
-	mock := Mock[Foo]()
+	ctrl := NewMockController(r)
+	mock := Mock[Foo](ctrl)
 	WhenSingle(mock.Baz(1, 2, AnyInt())).ThenReturn(10)
 	_ = mock.Baz(1, 2, 3)
 	r.AssertError()
@@ -199,8 +200,8 @@ func TestStackTraceEnabled(t *testing.T) {
 
 func TestImplicitMatchersLogValue(t *testing.T) {
 	r := common.NewMockReporter(t)
-	SetUp(r)
-	mock := Mock[Foo]()
+	ctrl := NewMockController(r)
+	mock := Mock[Foo](ctrl)
 	WhenSingle(mock.Baz(1, 2, 3)).ThenReturn(10).Verify(Once())
 	r.TriggerCleanup()
 	r.AssertError()

@@ -2,7 +2,7 @@
 
 ## Using options
 
-MockIO library can be configured by providing options from `mockopts` package inside `SetUp` function like this:
+MockIO library can be configured by providing options from `mockopts` package inside `NewMockController()` function like this:
 ```go
 package main
 
@@ -13,7 +13,7 @@ import (
 )
 
 func TestSimple(t *testing.T) {
-	SetUp(t, mockopts.WithoutStackTrace())
+	ctrl := NewMockController(t, mockopts.WithoutStackTrace())
 }
 
 ```
@@ -40,8 +40,8 @@ type Greeter interface {
 }
 
 func TestSimple(t *testing.T) {
-	SetUp(t, mockopts.StrictVerify())
-	greeter := Mock[Greeter]()
+	ctrl := NewMockController(t, mockopts.StrictVerify())
+	greeter := Mock[Greeter](ctrl)
 	When(greeter.Greet("John")).ThenReturn("Hello, John!")
 }
 
@@ -50,8 +50,8 @@ In this case, the test will fail because the `Greet` method was not called with 
 If we want this test to pass, we need to call greeter with the expected argument:
 ```go
 func TestSimple(t *testing.T) {
-	SetUp(t, mockopts.StrictVerify())
-	greeter := Mock[Greeter]()
+	ctrl := NewMockController(t, mockopts.StrictVerify())
+	greeter := Mock[Greeter](ctrl)
 	When(greeter.Greet("John")).ThenReturn("Hello, John!")
 	greeter.Greet("John")
 }
@@ -63,8 +63,8 @@ Consider the following example:
 
 ```go
 func TestSimple(t *testing.T) {
-    SetUp(t, mockopts.StrictVerify())
-    greeter := Mock[Greeter]()
+    ctrl := NewMockController(t, mockopts.StrictVerify())
+    greeter := Mock[Greeter](ctrl)
     When(greeter.Greet("John")).ThenReturn("Hello, John!")
     greeter.Greet("John")
     greeter.Greet("Jane")
@@ -75,8 +75,8 @@ In this case, the test will fail because the `Greet` method was called with an u
 If we want this test to pass, we need to remove the unexpected call, or add an expectation for it:
 ```go
 func TestSimple(t *testing.T) {
-    SetUp(t, mockopts.StrictVerify())
-    greeter := Mock[Greeter]()
+    ctrl := NewMockController(t, mockopts.StrictVerify())
+    greeter := Mock[Greeter](ctrl)
     When(greeter.Greet("John")).ThenReturn("Hello, John!")
     When(greeter.Greet("Jane")).ThenReturn("Hello, Jane!")
     greeter.Greet("John")
@@ -101,8 +101,8 @@ type Greeter interface {
 }
 
 func TestSimple(t *testing.T) {
-	SetUp(t)
-	greeter := Mock[Greeter]()
+	ctrl := NewMockController(t, mockopts.StrictVerify())
+	greeter := Mock[Greeter](ctrl)
 	When(greeter.Greet("Jane")).ThenReturn("hello world")
 	greeter.Greet("John")
 	VerifyNoMoreInteractions(greeter)
@@ -136,8 +136,8 @@ FAIL
 By adding `mockopts.WithoutStackTrace()` to the `SetUp` function, we can disable stack trace printing:
 ```go
 func TestSimple(t *testing.T) {
-	SetUp(t, mockopts.WithoutStackTrace())
-	greeter := Mock[Greeter]()
+	ctrl := NewMockController(t, mockopts.WithoutStackTrace())
+	greeter := Mock[Greeter](ctrl)
 	When(greeter.Greet("Jane")).ThenReturn("hello world")
 	greeter.Greet("John")
 	VerifyNoMoreInteractions(greeter)

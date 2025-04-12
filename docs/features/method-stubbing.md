@@ -89,7 +89,8 @@ type Foo interface {
 
 You can stub `Bar` method like this:
 ```go
-mock := Mock[Foo]()
+ctrl := NewMockController(t)
+mock := Mock[Foo](ctrl)
 WhenSingle(mock.Bar(AnyInt())).ThenAnswer(func(args []any) string {
     return fmt.Sprintf("Hello, %d", args[0].(int))
 })

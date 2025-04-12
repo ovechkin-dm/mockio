@@ -5,9 +5,8 @@ import (
 	"sync"
 	"sync/atomic"
 
-	"github.com/ovechkin-dm/mockio/config"
-	"github.com/ovechkin-dm/mockio/matchers"
-	"github.com/ovechkin-dm/mockio/threadlocal"
+	"github.com/ovechkin-dm/mockio/v2/matchers"
+	"github.com/ovechkin-dm/mockio/v2/threadlocal"
 )
 
 type fiberState struct {
@@ -22,10 +21,8 @@ type fiberState struct {
 
 type mockContext struct {
 	state     threadlocal.ThreadLocal[*fiberState]
-	reporter  *EnrichedReporter
 	lock      sync.Mutex
 	routineID int64
-	cfg       *config.MockConfig
 }
 
 type methodRecorder struct {
@@ -100,7 +97,7 @@ func (ctx *mockContext) getState() *fiberState {
 	return ctx.state.Get()
 }
 
-func newMockContext(reporter *EnrichedReporter, cfg *config.MockConfig) *mockContext {
+func newMockContext() *mockContext {
 	return &mockContext{
 		state: threadlocal.NewThreadLocal(func() *fiberState {
 			return &fiberState{
@@ -111,10 +108,8 @@ func newMockContext(reporter *EnrichedReporter, cfg *config.MockConfig) *mockCon
 				verifyState:    false,
 			}
 		}),
-		reporter:  reporter,
 		lock:      sync.Mutex{},
 		routineID: threadlocal.GoId(),
-		cfg:       cfg,
 	}
 }
 

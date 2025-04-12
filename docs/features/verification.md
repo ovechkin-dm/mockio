@@ -14,8 +14,8 @@ type Greeter interface {
 }
 
 func TestSimple(t *testing.T) {
-	SetUp(t)
-	greeter := Mock[Greeter]()
+	ctrl := NewMockController(t)
+	greeter := Mock[Greeter](ctrl)
 	When(greeter.Greet("Jane")).ThenReturn("hello world")
 	greeter.Greet("John")
 
@@ -30,8 +30,8 @@ If the method was called, the test will pass. If the method was not called, the 
 This test will succeed:
 ```go
 func TestSimple(t *testing.T) {
-	SetUp(t)
-	greeter := Mock[Greeter]()
+	ctrl := NewMockController(t)
+	greeter := Mock[Greeter](ctrl)
 	When(greeter.Greet("Jane")).ThenReturn("hello world")
 	greeter.Greet("John")
 	Verify(greeter, Once()).Greet("John")
@@ -41,8 +41,8 @@ func TestSimple(t *testing.T) {
 This test will fail:
 ```go
 func TestSimple(t *testing.T) {
-	SetUp(t)
-	greeter := Mock[Greeter]()
+	ctrl := NewMockController(t)
+	greeter := Mock[Greeter](ctrl)
 	When(greeter.Greet("Jane")).ThenReturn("hello world")
 	greeter.Greet("John")
 	Verify(greeter, Once()).Greet("Jane")
@@ -54,8 +54,8 @@ func TestSimple(t *testing.T) {
 Verify that a method was called at least once:
 ```go
 func TestSimple(t *testing.T) {
-    SetUp(t)
-    greeter := Mock[Greeter]()
+    ctrl := NewMockController(t)
+    greeter := Mock[Greeter](t)
     When(greeter.Greet("Jane")).ThenReturn("hello world")
     greeter.Greet("John")
     Verify(greeter, AtLeastOnce()).Greet("John")
@@ -67,8 +67,8 @@ func TestSimple(t *testing.T) {
 Verify that a method was called exactly once:
 ```go
 func TestSimple(t *testing.T) {
-    SetUp(t)
-    greeter := Mock[Greeter]()
+    ctrl := NewMockController(t)
+    greeter := Mock[Greeter](t)
     When(greeter.Greet("Jane")).ThenReturn("hello world")
     greeter.Greet("John")
     Verify(greeter, Once()).Greet("John")
@@ -80,8 +80,8 @@ func TestSimple(t *testing.T) {
 Verify that a method was called a specific number of times:
 ```go
 func TestSimple(t *testing.T) {
-    SetUp(t)
-    greeter := Mock[Greeter]()
+    ctrl := NewMockController(t)
+    greeter := Mock[Greeter](t)
     When(greeter.Greet("Jane")).ThenReturn("hello world")
     greeter.Greet("John")
     greeter.Greet("John")
@@ -98,8 +98,8 @@ It will fail the test if there are any unverified calls.
 This test will succeed:
 ```go
 func TestSimple(t *testing.T) {
-    SetUp(t)
-    greeter := Mock[Greeter]()
+    ctrl := NewMockController(t)
+    greeter := Mock[Greeter](ctrl)
     When(greeter.Greet("Jane")).ThenReturn("hello world")
     greeter.Greet("John")
     Verify(greeter, Once()).Greet("John")
@@ -110,8 +110,8 @@ func TestSimple(t *testing.T) {
 This test will fail:
 ```go
 func TestSimple(t *testing.T) {
-    SetUp(t)
-    greeter := Mock[Greeter]()
+    ctrl := NewMockController(t)
+    greeter := Mock[Greeter](ctrl)
     When(greeter.Greet("John")).ThenReturn("hello world")
     greeter.Greet("John")
     VerifyNoMoreInteractions(greeter)
@@ -123,8 +123,8 @@ func TestSimple(t *testing.T) {
 Since it is common to actually verify that a stub was used correctly, you can use the `Verify` function after the `ThenReturn` function:
 ```go
 func TestSimple(t *testing.T) {
-	SetUp(t)
-	greeter := Mock[Greeter]()
+	ctrl := NewMockController(t)
+	greeter := Mock[Greeter](ctrl)
 	When(greeter.Greet("John")).ThenReturn("hello world").Verify(Once())
 	greeter.Greet("John")
 	VerifyNoMoreInteractions(greeter)

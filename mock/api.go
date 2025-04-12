@@ -7,35 +7,10 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/ovechkin-dm/mockio/config"
-	"github.com/ovechkin-dm/mockio/matchers"
-	"github.com/ovechkin-dm/mockio/registry"
+	"github.com/ovechkin-dm/mockio/v2/config"
+	"github.com/ovechkin-dm/mockio/v2/matchers"
+	"github.com/ovechkin-dm/mockio/v2/registry"
 )
-
-// SetUp initializes the mock library with the reporter.
-// Example usage:
-//
-//	package simple
-//
-//	import (
-//		. "github.com/ovechkin-dm/mockio/mock"
-//		"testing"
-//	)
-//
-//	type myInterface interface {
-//		Foo(a int) int
-//	}
-//
-//	func TestSimple(t *testing.T) {
-//		SetUp(t)
-//		m := Mock[myInterface]()
-//		WhenSingle(m.Foo(Any[int]())).ThenReturn(42)
-//		ret := m.Foo(10)
-//		r.AssertEqual(42, ret)
-//	}
-func SetUp(t matchers.ErrorReporter, opts ...config.Option) {
-	registry.SetUp(t, opts...)
-}
 
 // Mock returns a mock object that implements the specified interface or type.
 // The returned object can be used to set up mock behaviors for its methods.
@@ -47,11 +22,11 @@ func SetUp(t matchers.ErrorReporter, opts ...config.Option) {
 //	}
 //
 //	func TestMyFunction(t *testing.T) {
-//	   // Set up the mock library
-//	   SetUp(t)
+//	   // Create controller
+//	   ctrl := NewMockController(t)
 //
 //	   // Create a mock object that implements MyInterface
-//	   myMock := Mock[MyInterface]()
+//	   myMock := Mock[MyInterface](ctrl)
 //
 //	   // Set up a mock behavior for the MyMethod method
 //	   WhenSingle(myMock.MyMethod("foo", 42)).ThenReturn("bar")
@@ -62,8 +37,8 @@ func SetUp(t matchers.ErrorReporter, opts ...config.Option) {
 //	   // Verify that the mock was called with the correct arguments
 //	   Verify(myMock, Times(1)).MyMethod(Any[string](), Any[int]())
 //	}
-func Mock[T any]() T {
-	return registry.Mock[T]()
+func Mock[T any](ctrl *matchers.MockController) T {
+	return registry.Mock[T](ctrl)
 }
 
 // Any returns a mock value of type T that matches any value of type T.
@@ -441,7 +416,7 @@ func Captor[T any]() matchers.ArgumentCaptor[T] {
 //	package simple
 //
 //	import (
-//		. "github.com/ovechkin-dm/mockio/mock"
+//		. "github.com/ovechkin-dm/mockio/v2/mock"
 //		"testing"
 //	)
 //
@@ -450,12 +425,10 @@ func Captor[T any]() matchers.ArgumentCaptor[T] {
 //	}
 //
 //	func TestSimple(t *testing.T) {
-//		r := common.NewMockReporter(t)
-//		SetUp(r)
-//		m := Mock[myInterface]()
+//		ctrl := NewMockController(t)
+//		m := Mock[myInterface](ctrl)
 //		WhenSingle(m.Foo(Any[int]())).ThenReturn(42)
-//		ret := m.Foo(10)
-//		r.AssertEqual(42, ret)
+//		_ = m.Foo(10)
 //		Verify(m, AtLeastOnce()).Foo(10)
 //	}
 func Verify[T any](t T, v matchers.MethodVerifier) T {
@@ -468,10 +441,11 @@ func Verify[T any](t T, v matchers.MethodVerifier) T {
 //
 // Example usage:
 //
-//	mockObj := Mock[MyInterface]()
-//	mockObj.MyMethod("arg1")
-//	mockObj.MyMethod("arg2")
-//	Verify(mockObj, AtLeastOnce()).MyMethod(Any[string]())
+//	 ctrl := NewMockController(t)
+//		mockObj := Mock[MyInterface](ctrl)
+//		mockObj.MyMethod("arg1")
+//		mockObj.MyMethod("arg2")
+//		Verify(mockObj, AtLeastOnce()).MyMethod(Any[string]())
 //
 // This verifies that the MyMethod function of mockObj was called at least once.
 func AtLeastOnce() matchers.MethodVerifier {
@@ -489,20 +463,23 @@ func Once() matchers.MethodVerifier {
 //
 // Example usage:
 //
-//	// Create a mock object for testing
-//	mockObj := Mock[MyInterface]()
+//	 // Create mock controller
+//	 ctrl := NewMockController(t)
 //
-//	// Call a method on the mock object
-//	mockObj.MyMethod()
+//		// Create a mock object for testing
+//		mockObj := Mock[MyInterface](ctrl)
 //
-//	// Verify that MyMethod was called exactly once
-//	Verify(mockObj, Times(1)).MyMethod()
+//		// Call a method on the mock object
+//		mockObj.MyMethod()
 //
-//	// Call the method again
-//	mockObj.MyMethod()
+//		// Verify that MyMethod was called exactly once
+//		Verify(mockObj, Times(1)).MyMethod()
 //
-//	// Verify that MyMethod was called exactly twice
-//	Verify(mockObj, Times(2)).MyMethod()
+//		// Call the method again
+//		mockObj.MyMethod()
+//
+//		// Verify that MyMethod was called exactly twice
+//		Verify(mockObj, Times(2)).MyMethod()
 //
 // If the number of method calls does not match the expected number of method calls, an error is returned.
 // The error message will indicate the expected and actual number of method calls.
@@ -514,17 +491,20 @@ func Times(n int) matchers.MethodVerifier {
 //
 // Example usage:
 //
-//	// Create a mock object for testing
-//	mockObj := Mock[MyInterface]()
+//	 // Create mock controller
+//	 ctrl := NewMockController(t)
 //
-//	// Verify that MyMethod was never called
-//	Verify(mockObj, Never()).MyMethod()
+//		// Create a mock object for testing
+//		mockObj := Mock[MyInterface](ctrl)
 //
-//	// Call the method
-//	mockObj.MyMethod()
+//		// Verify that MyMethod was never called
+//		Verify(mockObj, Never()).MyMethod()
 //
-//	// Verify that MyMethod was called at least once
-//	Verify(mockObj, AtLeastOnce()).MyMethod()
+//		// Call the method
+//		mockObj.MyMethod()
+//
+//		// Verify that MyMethod was called at least once
+//		Verify(mockObj, AtLeastOnce()).MyMethod()
 func Never() matchers.MethodVerifier {
 	return matchers.Times(0)
 }
@@ -533,17 +513,24 @@ func Never() matchers.MethodVerifier {
 // For example if
 // Example usage:
 //
-//	// Create a mock object for testing
-//	mockObj := Mock[MyInterface]()
+//	 // Create mock controller
+//	 ctrl := NewMockController(t)
 //
-//	// Call the method
-//	mockObj.MyMethod()
+//		// Create a mock object for testing
+//		mockObj := Mock[MyInterface](ctrl)
 //
-//	// Verify that MyMethod was called exactly once
-//	Verify(mockObj, Once()).MyMethod()
+//		// Call the method
+//		mockObj.MyMethod()
 //
-//	// Verify that there are no more unverified interactions
-//	VerifyNoMoreInteractions(mockObj)
+//		// Verify that MyMethod was called exactly once
+//		Verify(mockObj, Once()).MyMethod()
+//
+//		// Verify that there are no more unverified interactions
+//		VerifyNoMoreInteractions(mockObj)
 func VerifyNoMoreInteractions(value any) {
 	registry.VerifyNoMoreInteractions(value)
+}
+
+func NewMockController(t matchers.ErrorReporter, opts ...config.Option) *matchers.MockController {
+	return matchers.NewMockController(t, opts...)
 }

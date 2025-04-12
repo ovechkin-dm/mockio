@@ -3,9 +3,9 @@ package match
 import (
 	"testing"
 
-	"github.com/ovechkin-dm/mockio/tests/common"
+	"github.com/ovechkin-dm/mockio/v2/tests/common"
 
-	. "github.com/ovechkin-dm/mockio/mock"
+	. "github.com/ovechkin-dm/mockio/v2/mock"
 )
 
 type Iface interface {
@@ -38,8 +38,8 @@ type MapInterface interface {
 
 func TestAny(t *testing.T) {
 	r := common.NewMockReporter(t)
-	SetUp(r)
-	m := Mock[Iface]()
+	ctrl := NewMockController(r)
+	m := Mock[Iface](ctrl)
 	WhenSingle(m.Test(Any[string]())).ThenReturn(true)
 	ret := m.Test("test")
 	r.AssertEqual(true, ret)
@@ -47,8 +47,8 @@ func TestAny(t *testing.T) {
 
 func TestAnyStruct(t *testing.T) {
 	r := common.NewMockReporter(t)
-	SetUp(r)
-	m := Mock[Iface]()
+	ctrl := NewMockController(r)
+	m := Mock[Iface](ctrl)
 	WhenSingle(m.Test(Any[*St]())).ThenReturn(true)
 	st := &St{}
 	ret := m.Test(st)
@@ -57,8 +57,8 @@ func TestAnyStruct(t *testing.T) {
 
 func TestAnyWrongType(t *testing.T) {
 	r := common.NewMockReporter(t)
-	SetUp(r)
-	m := Mock[Iface]()
+	ctrl := NewMockController(r)
+	m := Mock[Iface](ctrl)
 	WhenSingle(m.Test(Any[int]())).ThenReturn(true)
 	ret := m.Test("test")
 	r.AssertEqual(false, ret)
@@ -66,9 +66,9 @@ func TestAnyWrongType(t *testing.T) {
 
 func TestExactStruct(t *testing.T) {
 	r := common.NewMockReporter(t)
-	SetUp(r)
+	ctrl := NewMockController(r)
 	a := St{}
-	m := Mock[Iface]()
+	m := Mock[Iface](ctrl)
 	WhenSingle(m.Test(Exact(&a))).ThenReturn(true)
 	ret := m.Test(&a)
 	r.AssertEqual(true, ret)
@@ -76,10 +76,10 @@ func TestExactStruct(t *testing.T) {
 
 func TestExactWrongStruct(t *testing.T) {
 	r := common.NewMockReporter(t)
-	SetUp(r)
+	ctrl := NewMockController(r)
 	a := &St{10}
 	b := &St{10}
-	m := Mock[Iface]()
+	m := Mock[Iface](ctrl)
 	WhenSingle(m.Test(Exact(a))).ThenReturn(true)
 	ret := m.Test(b)
 	r.AssertEqual(false, ret)
@@ -87,10 +87,10 @@ func TestExactWrongStruct(t *testing.T) {
 
 func TestEqualStruct(t *testing.T) {
 	r := common.NewMockReporter(t)
-	SetUp(r)
+	ctrl := NewMockController(r)
 	a := &St{10}
 	b := &St{10}
-	m := Mock[Iface]()
+	m := Mock[Iface](ctrl)
 	WhenSingle(m.Test(Equal(a))).ThenReturn(true)
 	ret := m.Test(b)
 	r.AssertEqual(true, ret)
@@ -98,10 +98,10 @@ func TestEqualStruct(t *testing.T) {
 
 func TestNonEqualStruct(t *testing.T) {
 	r := common.NewMockReporter(t)
-	SetUp(r)
+	ctrl := NewMockController(r)
 	a := &St{11}
 	b := &St{10}
-	m := Mock[Iface]()
+	m := Mock[Iface](ctrl)
 	WhenSingle(m.Test(Equal(a))).ThenReturn(true)
 	ret := m.Test(b)
 	r.AssertEqual(false, ret)
@@ -109,11 +109,11 @@ func TestNonEqualStruct(t *testing.T) {
 
 func TestCustomMatcher(t *testing.T) {
 	r := common.NewMockReporter(t)
-	SetUp(r)
+	ctrl := NewMockController(r)
 	even := CreateMatcher[int]("even", func(allArgs []any, actual int) bool {
 		return actual%2 == 0
 	})
-	m := Mock[Iface]()
+	m := Mock[Iface](ctrl)
 	WhenSingle(m.Test(even())).ThenReturn(true)
 	ret1 := m.Test(10)
 	ret2 := m.Test(11)
@@ -123,8 +123,8 @@ func TestCustomMatcher(t *testing.T) {
 
 func TestNotEqual(t *testing.T) {
 	r := common.NewMockReporter(t)
-	SetUp(r)
-	m := Mock[Iface]()
+	ctrl := NewMockController(r)
+	m := Mock[Iface](ctrl)
 	WhenSingle(m.Test(NotEqual("test"))).ThenReturn(true)
 	ret := m.Test("test1")
 	r.AssertEqual(true, ret)
@@ -132,8 +132,8 @@ func TestNotEqual(t *testing.T) {
 
 func TestOneOf(t *testing.T) {
 	r := common.NewMockReporter(t)
-	SetUp(r)
-	m := Mock[Iface]()
+	ctrl := NewMockController(r)
+	m := Mock[Iface](ctrl)
 	WhenSingle(m.Test(OneOf("test1", "test2"))).ThenReturn(true)
 	ret := m.Test("test2")
 	r.AssertEqual(true, ret)
@@ -141,8 +141,8 @@ func TestOneOf(t *testing.T) {
 
 func TestDeepEqual(t *testing.T) {
 	r := common.NewMockReporter(t)
-	SetUp(r)
-	m := Mock[MyInterface]()
+	ctrl := NewMockController(r)
+	m := Mock[MyInterface](ctrl)
 	s1 := MyStruct{
 		items: &[]int{1, 2, 3},
 	}
@@ -156,8 +156,8 @@ func TestDeepEqual(t *testing.T) {
 
 func TestNilMatch(t *testing.T) {
 	r := common.NewMockReporter(t)
-	SetUp(r)
-	m := Mock[Iface]()
+	ctrl := NewMockController(r)
+	m := Mock[Iface](ctrl)
 	WhenSingle(m.Test(Nil[any]())).ThenReturn(true)
 	ret := m.Test(nil)
 	r.AssertEqual(true, ret)
@@ -165,8 +165,8 @@ func TestNilMatch(t *testing.T) {
 
 func TestNilNoMatch(t *testing.T) {
 	r := common.NewMockReporter(t)
-	SetUp(r)
-	m := Mock[Iface]()
+	ctrl := NewMockController(r)
+	m := Mock[Iface](ctrl)
 	WhenSingle(m.Test(Nil[any]())).ThenReturn(true)
 	ret := m.Test(10)
 	r.AssertEqual(false, ret)
@@ -174,8 +174,8 @@ func TestNilNoMatch(t *testing.T) {
 
 func TestSubstringMatch(t *testing.T) {
 	r := common.NewMockReporter(t)
-	SetUp(r)
-	m := Mock[Iface]()
+	ctrl := NewMockController(r)
+	m := Mock[Iface](ctrl)
 	WhenSingle(m.Test(Substring("test"))).ThenReturn(true)
 	ret := m.Test("123test123")
 	r.AssertEqual(true, ret)
@@ -183,8 +183,8 @@ func TestSubstringMatch(t *testing.T) {
 
 func TestSubstringNoMatch(t *testing.T) {
 	r := common.NewMockReporter(t)
-	SetUp(r)
-	m := Mock[Iface]()
+	ctrl := NewMockController(r)
+	m := Mock[Iface](ctrl)
 	WhenSingle(m.Test(Substring("test321"))).ThenReturn(true)
 	ret := m.Test("123test123")
 	r.AssertEqual(false, ret)
@@ -192,8 +192,8 @@ func TestSubstringNoMatch(t *testing.T) {
 
 func TestNotNilMatch(t *testing.T) {
 	r := common.NewMockReporter(t)
-	SetUp(r)
-	m := Mock[Iface]()
+	ctrl := NewMockController(r)
+	m := Mock[Iface](ctrl)
 	WhenSingle(m.Test(NotNil[any]())).ThenReturn(true)
 	ret := m.Test(10)
 	r.AssertEqual(true, ret)
@@ -201,8 +201,8 @@ func TestNotNilMatch(t *testing.T) {
 
 func TestNotNilNoMatch(t *testing.T) {
 	r := common.NewMockReporter(t)
-	SetUp(r)
-	m := Mock[Iface]()
+	ctrl := NewMockController(r)
+	m := Mock[Iface](ctrl)
 	WhenSingle(m.Test(NotNil[any]())).ThenReturn(true)
 	ret := m.Test(nil)
 	r.AssertEqual(false, ret)
@@ -210,8 +210,8 @@ func TestNotNilNoMatch(t *testing.T) {
 
 func TestRegexMatch(t *testing.T) {
 	r := common.NewMockReporter(t)
-	SetUp(r)
-	m := Mock[Iface]()
+	ctrl := NewMockController(r)
+	m := Mock[Iface](ctrl)
 	WhenSingle(m.Test(Regex("test"))).ThenReturn(true)
 	ret := m.Test("123test123")
 	r.AssertEqual(true, ret)
@@ -219,8 +219,8 @@ func TestRegexMatch(t *testing.T) {
 
 func TestRegexNoMatch(t *testing.T) {
 	r := common.NewMockReporter(t)
-	SetUp(r)
-	m := Mock[Iface]()
+	ctrl := NewMockController(r)
+	m := Mock[Iface](ctrl)
 	WhenSingle(m.Test(Regex("test321"))).ThenReturn(true)
 	ret := m.Test("123test123")
 	r.AssertEqual(false, ret)
@@ -228,8 +228,8 @@ func TestRegexNoMatch(t *testing.T) {
 
 func TestSliceLenMatch(t *testing.T) {
 	r := common.NewMockReporter(t)
-	SetUp(r)
-	m := Mock[SliceInterface]()
+	ctrl := NewMockController(r)
+	m := Mock[SliceInterface](ctrl)
 	WhenSingle(m.Test(SliceLen[int](3))).ThenReturn(3)
 	ret := m.Test([]int{1, 2, 3})
 	r.AssertEqual(3, ret)
@@ -237,8 +237,8 @@ func TestSliceLenMatch(t *testing.T) {
 
 func TestSliceLenNoMatch(t *testing.T) {
 	r := common.NewMockReporter(t)
-	SetUp(r)
-	m := Mock[SliceInterface]()
+	ctrl := NewMockController(r)
+	m := Mock[SliceInterface](ctrl)
 	WhenSingle(m.Test(SliceLen[int](4))).ThenReturn(3)
 	ret := m.Test([]int{1, 2, 3})
 	r.AssertEqual(0, ret)
@@ -246,8 +246,8 @@ func TestSliceLenNoMatch(t *testing.T) {
 
 func TestMapLenMatch(t *testing.T) {
 	r := common.NewMockReporter(t)
-	SetUp(r)
-	m := Mock[MapInterface]()
+	ctrl := NewMockController(r)
+	m := Mock[MapInterface](ctrl)
 	WhenSingle(m.Test(MapLen[int, int](3))).ThenReturn(3)
 	ret := m.Test(map[int]int{1: 1, 2: 2, 3: 3})
 	r.AssertEqual(3, ret)
@@ -255,8 +255,8 @@ func TestMapLenMatch(t *testing.T) {
 
 func TestMapLenNoMatch(t *testing.T) {
 	r := common.NewMockReporter(t)
-	SetUp(r)
-	m := Mock[MapInterface]()
+	ctrl := NewMockController(r)
+	m := Mock[MapInterface](ctrl)
 	WhenSingle(m.Test(MapLen[int, int](3))).ThenReturn(3)
 	ret := m.Test(map[int]int{1: 1, 2: 2, 3: 3, 4: 4})
 	r.AssertEqual(0, ret)
@@ -264,8 +264,8 @@ func TestMapLenNoMatch(t *testing.T) {
 
 func TestSliceContainsMatch(t *testing.T) {
 	r := common.NewMockReporter(t)
-	SetUp(r)
-	m := Mock[SliceInterface]()
+	ctrl := NewMockController(r)
+	m := Mock[SliceInterface](ctrl)
 	WhenSingle(m.Test(SliceContains[int](3))).ThenReturn(3)
 	ret := m.Test([]int{1, 2, 3})
 	r.AssertEqual(3, ret)
@@ -273,8 +273,8 @@ func TestSliceContainsMatch(t *testing.T) {
 
 func TestSliceContainsNoMatch(t *testing.T) {
 	r := common.NewMockReporter(t)
-	SetUp(r)
-	m := Mock[SliceInterface]()
+	ctrl := NewMockController(r)
+	m := Mock[SliceInterface](ctrl)
 	WhenSingle(m.Test(SliceContains[int](4))).ThenReturn(3)
 	ret := m.Test([]int{1, 2, 3})
 	r.AssertEqual(0, ret)
@@ -282,8 +282,8 @@ func TestSliceContainsNoMatch(t *testing.T) {
 
 func TestMapContainsMatch(t *testing.T) {
 	r := common.NewMockReporter(t)
-	SetUp(r)
-	m := Mock[MapInterface]()
+	ctrl := NewMockController(r)
+	m := Mock[MapInterface](ctrl)
 	WhenSingle(m.Test(MapContains[int, int](3))).ThenReturn(3)
 	ret := m.Test(map[int]int{1: 1, 2: 2, 3: 3})
 	r.AssertEqual(3, ret)
@@ -291,8 +291,8 @@ func TestMapContainsMatch(t *testing.T) {
 
 func TestMapContainsNoMatch(t *testing.T) {
 	r := common.NewMockReporter(t)
-	SetUp(r)
-	m := Mock[MapInterface]()
+	ctrl := NewMockController(r)
+	m := Mock[MapInterface](ctrl)
 	WhenSingle(m.Test(MapContains[int, int](4))).ThenReturn(3)
 	ret := m.Test(map[int]int{1: 1, 2: 2, 3: 3})
 	r.AssertEqual(0, ret)
@@ -300,8 +300,8 @@ func TestMapContainsNoMatch(t *testing.T) {
 
 func TestSliceEqualUnorderedMatch(t *testing.T) {
 	r := common.NewMockReporter(t)
-	SetUp(r)
-	m := Mock[SliceInterface]()
+	ctrl := NewMockController(r)
+	m := Mock[SliceInterface](ctrl)
 	WhenSingle(m.Test(SliceEqualUnordered[int]([]int{1, 2, 3}))).ThenReturn(3)
 	ret := m.Test([]int{3, 2, 1})
 	r.AssertEqual(3, ret)
@@ -309,8 +309,8 @@ func TestSliceEqualUnorderedMatch(t *testing.T) {
 
 func TestSliceEqualUnorderedNoMatch(t *testing.T) {
 	r := common.NewMockReporter(t)
-	SetUp(r)
-	m := Mock[SliceInterface]()
+	ctrl := NewMockController(r)
+	m := Mock[SliceInterface](ctrl)
 	WhenSingle(m.Test(SliceEqualUnordered[int]([]int{1, 2, 3}))).ThenReturn(3)
 	ret := m.Test([]int{3, 2, 1, 4})
 	r.AssertEqual(0, ret)
@@ -318,16 +318,16 @@ func TestSliceEqualUnorderedNoMatch(t *testing.T) {
 
 func TestUnexpectedUseOfMatchers(t *testing.T) {
 	r := common.NewMockReporter(t)
-	SetUp(r)
-	m := Mock[Iface]()
+	ctrl := NewMockController(r)
+	m := Mock[Iface](ctrl)
 	m.Test(AnyString())
 	Verify(m, Once()).Test("test")
 	r.AssertErrorContains(r.GetError(), "Unexpected matchers declaration")
 }
 
 func TestExactNotComparable(t *testing.T) {
-	SetUp(t)
-	greeter := Mock[Greeter]()
+	ctrl := NewMockController(t)
+	greeter := Mock[Greeter](ctrl)
 	var data any = []int{1, 2}
 	When(greeter.Greet(Exact(data))).ThenReturn("hello world")
 	greeter.Greet(data)

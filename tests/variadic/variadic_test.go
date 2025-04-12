@@ -3,9 +3,9 @@ package variadic
 import (
 	"testing"
 
-	"github.com/ovechkin-dm/mockio/tests/common"
+	"github.com/ovechkin-dm/mockio/v2/tests/common"
 
-	. "github.com/ovechkin-dm/mockio/mock"
+	. "github.com/ovechkin-dm/mockio/v2/mock"
 )
 
 type myInterface interface {
@@ -14,8 +14,8 @@ type myInterface interface {
 
 func TestVariadicSimple(t *testing.T) {
 	r := common.NewMockReporter(t)
-	SetUp(r)
-	m := Mock[myInterface]()
+	ctrl := NewMockController(r)
+	m := Mock[myInterface](ctrl)
 	WhenSingle(m.Foo(1, 1)).ThenReturn(1)
 	WhenSingle(m.Foo(1)).ThenReturn(2)
 	ret := m.Foo(1)
@@ -26,8 +26,8 @@ func TestVariadicSimple(t *testing.T) {
 
 func TestCaptor(t *testing.T) {
 	r := common.NewMockReporter(t)
-	SetUp(r)
-	m := Mock[myInterface]()
+	ctrl := NewMockController(r)
+	m := Mock[myInterface](ctrl)
 	c1 := Captor[int]()
 	c2 := Captor[int]()
 	WhenSingle(m.Foo(c1.Capture(), c2.Capture())).ThenReturn(1)
