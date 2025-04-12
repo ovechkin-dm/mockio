@@ -7,7 +7,7 @@ MockIO library can be configured by providing options from `mockopts` package in
 package main
 
 import (
-	. "github.com/ovechkin-dm/mockio/mock"
+	. "github.com/ovechkin-dm/mockio/mock/v2"
 	"github.com/ovechkin-dm/mockio/mockopts"
 	"testing"
 )
@@ -30,7 +30,7 @@ Consider the following example:
 package main
 
 import (
-	. "github.com/ovechkin-dm/mockio/mock"
+	. "github.com/ovechkin-dm/mockio/mock/v2"
 	"github.com/ovechkin-dm/mockio/mockopts"
 	"testing"
 )
@@ -92,7 +92,7 @@ Consider the following example:
 package main
 
 import (
-	. "github.com/ovechkin-dm/mockio/mock"
+	. "github.com/ovechkin-dm/mockio/mock/v2"
 	"testing"
 )
 

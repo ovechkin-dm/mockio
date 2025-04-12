@@ -19,7 +19,7 @@ Latest documentation is available [here](https://ovechkin-dm.github.io/mockio/la
 Install latest version of the library using go get command:
 
 ```bash
-go get -u github.com/ovechkin-dm/mockio
+go get -u github.com/ovechkin-dm/mockio/v2
 ```
 
 Create a simple mock and test:
@@ -27,7 +27,7 @@ Create a simple mock and test:
 package main
 
 import (
-    . "github.com/ovechkin-dm/mockio/mock"
+    . "github.com/ovechkin-dm/mockio/mock/v2"
     "testing"
 )
 

@@ -7,7 +7,7 @@ Golang library for mocking without code generation, inspired by Mockito.
 Install latest version of the library using `go get` command:
 
 ```bash
-go get -u github.com/ovechkin-dm/mockio
+go get -u github.com/ovechkin-dm/mockio/v2
 ```
 
 ## Creating test
@@ -24,7 +24,7 @@ Now we will use `dot import` to simplify the usage of the library:
 
 ```go
 import (
-    ."github.com/ovechkin-dm/mockio/mock"
+    ."github.com/ovechkin-dm/mockio/mock/v2"
     "testing"
 )
 ```
@@ -49,7 +49,7 @@ Here is the full listing for our simple test:
 package main
 
 import (
-	. "github.com/ovechkin-dm/mockio/mock"
+	. "github.com/ovechkin-dm/mockio/mock/v2"
 	"testing"
 )
 
