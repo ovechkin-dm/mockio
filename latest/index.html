@@ -728,7 +728,7 @@
 <p>Golang library for mocking without code generation, inspired by Mockito.</p>
 <h2 id="installing-library">Installing library<a class="headerlink" href="#installing-library" title="Permanent link">&para;</a></h2>
 <p>Install latest version of the library using <code>go get</code> command:</p>
-<div class="highlight"><span class="filename">Bash</span><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>go<span class="w"> </span>get<span class="w"> </span>-u<span class="w"> </span>github.com/ovechkin-dm/mockio
+<div class="highlight"><span class="filename">Bash</span><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>go<span class="w"> </span>get<span class="w"> </span>-u<span class="w"> </span>github.com/ovechkin-dm/mockio/v2
 </code></pre></div>
 <h2 id="creating-test">Creating test<a class="headerlink" href="#creating-test" title="Permanent link">&para;</a></h2>
 <p>Let's create an interface that we want to mock:</p>
@@ -738,7 +738,7 @@
 </code></pre></div>
 <p>Now we will use <code>dot import</code> to simplify the usage of the library:</p>
 <div class="highlight"><span class="filename">Go</span><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="kn">import</span><span class="w"> </span><span class="p">(</span>
-<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="w">    </span><span class="p">.</span><span class="s">&quot;github.com/ovechkin-dm/mockio/mock&quot;</span>
+<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="w">    </span><span class="p">.</span><span class="s">&quot;github.com/ovechkin-dm/mockio/mock/v2&quot;</span>
 <a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="w">    </span><span class="s">&quot;testing&quot;</span>
 <a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a><span class="p">)</span>
 </code></pre></div>
@@ -757,7 +757,7 @@
 <div class="highlight"><span class="filename">Go</span><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="kn">package</span><span class="w"> </span><span class="nx">main</span>
 <a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>
 <a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a><span class="kn">import</span><span class="w"> </span><span class="p">(</span>
-<a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a><span class="w">    </span><span class="p">.</span><span class="w"> </span><span class="s">&quot;github.com/ovechkin-dm/mockio/mock&quot;</span>
+<a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a><span class="w">    </span><span class="p">.</span><span class="w"> </span><span class="s">&quot;github.com/ovechkin-dm/mockio/mock/v2&quot;</span>
 <a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a><span class="w">    </span><span class="s">&quot;testing&quot;</span>
 <a id="__codelineno-4-6" name="__codelineno-4-6" href="#__codelineno-4-6"></a><span class="p">)</span>
 <a id="__codelineno-4-7" name="__codelineno-4-7" href="#__codelineno-4-7"></a>
