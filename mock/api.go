@@ -440,11 +440,12 @@ func Verify[T any](t T, v matchers.MethodVerifier) T {
 // is greater than zero. It can be used to verify that a method has been called at least once.
 //
 // Example usage:
-//  ctrl := NewMockController(t)
-//	mockObj := Mock[MyInterface](ctrl)
-//	mockObj.MyMethod("arg1")
-//	mockObj.MyMethod("arg2")
-//	Verify(mockObj, AtLeastOnce()).MyMethod(Any[string]())
+//
+//	 ctrl := NewMockController(t)
+//		mockObj := Mock[MyInterface](ctrl)
+//		mockObj.MyMethod("arg1")
+//		mockObj.MyMethod("arg2")
+//		Verify(mockObj, AtLeastOnce()).MyMethod(Any[string]())
 //
 // This verifies that the MyMethod function of mockObj was called at least once.
 func AtLeastOnce() matchers.MethodVerifier {
@@ -461,23 +462,24 @@ func Once() matchers.MethodVerifier {
 // It takes an integer 'n' as an argument, which specifies the expected number of method calls.
 //
 // Example usage:
-//  // Create mock controller
-//  ctrl := NewMockController(t)
 //
-//	// Create a mock object for testing
-//	mockObj := Mock[MyInterface](ctrl)
+//	 // Create mock controller
+//	 ctrl := NewMockController(t)
 //
-//	// Call a method on the mock object
-//	mockObj.MyMethod()
+//		// Create a mock object for testing
+//		mockObj := Mock[MyInterface](ctrl)
 //
-//	// Verify that MyMethod was called exactly once
-//	Verify(mockObj, Times(1)).MyMethod()
+//		// Call a method on the mock object
+//		mockObj.MyMethod()
 //
-//	// Call the method again
-//	mockObj.MyMethod()
+//		// Verify that MyMethod was called exactly once
+//		Verify(mockObj, Times(1)).MyMethod()
 //
-//	// Verify that MyMethod was called exactly twice
-//	Verify(mockObj, Times(2)).MyMethod()
+//		// Call the method again
+//		mockObj.MyMethod()
+//
+//		// Verify that MyMethod was called exactly twice
+//		Verify(mockObj, Times(2)).MyMethod()
 //
 // If the number of method calls does not match the expected number of method calls, an error is returned.
 // The error message will indicate the expected and actual number of method calls.
@@ -488,20 +490,21 @@ func Times(n int) matchers.MethodVerifier {
 // Never returns a MethodVerifier that verifies that a method has never been called.
 //
 // Example usage:
-//  // Create mock controller
-//  ctrl := NewMockController(t)
 //
-//	// Create a mock object for testing
-//	mockObj := Mock[MyInterface](ctrl)
+//	 // Create mock controller
+//	 ctrl := NewMockController(t)
 //
-//	// Verify that MyMethod was never called
-//	Verify(mockObj, Never()).MyMethod()
+//		// Create a mock object for testing
+//		mockObj := Mock[MyInterface](ctrl)
 //
-//	// Call the method
-//	mockObj.MyMethod()
+//		// Verify that MyMethod was never called
+//		Verify(mockObj, Never()).MyMethod()
 //
-//	// Verify that MyMethod was called at least once
-//	Verify(mockObj, AtLeastOnce()).MyMethod()
+//		// Call the method
+//		mockObj.MyMethod()
+//
+//		// Verify that MyMethod was called at least once
+//		Verify(mockObj, AtLeastOnce()).MyMethod()
 func Never() matchers.MethodVerifier {
 	return matchers.Times(0)
 }
@@ -509,20 +512,21 @@ func Never() matchers.MethodVerifier {
 // VerifyNoMoreInteractions verifies that there are no more unverified interactions with the mock object.
 // For example if
 // Example usage:
-//  // Create mock controller
-//  ctrl := NewMockController(t)
 //
-//	// Create a mock object for testing
-//	mockObj := Mock[MyInterface](ctrl)
+//	 // Create mock controller
+//	 ctrl := NewMockController(t)
 //
-//	// Call the method
-//	mockObj.MyMethod()
+//		// Create a mock object for testing
+//		mockObj := Mock[MyInterface](ctrl)
 //
-//	// Verify that MyMethod was called exactly once
-//	Verify(mockObj, Once()).MyMethod()
+//		// Call the method
+//		mockObj.MyMethod()
 //
-//	// Verify that there are no more unverified interactions
-//	VerifyNoMoreInteractions(mockObj)
+//		// Verify that MyMethod was called exactly once
+//		Verify(mockObj, Once()).MyMethod()
+//
+//		// Verify that there are no more unverified interactions
+//		VerifyNoMoreInteractions(mockObj)
 func VerifyNoMoreInteractions(value any) {
 	registry.VerifyNoMoreInteractions(value)
 }
