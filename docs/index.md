@@ -33,8 +33,8 @@ Now we can create a mock for the `Greeter` interface, and test it's method `Gree
 
 ```go
 func TestGreet(t *testing.T) {
-    SetUp(t)
-    m := Mock[Greeter]()
+    ctrl := NewMockController(t)
+    m := Mock[Greeter](ctrl)
     WhenSingle(m.Greet("John")).ThenReturn("Hello, John!")
     if m.Greet("John") != "Hello, John!" {
         t.Fail()
@@ -58,8 +58,8 @@ type Greeter interface {
 }
 
 func TestGreet(t *testing.T) {
-	SetUp(t)
-	m := Mock[Greeter]()
+	ctrl := NewMockController(t)
+	m := Mock[Greeter](ctrl)
 	WhenSingle(m.Greet("John")).ThenReturn("Hello, John!")
 	if m.Greet("John") != "Hello, John!" {
 		t.Fail()

@@ -52,8 +52,8 @@ type Greeter interface {
 }
 
 func TestSimple(t *testing.T) {
-	SetUp(t)
-	greeter := Mock[Greeter]()
+	ctrl := NewMockController(t)
+	greeter := Mock[Greeter](ctrl)
 	c := Captor[string]()
 	When(greeter.Greet(c.Capture())).ThenReturn("Hello, world!")
 	_ = greeter.Greet("John")

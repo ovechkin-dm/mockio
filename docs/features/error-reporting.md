@@ -1,6 +1,6 @@
 # Error reporting
 
-`Mockio` library supports providing custom error reporting in `SetUp()` function.
+`Mockio` library supports providing custom error reporting in `NewMockController` function.
 This can be helpful if you want to introduce custom error reporting or logging.
 Reporter should implement `ErrorReporter` interface.
 ```go
@@ -33,34 +33,6 @@ At:
 Cause:
 	When() requires an argument which has to be 'a method call on a mock'.
 	For example: When(mock.GetArticles()).ThenReturn(articles)
-```
-
-### Verify from different goroutine
-
-Example:
-
-```go
-SetUp(r)
-mock := Mock[Foo]()
-wg := sync.WaitGroup{}
-wg.Add(1)
-go func() {
-    SetUp(r)
-    Verify(mock, Once())
-    wg.Done()
-}()
-wg.Wait()
-```
-
-Output:
-```
-At:
-	/demo/error_reporting_test.go:35 +0xc5
-Cause:
-	Argument passed to Verify() is {<nil> DynamicProxy[reporting.Foo] <nil>} and is not a mock, or a mock created in a different goroutine.
-	Make sure you place the parenthesis correctly.
-	Example of correct verification:
-		Verify(mock, Times(10)).SomeMethod()
 ```
 
 ### Non-mock verification

@@ -22,11 +22,11 @@ import (
 //	}
 //
 //	func TestMyFunction(t *testing.T) {
-//	   // Set up the mock library
-//	   SetUp(t)
+//	   // Create controller
+//	   ctrl := NewMockController(t)
 //
 //	   // Create a mock object that implements MyInterface
-//	   myMock := Mock[MyInterface]()
+//	   myMock := Mock[MyInterface](ctrl)
 //
 //	   // Set up a mock behavior for the MyMethod method
 //	   WhenSingle(myMock.MyMethod("foo", 42)).ThenReturn("bar")
@@ -425,12 +425,10 @@ func Captor[T any]() matchers.ArgumentCaptor[T] {
 //	}
 //
 //	func TestSimple(t *testing.T) {
-//		r := common.NewMockReporter(t)
-//		SetUp(r)
-//		m := Mock[myInterface]()
+//		ctrl := NewMockController(t)
+//		m := Mock[myInterface](ctrl)
 //		WhenSingle(m.Foo(Any[int]())).ThenReturn(42)
-//		ret := m.Foo(10)
-//		r.AssertEqual(42, ret)
+//		_ = m.Foo(10)
 //		Verify(m, AtLeastOnce()).Foo(10)
 //	}
 func Verify[T any](t T, v matchers.MethodVerifier) T {
@@ -442,8 +440,8 @@ func Verify[T any](t T, v matchers.MethodVerifier) T {
 // is greater than zero. It can be used to verify that a method has been called at least once.
 //
 // Example usage:
-//
-//	mockObj := Mock[MyInterface]()
+//  ctrl := NewMockController(t)
+//	mockObj := Mock[MyInterface](ctrl)
 //	mockObj.MyMethod("arg1")
 //	mockObj.MyMethod("arg2")
 //	Verify(mockObj, AtLeastOnce()).MyMethod(Any[string]())
@@ -463,9 +461,11 @@ func Once() matchers.MethodVerifier {
 // It takes an integer 'n' as an argument, which specifies the expected number of method calls.
 //
 // Example usage:
+//  // Create mock controller
+//  ctrl := NewMockController(t)
 //
 //	// Create a mock object for testing
-//	mockObj := Mock[MyInterface]()
+//	mockObj := Mock[MyInterface](ctrl)
 //
 //	// Call a method on the mock object
 //	mockObj.MyMethod()
@@ -488,9 +488,11 @@ func Times(n int) matchers.MethodVerifier {
 // Never returns a MethodVerifier that verifies that a method has never been called.
 //
 // Example usage:
+//  // Create mock controller
+//  ctrl := NewMockController(t)
 //
 //	// Create a mock object for testing
-//	mockObj := Mock[MyInterface]()
+//	mockObj := Mock[MyInterface](ctrl)
 //
 //	// Verify that MyMethod was never called
 //	Verify(mockObj, Never()).MyMethod()
@@ -507,9 +509,11 @@ func Never() matchers.MethodVerifier {
 // VerifyNoMoreInteractions verifies that there are no more unverified interactions with the mock object.
 // For example if
 // Example usage:
+//  // Create mock controller
+//  ctrl := NewMockController(t)
 //
 //	// Create a mock object for testing
-//	mockObj := Mock[MyInterface]()
+//	mockObj := Mock[MyInterface](ctrl)
 //
 //	// Call the method
 //	mockObj.MyMethod()

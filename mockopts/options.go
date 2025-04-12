@@ -9,7 +9,7 @@ import (
 // This option is useful for debugging.
 // Example:
 //
-//	SetUp(t, WithoutStackTrace())
+//	ctrl := NewMockController(t, mockopts.WithoutStackTrace())
 func WithoutStackTrace() config.Option {
 	return func(cfg *config.MockConfig) {
 		cfg.PrintStackTrace = false

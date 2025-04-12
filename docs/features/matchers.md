@@ -16,8 +16,8 @@ type Greeter interface {
 }
 
 func TestSimple(t *testing.T) {
-	SetUp(t)
-	greeter := Mock[Greeter]()
+    ctrl := NewMockController(t)	
+	greeter := Mock[Greeter](ctrl)
 	When(greeter.Greet("Jane")).ThenReturn("hello world")
 	greeter.Greet("John")
 }
@@ -29,8 +29,8 @@ The `Any[T]()` matcher matches any value of the type `T`.
 This test will succeed:
 ```go
 func TestSimple(t *testing.T) {
-    SetUp(t)
-    greeter := Mock[Greeter]()
+    ctrl := NewMockController(t)
+    greeter := Mock[Greeter](ctrl)
     When(greeter.Greet(Any[string]())).ThenReturn("hello world")
     if greeter.Greet("John") != "hello world" {
         t.Error("Expected 'hello world'")
@@ -44,8 +44,8 @@ The `AnyInt()` matcher matches any integer value.
 This test will succeed:
 ```go
 func TestSimple(t *testing.T) {
-	SetUp(t)
-	greeter := Mock[Greeter]()
+	ctrl := NewMockController(t)
+	greeter := Mock[Greeter](ctrl)
 	When(greeter.Greet(Any[int]())).ThenReturn("hello world")
 	if greeter.Greet(10) != "hello world" {
 		t.Error("Expected 'hello world'")
@@ -55,8 +55,8 @@ func TestSimple(t *testing.T) {
 This test will fail, because the argument is not an integer:
 ```go
 func TestSimple(t *testing.T) {
-	SetUp(t)
-	greeter := Mock[Greeter]()
+	ctrl := NewMockController(t)
+	greeter := Mock[Greeter](ctrl)
 	When(greeter.Greet(Any[int]())).ThenReturn("hello world")
 	if greeter.Greet("John") != "hello world" {
 		t.Error("Expected 'hello world'")
@@ -70,8 +70,8 @@ The `AnyString()` matcher matches any string value.
 This test will succeed:
 ```go
 func TestSimple(t *testing.T) {
-	SetUp(t)
-	greeter := Mock[Greeter]()
+	ctrl := NewMockController(t)
+	greeter := Mock[Greeter](ctrl)
 	When(greeter.Greet(Any[string]())).ThenReturn("hello world")
 	if greeter.Greet("John") != "hello world" {
 		t.Error("Expected 'hello world'")
@@ -81,8 +81,8 @@ func TestSimple(t *testing.T) {
 This test will fail, because the argument is not a string:
 ```go
 func TestSimple(t *testing.T) {
-	SetUp(t)
-	greeter := Mock[Greeter]()
+	ctrl := NewMockController(t)
+	greeter := Mock[Greeter](ctrl)
 	When(greeter.Greet(Any[int]())).ThenReturn("hello world")
 	if greeter.Greet(10) != "hello world" {
 		t.Error("Expected 'hello world'")
@@ -96,8 +96,8 @@ The `AnyInterface()` matcher matches any value of any type.
 This test will succeed:
 ```go
 func TestSimple(t *testing.T) {
-    SetUp(t)
-    greeter := Mock[Greeter]()
+    ctrl := NewMockController(t)
+    greeter := Mock[Greeter](ctrl)
     When(greeter.Greet(AnyInterface())).ThenReturn("hello world")
     if greeter.Greet("John") != "hello world" {
         t.Error("Expected 'hello world'")
@@ -108,8 +108,8 @@ func TestSimple(t *testing.T) {
 This test will also succeed:
 ```go
 func TestSimple(t *testing.T) {
-    SetUp(t)
-    greeter := Mock[Greeter]()
+    ctrl := NewMockController(t)
+    greeter := Mock[Greeter](ctrl)
     When(greeter.Greet(AnyInterface())).ThenReturn("hello world")
     if greeter.Greet(10) != "hello world" {
         t.Error("Expected 'hello world'")
@@ -123,8 +123,8 @@ The `AnyContext()` matcher matches any context.Context value.
 This test will succeed:
 ```go
 func TestSimple(t *testing.T) {
-    SetUp(t)
-    greeter := Mock[Greeter]()
+    ctrl := NewMockController(t)
+    greeter := Mock[Greeter](ctrl)
     When(greeter.Greet(AnyContext())).ThenReturn("hello world")
     if greeter.Greet(context.Background()) != "hello world" {
         t.Error("Expected 'hello world'")
@@ -138,8 +138,8 @@ The `AnyOfType[T](t T)` matcher matches any value of the type `T` or its subtype
 This test will succeed:
 ```go
 func TestSimple(t *testing.T) {
-	SetUp(t)
-	greeter := Mock[Greeter]()
+	ctrl := NewMockController(t)
+	greeter := Mock[Greeter](ctrl)
 	When(greeter.Greet(AnyOfType(10))).ThenReturn("hello world")
 	if greeter.Greet(10) != "hello world" {
 		t.Error("Expected 'hello world'")
@@ -154,8 +154,8 @@ The `Nil[T]()` matcher matches any nil value of the type `T`.
 This test will succeed:
 ```go
 func TestSimple(t *testing.T) {
-    SetUp(t)
-    greeter := Mock[Greeter]()
+    ctrl := NewMockController(t)
+    greeter := Mock[Greeter](ctrl)
     When(greeter.Greet(Nil[any]())).ThenReturn("hello world")
     if greeter.Greet(nil) != "hello world" {
         t.Error("Expected 'hello world'")
@@ -169,8 +169,8 @@ The `NotNil[T]()` matcher matches any non-nil value of the type `T`.
 This test will succeed:
 ```go
 func TestSimple(t *testing.T) {
-    SetUp(t)
-    greeter := Mock[Greeter]()
+    ctrl := NewMockController(t)
+    greeter := Mock[Greeter](ctrl)
     When(greeter.Greet(NotNil[any]())).ThenReturn("hello world")
     if greeter.Greet("John") != "hello world" {
         t.Error("Expected 'hello world'")
@@ -181,8 +181,8 @@ func TestSimple(t *testing.T) {
 This test will fail:
 ```go
 func TestSimple(t *testing.T) {
-    SetUp(t)
-    greeter := Mock[Greeter]()
+    ctrl := NewMockController(t)
+    greeter := Mock[Greeter](ctrl)
     When(greeter.Greet(NotNil[any]())).ThenReturn("hello world")
     if greeter.Greet(nil) != "hello world" {
         t.Error("Expected 'hello world'")
@@ -196,8 +196,8 @@ The `Regex(pattern string)` matcher matches any string that matches the regular 
 This test will succeed:
 ```go
 func TestSimple(t *testing.T) {
-    SetUp(t)
-    greeter := Mock[Greeter]()
+    ctrl := NewMockController(t)
+    greeter := Mock[Greeter](ctrl)
     When(greeter.Greet(Regex("J.*"))).ThenReturn("hello world")
     if greeter.Greet("John") != "hello world" {
         t.Error("Expected 'hello world'")
@@ -211,8 +211,8 @@ The `Substring(sub string)` matcher matches any string that contains the substri
 This test will succeed:
 ```go
 func TestSimple(t *testing.T) {
-    SetUp(t)
-    greeter := Mock[Greeter]()
+    ctrl := NewMockController(t)
+    greeter := Mock[Greeter](ctrl)
     When(greeter.Greet(Substring("oh"))).ThenReturn("hello world")
     if greeter.Greet("John") != "hello world" {
         t.Error("Expected 'hello world'")
@@ -226,8 +226,8 @@ The `SliceLen(length int)` matcher matches any slice with the length `length`.
 This test will succeed:
 ```go
 func TestSimple(t *testing.T) {
-    SetUp(t)
-    greeter := Mock[Greeter]()
+    ctrl := NewMockController(t)
+    greeter := Mock[Greeter](ctrl)
     When(greeter.Greet(SliceLen[int](2))).ThenReturn("hello world")
     if greeter.Greet([]int{1, 2}) != "hello world" {
         t.Error("Expected 'hello world'")
@@ -238,8 +238,8 @@ func TestSimple(t *testing.T) {
 This test will fail:
 ```go
 func TestSimple(t *testing.T) {
-    SetUp(t)
-    greeter := Mock[Greeter]()
+    ctrl := NewMockController(t)
+    greeter := Mock[Greeter](ctrl)
     When(greeter.Greet(SliceLen[int](2))).ThenReturn("hello world")
     if greeter.Greet([]int{1, 2, 3}) != "hello world" {
         t.Error("Expected 'hello world'")
@@ -253,8 +253,8 @@ The `MapLen(length int)` matcher matches any map with the length `length`.
 This test will succeed:
 ```go
 func TestSimple(t *testing.T) {
-    SetUp(t)
-    greeter := Mock[Greeter]()
+    ctrl := NewMockController(t)
+    greeter := Mock[Greeter](ctrl)
     When(greeter.Greet(MapLen[int, string](2))).ThenReturn("hello world")
     if greeter.Greet(map[int]string{1: "one", 2: "two"}) != "hello world" {
         t.Error("Expected 'hello world'")
@@ -265,8 +265,8 @@ func TestSimple(t *testing.T) {
 This test will fail:
 ```go
 func TestSimple(t *testing.T) {
-    SetUp(t)
-    greeter := Mock[Greeter]()
+    ctrl := NewMockController(t)
+    greeter := Mock[Greeter](ctrl)
     When(greeter.Greet(MapLen[int, string](2))).ThenReturn("hello world")
     if greeter.Greet(map[int]string{1: "one", 2: "two", 3: "three"}) != "hello world" {
         t.Error("Expected 'hello world'")
@@ -280,8 +280,8 @@ The `SliceContains[T any](values ...T)` matcher matches any slice that contains 
 This test will succeed:
 ```go
 func TestSimple(t *testing.T) {
-    SetUp(t)
-    greeter := Mock[Greeter]()
+    ctrl := NewMockController(t)
+    greeter := Mock[Greeter](ctrl)
     When(greeter.Greet(SliceContains[int](1, 2))).ThenReturn("hello world")
     if greeter.Greet([]int{1, 2, 3}) != "hello world" {
         t.Error("Expected 'hello world'")
@@ -292,8 +292,8 @@ func TestSimple(t *testing.T) {
 This test will fail:
 ```go
 func TestSimple(t *testing.T) {
-    SetUp(t)
-    greeter := Mock[Greeter]()
+    ctrl := NewMockController(t)
+    greeter := Mock[Greeter](ctrl)
     When(greeter.Greet(SliceContains[int](1, 2))).ThenReturn("hello world")
     if greeter.Greet([]int{1, 3}) != "hello world" {
         t.Error("Expected 'hello world'")
@@ -307,8 +307,8 @@ The `MapContains[K any, V any](keys ...K)` matcher matches any map that contains
 This test will succeed:
 ```go
 func TestSimple(t *testing.T) {
-    SetUp(t)
-    greeter := Mock[Greeter]()
+    ctrl := NewMockController(t)
+    greeter := Mock[Greeter](ctrl)
     When(greeter.Greet(MapContains[int, string](1, 2))).ThenReturn("hello world")
     if greeter.Greet(map[int]string{1: "one", 2: "two", 3: "three"}) != "hello world" {
         t.Error("Expected 'hello world'")
@@ -319,8 +319,8 @@ func TestSimple(t *testing.T) {
 This test will fail:
 ```go
 func TestSimple(t *testing.T) {
-    SetUp(t)
-    greeter := Mock[Greeter]()
+    ctrl := NewMockController(t)
+    greeter := Mock[Greeter](ctrl)
     When(greeter.Greet(MapContains[int, string](1, 2))).ThenReturn("hello world")
     if greeter.Greet(map[int]string{1: "one", 3: "three"}) != "hello world" {
         t.Error("Expected 'hello world'")
@@ -335,8 +335,8 @@ The `SliceEqualUnordered[T any](values []T)` matcher matches any slice that cont
 This test will succeed:
 ```go
 func TestSimple(t *testing.T) {
-    SetUp(t)
-    greeter := Mock[Greeter]()
+    ctrl := NewMockController(t)
+    greeter := Mock[Greeter](ctrl)
     When(greeter.Greet(SliceEqualUnordered[int](1, 2))).ThenReturn("hello world")
     if greeter.Greet([]int{2, 1}) != "hello world" {
         t.Error("Expected 'hello world'")
@@ -347,8 +347,8 @@ func TestSimple(t *testing.T) {
 This test will fail:
 ```go
 func TestSimple(t *testing.T) {
-    SetUp(t)
-    greeter := Mock[Greeter]()
+    ctrl := NewMockController(t)
+    greeter := Mock[Greeter](ctrl)
     When(greeter.Greet(SliceEqualUnordered[int](1, 2))).ThenReturn("hello world")
     if greeter.Greet([]int{1, 3}) != "hello world" {
         t.Error("Expected 'hello world'")
@@ -364,8 +364,8 @@ The `Exact` matcher matches any value that is equal to the expected value.
 This test will succeed:
 ```go
 func TestSimple(t *testing.T) {
-	SetUp(t)
-	greeter := Mock[Greeter]()
+	ctrl := NewMockController(t)
+	greeter := Mock[Greeter](ctrl)
 	world1 := "world"
 	When(greeter.Greet(Exact(&world1))).ThenReturn("hello world")
 	if greeter.Greet(&world1) != "hello world" {
@@ -377,8 +377,8 @@ func TestSimple(t *testing.T) {
 However, this test will fail, because although the values are equal, they are different pointers:
 ```go
 func TestSimple(t *testing.T) {
-	SetUp(t)
-	greeter := Mock[Greeter]()
+	ctrl := NewMockController(t)
+	greeter := Mock[Greeter](ctrl)
 	world1 := "world"
 	world2 := "world"
 	When(greeter.Greet(Exact(&world1))).ThenReturn("hello world")
@@ -395,8 +395,8 @@ The `Equal` matcher matches any value that is equal to the expected value. `Equa
 This test will succeed, because `reflect.DeepEqual` compares values by their content:
 ```go
 func TestSimple(t *testing.T) {
-	SetUp(t)
-	greeter := Mock[Greeter]()
+	ctrl := NewMockController(t)
+	greeter := Mock[Greeter](ctrl)
 	world1 := "world"
 	world2 := "world"
 	When(greeter.Greet(Equal(&world1))).ThenReturn("hello world")
@@ -413,8 +413,8 @@ The `NotEqual` matcher matches any value that is not equal to the expected value
 This test will succeed:
 ```go
 func TestSimple(t *testing.T) {
-    SetUp(t)
-    greeter := Mock[Greeter]()
+    ctrl := NewMockController(t)
+    greeter := Mock[Greeter](ctrl)
     When(greeter.Greet(NotEqual("John"))).ThenReturn("hello world")
     if greeter.Greet("world") != "hello world" {
         t.Error("Expected 'hello John'")
@@ -430,8 +430,8 @@ The `OneOf` matcher matches any value that is equal to one of the expected value
 This test will succeed:
 ```go
 func TestSimple(t *testing.T) {
-	SetUp(t)
-	greeter := Mock[Greeter]()
+	ctrl := NewMockController(t)
+	greeter := Mock[Greeter](ctrl)
 	When(greeter.Greet(OneOf("John", "Jane"))).ThenReturn("hello John or Jane")
 	if greeter.Greet("Jane") != "hello John or Jane" {
 		t.Error("expected 'hello John or Jane'")
@@ -444,8 +444,8 @@ Here is an example of a custom matcher that matches odd numbers only:
 
 ```go
 func TestSimple(t *testing.T) {
-	SetUp(t)
-	greeter := Mock[Greeter]()
+	ctrl := NewMockController(t)
+	greeter := Mock[Greeter](ctrl)
 	odd := CreateMatcher[int]("odd", func(args []any, v int) bool {
 		return v%2 == 1
 	})
@@ -455,6 +455,4 @@ func TestSimple(t *testing.T) {
 	}
 }
 ```
-
-For more examples on custom matchers see `Examples` section.
 
