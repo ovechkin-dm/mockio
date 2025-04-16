@@ -41,7 +41,7 @@ func Mock[T any](ctrl *matchers.MockController) T {
 	}
 	result, ok := t.(T)
 	if !ok {
-		getInstance().reporter.FailNow(fmt.Errorf("error casting mock to type %s", tp))
+		getInstance().reporter.FailNow(fmt.Errorf("error casting mock to type %s", tp.String()))
 		var zero T
 		return zero
 	}
