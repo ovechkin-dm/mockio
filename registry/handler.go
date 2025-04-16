@@ -13,7 +13,7 @@ type invocationHandler struct {
 	methods      map[string]*methodRecorder
 	instanceType reflect.Type
 	lock         sync.Mutex
-	env  		 *matchers.MockEnv
+	env          *matchers.MockEnv
 	reporter     *EnrichedReporter
 }
 
@@ -204,7 +204,7 @@ func (h *invocationHandler) DoVerifyMethod(call *MethodCall) []reflect.Value {
 	return createDefaultReturnValues(call.Method)
 }
 
-func newHandler(tp reflect.Type, holder *mockContext, env *matchers.MockEnv) *invocationHandler {	
+func newHandler(tp reflect.Type, holder *mockContext, env *matchers.MockEnv) *invocationHandler {
 	recorders := make(map[string]*methodRecorder)
 	for i := 0; i < tp.NumMethod(); i++ {
 		recorders[tp.Method(i).Name] = &methodRecorder{
@@ -371,7 +371,7 @@ func newInvocationHandler(
 		methods:      methods,
 		instanceType: instanceType,
 		lock:         sync.Mutex{},
-		env:   env,
+		env:          env,
 		reporter:     newEnrichedReporter(env.Reporter, env.Config),
 	}
 	return handler

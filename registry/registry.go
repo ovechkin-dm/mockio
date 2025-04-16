@@ -78,7 +78,7 @@ func When() matchers.ReturnerAll {
 	return wh.When()
 }
 
-func VerifyMethod(t any, v matchers.MethodVerifier) {	
+func VerifyMethod(t any, v matchers.MethodVerifier) {
 	handler := UnwrapHandler(t)
 	if handler == nil {
 		return
@@ -122,13 +122,13 @@ func NewMockController(reporter matchers.ErrorReporter, opts ...config.Option) *
 	for _, opt := range opts {
 		opt(cfg)
 	}
-	env :=  &matchers.MockEnv{
+	env := &matchers.MockEnv{
 		Reporter: reporter,
 		Config:   cfg,
 	}
 	factory := &mockFactoryImpl{}
 	ctrl := &matchers.MockController{
-		Env: env,
+		Env:         env,
 		MockFactory: factory,
 	}
 	return ctrl
@@ -146,11 +146,9 @@ func UnwrapHandler(mock any) *invocationHandler {
 		return nil
 	}
 	return handler
-
 }
 
-
-type mockFactoryImpl struct {}
+type mockFactoryImpl struct{}
 
 func (m *mockFactoryImpl) BuildHandler(env *matchers.MockEnv, ifaceType reflect.Type) matchers.Handler {
 	handler := newHandler(ifaceType, getInstance().mockContext, env)
