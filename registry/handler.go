@@ -204,6 +204,8 @@ func (h *invocationHandler) DoVerifyMethod(call *MethodCall) []reflect.Value {
 	return createDefaultReturnValues(call.Method)
 }
 
+// newHandler creates a new invocationHandler.
+// The `tp` parameter represents the reflector type for the target interface.
 func newHandler(tp reflect.Type, holder *mockContext, env *matchers.MockEnv) *invocationHandler {
 	recorders := make(map[string]*methodRecorder)
 	for i := 0; i < tp.NumMethod(); i++ {
