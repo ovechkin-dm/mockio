@@ -1,0 +1,8 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "title": "Mockio mockery template",
+    "type": "object",
+    "additionalProperties": false,
+    "properties": {},
+    "required": []
+}
