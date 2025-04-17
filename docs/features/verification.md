@@ -5,7 +5,7 @@ We will use the following interface for the examples:
 package main
 
 import (
-	. "github.com/ovechkin-dm/mockio/mock/v2"
+	. "github.com/ovechkin-dm/mockio/v2/mock"
 	"testing"
 )
 

@@ -43,7 +43,7 @@ In this example we will create a mock, and use an argument captor to capture the
 package main
 
 import (
-	. "github.com/ovechkin-dm/mockio/mock/v2"
+	. "github.com/ovechkin-dm/mockio/v2/mock"
 	"testing"
 )
 

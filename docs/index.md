@@ -24,7 +24,7 @@ Now we will use `dot import` to simplify the usage of the library:
 
 ```go
 import (
-    ."github.com/ovechkin-dm/mockio/mock/v2"
+    ."github.com/ovechkin-dm/mockio/v2/mock"
     "testing"
 )
 ```
@@ -49,7 +49,7 @@ Here is the full listing for our simple test:
 package main
 
 import (
-	. "github.com/ovechkin-dm/mockio/mock/v2"
+	. "github.com/ovechkin-dm/mockio/v2/mock"
 	"testing"
 )
 
