@@ -13,7 +13,7 @@ type invocationHandler struct {
 	methods      map[string]*methodRecorder
 	instanceType reflect.Type
 	lock         sync.Mutex
-	controller   *matchers.MockController
+	env          *matchers.MockEnv
 	reporter     *EnrichedReporter
 }
 
@@ -204,8 +204,9 @@ func (h *invocationHandler) DoVerifyMethod(call *MethodCall) []reflect.Value {
 	return createDefaultReturnValues(call.Method)
 }
 
-func newHandler[T any](holder *mockContext, ctrl *matchers.MockController) *invocationHandler {
-	tp := reflect.TypeOf(new(T)).Elem()
+// newHandler creates a new invocationHandler.
+// The `tp` parameter represents the reflector type for the target interface.
+func newHandler(tp reflect.Type, holder *mockContext, env *matchers.MockEnv) *invocationHandler {
 	recorders := make(map[string]*methodRecorder)
 	for i := 0; i < tp.NumMethod(); i++ {
 		recorders[tp.Method(i).Name] = &methodRecorder{
@@ -214,7 +215,7 @@ func newHandler[T any](holder *mockContext, ctrl *matchers.MockController) *invo
 			methodType:    tp.Method(i),
 		}
 	}
-	return newInvocationHandler(holder, recorders, tp, ctrl)
+	return newInvocationHandler(holder, recorders, tp, env)
 }
 
 func (h *invocationHandler) validateMatchers(call *MethodCall) bool {
@@ -347,7 +348,7 @@ func (h *invocationHandler) PostponedVerify(tearDown bool) {
 }
 
 func (h *invocationHandler) TearDown() {
-	if h.controller.Config.StrictVerify {
+	if h.env.Config.StrictVerify {
 		for _, m := range h.methods {
 			for _, mm := range m.methodMatches {
 				if len(mm.verifiers) == 0 {
@@ -365,15 +366,15 @@ func newInvocationHandler(
 	ctx *mockContext,
 	methods map[string]*methodRecorder,
 	instanceType reflect.Type,
-	controller *matchers.MockController,
+	env *matchers.MockEnv,
 ) *invocationHandler {
 	handler := &invocationHandler{
 		ctx:          ctx,
 		methods:      methods,
 		instanceType: instanceType,
 		lock:         sync.Mutex{},
-		controller:   controller,
-		reporter:     newEnrichedReporter(controller.Reporter, controller.Config),
+		env:          env,
+		reporter:     newEnrichedReporter(env.Reporter, env.Config),
 	}
 	return handler
 }
