@@ -135,12 +135,19 @@ func NewMockController(reporter matchers.ErrorReporter, opts ...config.Option) *
 }
 
 func UnwrapHandler(mock any) *invocationHandler {
+	if mock == nil {
+		getInstance().reporter.ReportUnregisteredMockVerify(mock)
+	}
+	handler, ok := mock.(*invocationHandler)
+	if ok {
+		return handler
+	}
 	payload, err := dyno.UnwrapPayload(mock)
 	if err != nil {
 		getInstance().reporter.ReportUnregisteredMockVerify(mock)
 		return nil
 	}
-	handler, ok := payload.(*invocationHandler)
+	handler, ok = payload.(*invocationHandler)
 	if !ok {
 		getInstance().reporter.ReportUnregisteredMockVerify(mock)
 		return nil
