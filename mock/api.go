@@ -532,5 +532,5 @@ func VerifyNoMoreInteractions(value any) {
 }
 
 func NewMockController(t matchers.ErrorReporter, opts ...config.Option) *matchers.MockController {
-	return matchers.NewMockController(t, opts...)
+	return registry.NewMockController(t, opts...)
 }

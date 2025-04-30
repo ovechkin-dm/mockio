@@ -31,15 +31,21 @@ func getInstance() *Registry {
 }
 
 func Mock[T any](ctrl *matchers.MockController) T {
-	handler := newHandler[T](getInstance().mockContext, ctrl)
-	ctrl.Reporter.Cleanup(handler.TearDown)
-	t, err := dyno.Dynamic[T](handler.Handle, dynoopts.WithPayload(handler))
+	tp := reflect.TypeOf(new(T)).Elem()
+	handler := ctrl.MockFactory.BuildHandler(ctrl.Env, tp)
+	t, err := dyno.DynamicByType(handler.Handle, tp, dynoopts.WithPayload(handler))
 	if err != nil {
 		getInstance().reporter.FailNow(fmt.Errorf("error creating mock: %w", err))
 		var zero T
 		return zero
 	}
-	return t
+	result, ok := t.(T)
+	if !ok {
+		getInstance().reporter.FailNow(fmt.Errorf("error casting mock to type %s", tp.String()))
+		var zero T
+		return zero
+	}
+	return result
 }
 
 func AddMatcher[T any](m matchers.Matcher[T]) {
@@ -73,28 +79,16 @@ func When() matchers.ReturnerAll {
 }
 
 func VerifyMethod(t any, v matchers.MethodVerifier) {
-	payload, err := dyno.UnwrapPayload(t)
-	if err != nil {
-		getInstance().reporter.ReportUnregisteredMockVerify(t)
-		return
-	}
-	handler, ok := payload.(*invocationHandler)
-	if !ok {
-		getInstance().reporter.ReportUnregisteredMockVerify(t)
+	handler := UnwrapHandler(t)
+	if handler == nil {
 		return
 	}
 	handler.VerifyMethod(v)
 }
 
 func VerifyNoMoreInteractions(t any) {
-	payload, err := dyno.UnwrapPayload(t)
-	if err != nil {
-		getInstance().reporter.ReportUnregisteredMockVerify(t)
-		return
-	}
-	handler, ok := payload.(*invocationHandler)
-	if !ok {
-		getInstance().reporter.ReportUnregisteredMockVerify(t)
+	handler := UnwrapHandler(t)
+	if handler == nil {
 		return
 	}
 	handler.VerifyNoMoreInteractions(false)
@@ -118,4 +112,53 @@ func NewArgumentCaptor[T any]() matchers.ArgumentCaptor[T] {
 		lock:     sync.Mutex{},
 		reporter: getInstance().reporter,
 	}
+}
+
+func NewMockController(reporter matchers.ErrorReporter, opts ...config.Option) *matchers.MockController {
+	cfg := config.NewConfig()
+	if reporter == nil {
+		panic("MockController: provided a nil error reporting (*testing.T) instance")
+	}
+	for _, opt := range opts {
+		opt(cfg)
+	}
+	env := &matchers.MockEnv{
+		Reporter: reporter,
+		Config:   cfg,
+	}
+	factory := &mockFactoryImpl{}
+	ctrl := &matchers.MockController{
+		Env:         env,
+		MockFactory: factory,
+	}
+	return ctrl
+}
+
+func UnwrapHandler(mock any) *invocationHandler {
+	if mock == nil {
+		getInstance().reporter.ReportUnregisteredMockVerify(mock)
+	}
+	handler, ok := mock.(*invocationHandler)
+	if ok {
+		return handler
+	}
+	payload, err := dyno.UnwrapPayload(mock)
+	if err != nil {
+		getInstance().reporter.ReportUnregisteredMockVerify(mock)
+		return nil
+	}
+	handler, ok = payload.(*invocationHandler)
+	if !ok {
+		getInstance().reporter.ReportUnregisteredMockVerify(mock)
+		return nil
+	}
+	return handler
+}
+
+type mockFactoryImpl struct{}
+
+func (m *mockFactoryImpl) BuildHandler(env *matchers.MockEnv, ifaceType reflect.Type) matchers.Handler {
+	handler := newHandler(ifaceType, getInstance().mockContext, env)
+	env.Reporter.Cleanup(handler.TearDown)
+	return handler
 }
