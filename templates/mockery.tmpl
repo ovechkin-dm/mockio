@@ -68,7 +68,7 @@ func ({{ $structHandlerMethodVar }} *{{$mock.StructName}}{{ $mock.TypeInstantiat
 {{- range $methodIdx, $method := .Methods }} {{/* START METHOD RANGE */}}
 
 // {{ $method.Name }} provides a mock function for the type {{ $mock.StructName }}
-{{ $structVar := $method.Scope.AllocateName "mock" }}
+{{- $structVar := $method.Scope.AllocateName "mock" }}
 func ({{ $structVar }} *{{$mock.StructName}}{{ $mock.TypeInstantiation }}) {{$method.Name}}({{$method.ArgList}}) {{$method.ReturnArgTypeList}} {
     {{- $methodTypeVar := $method.Scope.AllocateName "methodType" }}
     {{- $argsVar := $method.Scope.AllocateName "args" }}

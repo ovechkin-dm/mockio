@@ -37,7 +37,6 @@ func (mock *MockGreeter) Handler() matchers.Handler {
 }
 
 // Greet provides a mock function for the type MockGreeter
-
 func (mock *MockGreeter) Greet(name string) string {
 	methodType := mock._methodsMap["Greet"]
 	args := []reflect.Value{
