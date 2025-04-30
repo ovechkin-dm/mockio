@@ -43,7 +43,7 @@ func TestGeneratedMockNoMoreInteractionsFail(t *testing.T) {
 		return "Hello, " + args[0].(string)
 	})
 	result := m.Greet("John")
-	r.AssertEqual("Hello, John", result)	
+	r.AssertEqual("Hello, John", result)
 	VerifyNoMoreInteractions(m)
 	r.AssertError()
 }
