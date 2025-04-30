@@ -14,7 +14,7 @@ import (
 )
 
 type HandlerHolder interface {
-    Handler() matchers.Handler
+	Handler() matchers.Handler
 }
 
 var instance = threadlocal.NewThreadLocal(newRegistry)
@@ -162,8 +162,6 @@ func UnwrapHandler(mock any) *invocationHandler {
 	}
 	return handler
 }
-
-
 
 type mockFactoryImpl struct{}
 
