@@ -13,6 +13,10 @@ import (
 	"github.com/ovechkin-dm/mockio/v2/threadlocal"
 )
 
+type HandlerHolder interface {
+	Handler() matchers.Handler
+}
+
 var instance = threadlocal.NewThreadLocal(newRegistry)
 
 type Registry struct {
@@ -138,9 +142,13 @@ func UnwrapHandler(mock any) *invocationHandler {
 	if mock == nil {
 		getInstance().reporter.ReportUnregisteredMockVerify(mock)
 	}
-	handler, ok := mock.(*invocationHandler)
+	handlerHolder, ok := mock.(HandlerHolder)
+	var handler *invocationHandler
 	if ok {
-		return handler
+		handler, handlerOk := handlerHolder.Handler().(*invocationHandler)
+		if handlerOk {
+			return handler
+		}
 	}
 	payload, err := dyno.UnwrapPayload(mock)
 	if err != nil {

@@ -31,6 +31,7 @@ import (
 {{- $methodVar := $constructorScope.AllocateName "method" }}
 {{- $mockVar := $constructorScope.AllocateName "mockVar" }}
 
+
 func {{ $constructorName }}{{ $mock.TypeConstraint }} ({{ $ctrlVar }} *{{ $matchersPackage.Qualifier }}.MockController) {{ $root.SrcPkgQualifier }}{{ $mock.Name }}{{ $mock.TypeInstantiation }} {
     {{ $tpVar }} := {{ $reflectPackage.Qualifier }}.TypeOf(new({{ $root.SrcPkgQualifier }}{{ $mock.Name }}{{ $mock.TypeInstantiation }})).Elem()        
     {{ $handlerVar }} := {{ $ctrlVar }}.MockFactory.BuildHandler(ctrl.Env, tp)
@@ -56,11 +57,18 @@ type {{ $mock.StructName }}{{ $mock.TypeConstraint }} struct {
     _methodsMap map[string]{{ $reflectPackage.Qualifier }}.Method
 }
 
+{{- with $handlerMethodScope := $root.Registry.MethodScope }} {{/* START HANDLER METHOD */}}
+{{- $structHandlerMethodVar := $handlerMethodScope.AllocateName "mock" }}
+func ({{ $structHandlerMethodVar }} *{{$mock.StructName}}{{ $mock.TypeInstantiation }}) Handler() {{ $matchersPackage.Qualifier }}.Handler {
+    return {{ $structHandlerMethodVar }}._handler
+}
+{{- end }} {{/* END HANDLER METHOD */}}
+
 {{/* RANGE OVER ALL METHODS */}}
 {{- range $methodIdx, $method := .Methods }} {{/* START METHOD RANGE */}}
 
 // {{ $method.Name }} provides a mock function for the type {{ $mock.StructName }}
-{{ $structVar := $method.Scope.AllocateName "mock" }}
+{{- $structVar := $method.Scope.AllocateName "mock" }}
 func ({{ $structVar }} *{{$mock.StructName}}{{ $mock.TypeInstantiation }}) {{$method.Name}}({{$method.ArgList}}) {{$method.ReturnArgTypeList}} {
     {{- $methodTypeVar := $method.Scope.AllocateName "methodType" }}
     {{- $argsVar := $method.Scope.AllocateName "args" }}
