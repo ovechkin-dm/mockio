@@ -10,13 +10,13 @@
       
       
       
-        <link rel="canonical" href="https://ovechkin-dm.github.io/mockio/latest/features/method-stubbing/">
+        <link rel="canonical" href="https://ovechkin-dm.github.io/mockio/latest/features/code-generation/">
       
       
-        <link rel="prev" href="../..">
+        <link rel="prev" href="../error-reporting/">
       
       
-        <link rel="next" href="../matchers/">
+        <link rel="next" href="../../limitations/">
       
       
       <link rel="icon" href="../../assets/images/favicon.png">
@@ -24,7 +24,7 @@
     
     
       
-        <title>Method stubbing - mockio</title>
+        <title>Code generation - mockio</title>
       
     
     
@@ -61,11 +61,11 @@
       
         <meta  property="og:type"  content="website" >
       
-        <meta  property="og:title"  content="Method stubbing - mockio" >
+        <meta  property="og:title"  content="Code generation - mockio" >
       
         <meta  property="og:description"  content="Mock library for Go" >
       
-        <meta  property="og:image"  content="https://ovechkin-dm.github.io/mockio/latest/assets/images/social/features/method-stubbing.png" >
+        <meta  property="og:image"  content="https://ovechkin-dm.github.io/mockio/latest/assets/images/social/features/code-generation.png" >
       
         <meta  property="og:image:type"  content="image/png" >
       
@@ -73,15 +73,15 @@
       
         <meta  property="og:image:height"  content="630" >
       
-        <meta  property="og:url"  content="https://ovechkin-dm.github.io/mockio/latest/features/method-stubbing/" >
+        <meta  property="og:url"  content="https://ovechkin-dm.github.io/mockio/latest/features/code-generation/" >
       
         <meta  name="twitter:card"  content="summary_large_image" >
       
-        <meta  name="twitter:title"  content="Method stubbing - mockio" >
+        <meta  name="twitter:title"  content="Code generation - mockio" >
       
         <meta  name="twitter:description"  content="Mock library for Go" >
       
-        <meta  name="twitter:image"  content="https://ovechkin-dm.github.io/mockio/latest/assets/images/social/features/method-stubbing.png" >
+        <meta  name="twitter:image"  content="https://ovechkin-dm.github.io/mockio/latest/assets/images/social/features/code-generation.png" >
       
     
     
@@ -113,7 +113,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#method-stubbing" class="md-skip">
+        <a href="#code-generation" class="md-skip">
           Skip to content
         </a>
       
@@ -153,7 +153,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Method stubbing
+              Code generation
             
           </span>
         </div>
@@ -381,32 +381,10 @@
                 
   
   
-    
   
   
-  
-    <li class="md-nav__item md-nav__item--active">
-      
-      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
-      
-      
-        
-      
-      
-        <label class="md-nav__link md-nav__link--active" for="__toc">
-          
-  
-  
-  <span class="md-ellipsis">
-    Method stubbing
-    
-  </span>
-  
-
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <a href="./" class="md-nav__link md-nav__link--active">
+    <li class="md-nav__item">
+      <a href="../method-stubbing/" class="md-nav__link">
         
   
   
@@ -417,80 +395,6 @@
   
 
       </a>
-      
-        
-
-<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
-  
-  
-  
-    
-  
-  
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#when" class="md-nav__link">
-    <span class="md-ellipsis">
-      When
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#whensingle" class="md-nav__link">
-    <span class="md-ellipsis">
-      WhenSingle
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#whendouble" class="md-nav__link">
-    <span class="md-ellipsis">
-      WhenDouble
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#thenanswer" class="md-nav__link">
-    <span class="md-ellipsis">
-      ThenAnswer
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#thenreturn" class="md-nav__link">
-    <span class="md-ellipsis">
-      ThenReturn
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#implicit-exact-matchers" class="md-nav__link">
-    <span class="md-ellipsis">
-      Implicit Exact matchers
-    </span>
-  </a>
-  
-</li>
-      
-    </ul>
-  
-</nav>
-      
     </li>
   
 
@@ -638,10 +542,32 @@
                 
   
   
+    
   
   
-    <li class="md-nav__item">
-      <a href="../code-generation/" class="md-nav__link">
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    Code generation
+    
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
         
   
   
@@ -652,6 +578,71 @@
   
 
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#installation" class="md-nav__link">
+    <span class="md-ellipsis">
+      Installation
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      Configuration
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#code-generation_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      Code generation
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#usage" class="md-nav__link">
+    <span class="md-ellipsis">
+      Usage
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#full-example" class="md-nav__link">
+    <span class="md-ellipsis">
+      Full example
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
     </li>
   
 
@@ -735,54 +726,45 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#when" class="md-nav__link">
+  <a href="#installation" class="md-nav__link">
     <span class="md-ellipsis">
-      When
+      Installation
     </span>
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#whensingle" class="md-nav__link">
+  <a href="#configuration" class="md-nav__link">
     <span class="md-ellipsis">
-      WhenSingle
+      Configuration
     </span>
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#whendouble" class="md-nav__link">
+  <a href="#code-generation_1" class="md-nav__link">
     <span class="md-ellipsis">
-      WhenDouble
+      Code generation
     </span>
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#thenanswer" class="md-nav__link">
+  <a href="#usage" class="md-nav__link">
     <span class="md-ellipsis">
-      ThenAnswer
+      Usage
     </span>
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#thenreturn" class="md-nav__link">
+  <a href="#full-example" class="md-nav__link">
     <span class="md-ellipsis">
-      ThenReturn
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#implicit-exact-matchers" class="md-nav__link">
-    <span class="md-ellipsis">
-      Implicit Exact matchers
+      Full example
     </span>
   </a>
   
@@ -807,94 +789,50 @@
   
 
 
-<h1 id="method-stubbing">Method stubbing<a class="headerlink" href="#method-stubbing" title="Permanent link">&para;</a></h1>
-<p>Method stubbing is a technique used in unit testing to replace a method with a stub. A stub is a small piece of code
-that simulates the behavior of the method it replaces. This allows you to test the behavior of the code that calls the
-method without actually executing the method itself.</p>
-<p>Basic usage of method stubbing in Mockio looks like this:</p>
-<div class="highlight"><span class="filename">Go</span><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="nx">When</span><span class="p">(</span><span class="nx">mock</span><span class="p">.</span><span class="nx">SomeMethod</span><span class="p">(</span><span class="nx">AnyInt</span><span class="p">())).</span><span class="nx">ThenReturn</span><span class="p">(</span><span class="s">&quot;some value&quot;</span><span class="p">)</span>
+<h1 id="code-generation">Code Generation<a class="headerlink" href="#code-generation" title="Permanent link">&para;</a></h1>
+<p>While Mockio is designed to work without code generation, it also provides a code generation tool that can help with creating mock implementations for your interfaces. This can be useful in cases where you want to have more control over the mock implementation, or don't want to rely on an unsafe features mockio uses.</p>
+<h2 id="installation">Installation<a class="headerlink" href="#installation" title="Permanent link">&para;</a></h2>
+<p>Since mockio relies on mockery generation tool, mockery should be installed.</p>
+<div class="highlight"><span class="filename">Bash</span><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>go<span class="w"> </span>install<span class="w"> </span>github.com/vektra/mockery/v3@v3.2.5
 </code></pre></div>
-<ul>
-<li><code>When</code> is a function that takes a method call as an argument and returns a <code>Returner</code> object.</li>
-<li>Inside the method call argument you can use any matcher from the library's API. In this example we used <code>AnyInt()</code> matcher.</li>
-<li><code>ThenReturn</code> is a method of the <code>Returner</code></li>
-</ul>
-<p>This is basic usage of method stubbing. But there are also some useful extensions to this API.</p>
-<h2 id="when">When<a class="headerlink" href="#when" title="Permanent link">&para;</a></h2>
-<p><code>When</code> is a function that allows you to stub a method.
-Keep in mind, that <code>When</code> is a generic function, so it does not provide any type check on return value.</p>
-<h2 id="whensingle">WhenSingle<a class="headerlink" href="#whensingle" title="Permanent link">&para;</a></h2>
-<p><code>WhenSingle</code> is a function that allows you to stub a method to return a single value. 
-It is almost the same as <code>When</code>, but it provides additional type check on return value.</p>
-<p>Consider Following interface:
-<div class="highlight"><span class="filename">Go</span><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="kd">type</span><span class="w"> </span><span class="nx">Foo</span><span class="w"> </span><span class="kd">interface</span><span class="w"> </span><span class="p">{</span>
-<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="w">    </span><span class="nx">Bar</span><span class="p">(</span><span class="kt">int</span><span class="p">)</span><span class="w"> </span><span class="kt">string</span>
-<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="p">}</span>
-</code></pre></div></p>
-<p>You can stub <code>Bar</code> method like this:
-<div class="highlight"><span class="filename">Go</span><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="nx">WhenSingle</span><span class="p">(</span><span class="nx">mock</span><span class="p">.</span><span class="nx">Bar</span><span class="p">(</span><span class="nx">AnyInt</span><span class="p">())).</span><span class="nx">ThenReturn</span><span class="p">(</span><span class="s">&quot;some value&quot;</span><span class="p">)</span>
-</code></pre></div></p>
-<p>However, this will not compile:
-<div class="highlight"><span class="filename">Go</span><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="nx">WhenSingle</span><span class="p">(</span><span class="nx">mock</span><span class="p">.</span><span class="nx">Bar</span><span class="p">(</span><span class="nx">AnyInt</span><span class="p">())).</span><span class="nx">ThenReturn</span><span class="p">(</span><span class="mi">42</span><span class="p">)</span>
-</code></pre></div></p>
-<p>But this will:
-<div class="highlight"><span class="filename">Go</span><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="nx">When</span><span class="p">(</span><span class="nx">mock</span><span class="p">.</span><span class="nx">Bar</span><span class="p">(</span><span class="nx">AnyInt</span><span class="p">())).</span><span class="nx">ThenReturn</span><span class="p">(</span><span class="mi">42</span><span class="p">)</span>
-</code></pre></div></p>
-<h2 id="whendouble">WhenDouble<a class="headerlink" href="#whendouble" title="Permanent link">&para;</a></h2>
-<p><code>WhenDouble</code> is a function that allows you to stub a method to return two values.
-It is almost the same as <code>When</code>, but it provides additional type check on return values.</p>
-<p>Consider Following interface:
-<div class="highlight"><span class="filename">Go</span><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="kd">type</span><span class="w"> </span><span class="nx">Foo</span><span class="w"> </span><span class="kd">interface</span><span class="w"> </span><span class="p">{</span>
-<a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a><span class="w">    </span><span class="nx">Bar</span><span class="p">(</span><span class="kt">int</span><span class="p">)</span><span class="w"> </span><span class="p">(</span><span class="kt">string</span><span class="p">,</span><span class="w"> </span><span class="kt">error</span><span class="p">)</span>
-<a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a><span class="p">}</span>
-</code></pre></div></p>
-<p>You can stub <code>Bar</code> method like this:
-<div class="highlight"><span class="filename">Go</span><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="nx">WhenDouble</span><span class="p">(</span><span class="nx">mock</span><span class="p">.</span><span class="nx">Bar</span><span class="p">(</span><span class="nx">AnyInt</span><span class="p">())).</span><span class="nx">ThenReturn</span><span class="p">(</span><span class="s">&quot;some value&quot;</span><span class="p">,</span><span class="w"> </span><span class="kc">nil</span><span class="p">)</span>
-</code></pre></div></p>
-<p>However, this will not compile:
-<div class="highlight"><span class="filename">Go</span><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="nx">WhenDouble</span><span class="p">(</span><span class="nx">mock</span><span class="p">.</span><span class="nx">Bar</span><span class="p">(</span><span class="nx">AnyInt</span><span class="p">())).</span><span class="nx">ThenReturn</span><span class="p">(</span><span class="s">&quot;some value&quot;</span><span class="p">,</span><span class="w"> </span><span class="mi">42</span><span class="p">)</span>
-</code></pre></div></p>
-<p>But this will:
-<div class="highlight"><span class="filename">Go</span><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a><span class="nx">When</span><span class="p">(</span><span class="nx">mock</span><span class="p">.</span><span class="nx">Bar</span><span class="p">(</span><span class="nx">AnyInt</span><span class="p">())).</span><span class="nx">ThenReturn</span><span class="p">(</span><span class="s">&quot;some value&quot;</span><span class="p">,</span><span class="w"> </span><span class="mi">42</span><span class="p">)</span>
-</code></pre></div></p>
-<h2 id="thenanswer">ThenAnswer<a class="headerlink" href="#thenanswer" title="Permanent link">&para;</a></h2>
-<p><code>Answer</code> is a function that allows you to stub a method to return a value based on the arguments passed to the method.</p>
-<p>Consider following interface:
-<div class="highlight"><span class="filename">Go</span><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a><span class="kd">type</span><span class="w"> </span><span class="nx">Foo</span><span class="w"> </span><span class="kd">interface</span><span class="w"> </span><span class="p">{</span>
-<a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a><span class="w">    </span><span class="nx">Bar</span><span class="p">(</span><span class="kt">int</span><span class="p">)</span><span class="w"> </span><span class="kt">string</span>
-<a id="__codelineno-9-3" name="__codelineno-9-3" href="#__codelineno-9-3"></a><span class="p">}</span>
-</code></pre></div></p>
-<p>You can stub <code>Bar</code> method like this:
-<div class="highlight"><span class="filename">Go</span><pre><span></span><code><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a><span class="nx">ctrl</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">NewMockController</span><span class="p">(</span><span class="nx">t</span><span class="p">)</span>
-<a id="__codelineno-10-2" name="__codelineno-10-2" href="#__codelineno-10-2"></a><span class="nx">mock</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">Mock</span><span class="p">[</span><span class="nx">Foo</span><span class="p">](</span><span class="nx">ctrl</span><span class="p">)</span>
-<a id="__codelineno-10-3" name="__codelineno-10-3" href="#__codelineno-10-3"></a><span class="nx">WhenSingle</span><span class="p">(</span><span class="nx">mock</span><span class="p">.</span><span class="nx">Bar</span><span class="p">(</span><span class="nx">AnyInt</span><span class="p">())).</span><span class="nx">ThenAnswer</span><span class="p">(</span><span class="kd">func</span><span class="p">(</span><span class="nx">args</span><span class="w"> </span><span class="p">[]</span><span class="kt">any</span><span class="p">)</span><span class="w"> </span><span class="kt">string</span><span class="w"> </span><span class="p">{</span>
-<a id="__codelineno-10-4" name="__codelineno-10-4" href="#__codelineno-10-4"></a><span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="nx">fmt</span><span class="p">.</span><span class="nx">Sprintf</span><span class="p">(</span><span class="s">&quot;Hello, %d&quot;</span><span class="p">,</span><span class="w"> </span><span class="nx">args</span><span class="p">[</span><span class="mi">0</span><span class="p">].(</span><span class="kt">int</span><span class="p">))</span>
-<a id="__codelineno-10-5" name="__codelineno-10-5" href="#__codelineno-10-5"></a><span class="p">})</span>
-</code></pre></div></p>
-<p>When <code>Bar</code> method is called with argument <code>42</code>, it will return <code>"Hello, 42"</code>.</p>
-<h2 id="thenreturn">ThenReturn<a class="headerlink" href="#thenreturn" title="Permanent link">&para;</a></h2>
-<p>You can chain multiple <code>ThenReturn</code> calls to return different values on subsequent calls:</p>
-<div class="highlight"><span class="filename">Go</span><pre><span></span><code><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a><span class="nx">When</span><span class="p">(</span><span class="nx">mock</span><span class="p">.</span><span class="nx">SomeMethod</span><span class="p">(</span><span class="nx">AnyInt</span><span class="p">())).</span>
-<a id="__codelineno-11-2" name="__codelineno-11-2" href="#__codelineno-11-2"></a><span class="w">    </span><span class="nx">ThenReturn</span><span class="p">(</span><span class="s">&quot;first value&quot;</span><span class="p">).</span>
-<a id="__codelineno-11-3" name="__codelineno-11-3" href="#__codelineno-11-3"></a><span class="w">    </span><span class="nx">ThenReturn</span><span class="p">(</span><span class="s">&quot;second value&quot;</span><span class="p">)</span>
+<p>Please refer to official mockery <a href="https://vektra.github.io/mockery/latest/installation/">installation guide</a></p>
+<h2 id="configuration">Configuration<a class="headerlink" href="#configuration" title="Permanent link">&para;</a></h2>
+<p>To configure mockery tool, provide a link to mockio tempate:</p>
+<div class="highlight"><span class="filename">YAML</span><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="nt">all</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">false</span>
+<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="nt">dir</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;{{.InterfaceDir}}&#39;</span>
+<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="nt">filename</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">mocks_test.go</span>
+<a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a><span class="nt">force-file-write</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+<a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a><span class="nt">formatter</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">goimports</span>
+<a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a><span class="nt">log-level</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">info</span>
+<a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a><span class="nt">structname</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;{{.Mock}}{{.InterfaceName}}&#39;</span>
+<a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a><span class="nt">pkgname</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;{{.SrcPackageName}}&#39;</span>
+<a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a><span class="nt">recursive</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">false</span>
+<a id="__codelineno-1-10" name="__codelineno-1-10" href="#__codelineno-1-10"></a><span class="nt">require-template-schema-exists</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+<a id="__codelineno-1-11" name="__codelineno-1-11" href="#__codelineno-1-11"></a><span class="nt">template</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">https://raw.githubusercontent.com/ovechkin-dm/mockio/refs/heads/main/templates/mockery.tmpl</span>
+<a id="__codelineno-1-12" name="__codelineno-1-12" href="#__codelineno-1-12"></a><span class="nt">template-schema</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;{{.Template}}.schema.json&#39;</span>
+<a id="__codelineno-1-13" name="__codelineno-1-13" href="#__codelineno-1-13"></a><span class="nt">packages</span><span class="p">:</span>
+<a id="__codelineno-1-14" name="__codelineno-1-14" href="#__codelineno-1-14"></a><span class="w">  </span><span class="nt">your-package-name</span><span class="p">:</span>
+<a id="__codelineno-1-15" name="__codelineno-1-15" href="#__codelineno-1-15"></a><span class="w">    </span><span class="nt">config</span><span class="p">:</span>
+<a id="__codelineno-1-16" name="__codelineno-1-16" href="#__codelineno-1-16"></a><span class="w">      </span><span class="nt">all</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
 </code></pre></div>
-<p>Calling <code>SomeMethod</code> first time will return <code>"first value"</code>, second time <code>"second value"</code>, and so on.</p>
-<h2 id="implicit-exact-matchers">Implicit <code>Exact</code> matchers<a class="headerlink" href="#implicit-exact-matchers" title="Permanent link">&para;</a></h2>
-<p>Consider following interface:</p>
-<div class="highlight"><span class="filename">Go</span><pre><span></span><code><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a><span class="kd">type</span><span class="w"> </span><span class="nx">Foo</span><span class="w"> </span><span class="kd">interface</span><span class="w"> </span><span class="p">{</span>
-<a id="__codelineno-12-2" name="__codelineno-12-2" href="#__codelineno-12-2"></a><span class="w">    </span><span class="nx">Bar</span><span class="p">(</span><span class="kt">int</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="p">)</span><span class="w"> </span><span class="kt">string</span>
-<a id="__codelineno-12-3" name="__codelineno-12-3" href="#__codelineno-12-3"></a><span class="p">}</span>
+<p>The main difference here is the <code>template</code> parameter.</p>
+<p>Please refer to official mockery <a href="https://vektra.github.io/mockery/latest/configuration/">configuration guide</a> for more details.</p>
+<h2 id="code-generation_1">Code generation<a class="headerlink" href="#code-generation_1" title="Permanent link">&para;</a></h2>
+<p>Now that mockery is installed and configured, we can run mockery command in project root:</p>
+<div class="highlight"><span class="filename">Bash</span><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>mockery
 </code></pre></div>
-<p>To stub <code>Bar</code> method, we can use something like this:
-<div class="highlight"><span class="filename">Go</span><pre><span></span><code><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a><span class="nx">When</span><span class="p">(</span><span class="nx">mock</span><span class="p">.</span><span class="nx">Bar</span><span class="p">(</span><span class="nx">Exact</span><span class="p">(</span><span class="mi">1</span><span class="p">),</span><span class="w"> </span><span class="nx">Exact</span><span class="p">(</span><span class="mi">2</span><span class="p">))).</span><span class="nx">ThenReturn</span><span class="p">(</span><span class="s">&quot;some value&quot;</span><span class="p">)</span>
-</code></pre></div></p>
-<p>However, this can be simplified to:
-<div class="highlight"><span class="filename">Go</span><pre><span></span><code><a id="__codelineno-14-1" name="__codelineno-14-1" href="#__codelineno-14-1"></a><span class="nx">When</span><span class="p">(</span><span class="nx">mock</span><span class="p">.</span><span class="nx">Bar</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="p">)).</span><span class="nx">ThenReturn</span><span class="p">(</span><span class="s">&quot;some value&quot;</span><span class="p">)</span>
-</code></pre></div></p>
-<p>In short, you can omit using matchers when you want to match exact values, but they all should be exact.
-For example, this will not work:
-<div class="highlight"><span class="filename">Go</span><pre><span></span><code><a id="__codelineno-15-1" name="__codelineno-15-1" href="#__codelineno-15-1"></a><span class="nx">When</span><span class="p">(</span><span class="nx">mock</span><span class="p">.</span><span class="nx">Bar</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="nx">Exact</span><span class="p">(</span><span class="mi">2</span><span class="p">))).</span><span class="nx">ThenReturn</span><span class="p">(</span><span class="s">&quot;some value&quot;</span><span class="p">)</span>
-</code></pre></div></p>
+<p>It will generate necessary mocks</p>
+<h2 id="usage">Usage<a class="headerlink" href="#usage" title="Permanent link">&para;</a></h2>
+<p>To use the generated mock, you can create them via generated contructor call <code>New{YourMockName}</code>.
+Here is an example:</p>
+<div class="highlight"><span class="filename">Text Only</span><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>func TestSimple(t *testing.T) {
+<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>    ctrl := NewMockController(t)
+<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>    m := NewMockUserService(ctrl)
+<a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a>}
+</code></pre></div>
+<p>Other than that, API stays the same as if runtime mocks were used. </p>
+<h2 id="full-example">Full example<a class="headerlink" href="#full-example" title="Permanent link">&para;</a></h2>
+<p>You can check full example <a href="https://github.com/ovechkin-dm/mockio-codegen-example">here</a></p>
 
 
 
