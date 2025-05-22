@@ -52,7 +52,7 @@ markdown_extensions:
 
 nav:
   - Home: index.md
-  - Features:
+  - Features:      
       - Method stubbing: features/method-stubbing.md
       - Matchers: features/matchers.md
       - Verification: features/verification.md
@@ -60,6 +60,7 @@ nav:
       - Argument captors: features/captors.md
       - Parallel execution: features/parallel-execution.md
       - Error reporting: features/error-reporting.md
+      - Code generation: features/code-generation.md
   - Limitations: limitations.md
   - Sponsors: sponsors.md
 
