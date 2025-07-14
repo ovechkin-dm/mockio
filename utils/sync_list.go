@@ -16,7 +16,9 @@ func (l *SyncList[T]) Add(item T) {
 func (l *SyncList[T]) GetCopy() []T {
 	l.lock.Lock()
 	defer l.lock.Unlock()
-	return l.items
+	itemsCopy := make([]T, len(l.items))
+	copy(itemsCopy, l.items)
+	return itemsCopy
 }
 
 func NewSyncList[T any]() *SyncList[T] {
