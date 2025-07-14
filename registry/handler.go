@@ -6,6 +6,7 @@ import (
 	"sync"
 
 	"github.com/ovechkin-dm/mockio/v2/matchers"
+	"github.com/ovechkin-dm/mockio/v2/utils"
 )
 
 type invocationHandler struct {
@@ -18,8 +19,6 @@ type invocationHandler struct {
 }
 
 func (h *invocationHandler) Handle(method reflect.Method, values []reflect.Value) []reflect.Value {
-	h.lock.Lock()
-	defer h.lock.Unlock()
 	values = h.refineValues(method, values)
 	call := &MethodCall{
 		Method:     method,
@@ -29,7 +28,7 @@ func (h *invocationHandler) Handle(method reflect.Method, values []reflect.Value
 	if h.ctx.getState().verifyState {
 		return h.DoVerifyMethod(call)
 	}
-	h.methods[method.Name].calls = append(h.methods[method.Name].calls, call)
+	h.methods[method.Name].calls.Add(call)
 	return h.DoAnswer(call)
 }
 
@@ -38,7 +37,8 @@ func (h *invocationHandler) DoAnswer(c *MethodCall) []reflect.Value {
 	h.ctx.getState().whenHandler = h
 	h.ctx.getState().whenCall = c
 	var matched bool
-	for _, mm := range rec.methodMatches {
+	methodMatches := rec.methodMatches.GetCopy()
+	for _, mm := range methodMatches {
 		matched = true
 		if len(mm.matchers) != len(c.Values) {
 			continue
@@ -83,7 +83,6 @@ func (h *invocationHandler) DoAnswer(c *MethodCall) []reflect.Value {
 func (h *invocationHandler) When() matchers.ReturnerAll {
 	h.lock.Lock()
 	defer h.lock.Unlock()
-
 	whenCall := h.ctx.getState().whenCall
 	whenAnswer := h.ctx.getState().whenAnswer
 	whenMethodMatch := h.ctx.getState().whenMethodMatch
@@ -126,7 +125,7 @@ func (h *invocationHandler) When() matchers.ReturnerAll {
 		answered:   make([]*answerWrapper, 0),
 		stackTrace: NewStackTrace(),
 	}
-	rec.methodMatches = append(rec.methodMatches, m)
+	rec.methodMatches.Add(m)
 	return NewReturnerAll(h.ctx, m)
 }
 
@@ -141,6 +140,8 @@ func (h *invocationHandler) VerifyMethod(verifier matchers.MethodVerifier) {
 }
 
 func (h *invocationHandler) DoVerifyMethod(call *MethodCall) []reflect.Value {
+	h.lock.Lock()
+	defer h.lock.Unlock()
 	matchersOk := h.validateMatchers(call)
 	argMatchers := h.ctx.getState().matchers
 
@@ -153,7 +154,8 @@ func (h *invocationHandler) DoVerifyMethod(call *MethodCall) []reflect.Value {
 
 	rec := h.methods[call.Method.Name]
 	matchedInvocations := make([]*MethodCall, 0)
-	for _, c := range rec.calls {
+	calls := rec.calls.GetCopy()
+	for _, c := range calls {
 		if c.WhenCall {
 			continue
 		}
@@ -210,8 +212,8 @@ func newHandler(tp reflect.Type, holder *mockContext, env *matchers.MockEnv) *in
 	recorders := make(map[string]*methodRecorder)
 	for i := 0; i < tp.NumMethod(); i++ {
 		recorders[tp.Method(i).Name] = &methodRecorder{
-			methodMatches: make([]*methodMatch, 0),
-			calls:         make([]*MethodCall, 0),
+			methodMatches: utils.NewSyncList[*methodMatch](),
+			calls:         utils.NewSyncList[*MethodCall](),
 			methodType:    tp.Method(i),
 		}
 	}
@@ -267,7 +269,8 @@ func (h *invocationHandler) VerifyNoMoreInteractions(tearDown bool) {
 	h.PostponedVerify(tearDown)
 	unexpected := make([]*MethodCall, 0)
 	for _, rec := range h.methods {
-		for _, call := range rec.calls {
+		calls := rec.calls.GetCopy()
+		for _, call := range calls {
 			if call.WhenCall {
 				continue
 			}
@@ -300,12 +303,14 @@ func (h *invocationHandler) refineValues(method reflect.Method, values []reflect
 
 func (h *invocationHandler) PostponedVerify(tearDown bool) {
 	for _, rec := range h.methods {
-		for _, match := range rec.methodMatches {
+		methodMatches := rec.methodMatches.GetCopy()
+		for _, match := range methodMatches {
 			if len(match.verifiers) == 0 {
 				continue
 			}
 			matchedInvocations := make([]*MethodCall, 0)
-			for _, call := range rec.calls {
+			calls := rec.calls.GetCopy()
+			for _, call := range calls {
 				if call.WhenCall {
 					continue
 				}
@@ -350,7 +355,8 @@ func (h *invocationHandler) PostponedVerify(tearDown bool) {
 func (h *invocationHandler) TearDown() {
 	if h.env.Config.StrictVerify {
 		for _, m := range h.methods {
-			for _, mm := range m.methodMatches {
+			methodMatches := m.methodMatches.GetCopy()
+			for _, mm := range methodMatches {
 				if len(mm.verifiers) == 0 {
 					mm.verifiers = append(mm.verifiers, matchers.AtLeastOnce())
 				}
