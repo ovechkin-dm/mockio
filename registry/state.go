@@ -7,6 +7,7 @@ import (
 
 	"github.com/ovechkin-dm/mockio/v2/matchers"
 	"github.com/ovechkin-dm/mockio/v2/threadlocal"
+	"github.com/ovechkin-dm/mockio/v2/utils"
 )
 
 type fiberState struct {
@@ -26,8 +27,8 @@ type mockContext struct {
 }
 
 type methodRecorder struct {
-	methodMatches []*methodMatch
-	calls         []*MethodCall
+	methodMatches *utils.SyncList[*methodMatch]
+	calls         *utils.SyncList[*MethodCall]
 	methodType    reflect.Method
 }
 

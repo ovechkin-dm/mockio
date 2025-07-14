@@ -152,7 +152,8 @@ func (e *EnrichedReporter) ReportVerifyMethodError(
 	callStr := PrettyPrintMethodInvocation(tp, method, args)
 
 	other := strings.Builder{}
-	for j, c := range recorder.calls {
+	calls := recorder.calls.GetCopy()
+	for j, c := range calls {
 		if c.WhenCall {
 			continue
 		}
@@ -162,7 +163,7 @@ func (e *EnrichedReporter) ReportVerifyMethodError(
 		}
 		pretty := PrettyPrintMethodInvocation(tp, c.Method, callArgs)
 		other.WriteString(fmt.Sprintf("\t\t%s at %s", pretty, c.StackTrace.CallerLine()))
-		if j != len(recorder.calls)-1 {
+		if j != len(calls)-1 {
 			other.WriteString("\n")
 		}
 	}
