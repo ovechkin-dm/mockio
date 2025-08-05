@@ -26,7 +26,6 @@ func Test_MockioRaceCondition(t *testing.T) {
 			)).ThenReturn("mocked response", nil)
 
 			response, err := testService.DoSomething(context.Background(), "test input")
-
 			if err != nil {
 				t.Errorf("Test %d: unexpected error: %v", i, err)
 			}
@@ -34,7 +33,7 @@ func Test_MockioRaceCondition(t *testing.T) {
 				t.Errorf("Test %d: expected 'mocked response', got %q", i, response)
 			}
 
-			mock.Verify(testService, mock.Once()).DoSomething(
+			_, _ = mock.Verify(testService, mock.Once()).DoSomething(
 				mock.AnyContext(),
 				mock.Any[string](),
 			)
