@@ -224,20 +224,21 @@ func MapContains[K comparable, V any](values ...K) map[K]V {
 //	WhenSingle(myMock.MyMethod(SliceEqualUnordered([]int{2,1}))).ThenReturn("baz")
 func SliceEqualUnordered[T any](values []T) []T {
 	desc := fmt.Sprintf("EqualUnordered(%v)", values)
-	vmap := make(map[any]struct{})
-	for _, v := range values {
-		vmap[v] = struct{}{}
-	}
 	m := registry.FunMatcher(desc, func(m []any, actual []T) bool {
-		if len(vmap) != len(values) {
-			return false
-		}
 		if len(actual) != len(values) {
 			return false
 		}
-		for _, v := range actual {
-			_, ok := vmap[v]
-			if !ok {
+		matched := make([]bool, len(values))
+		for _, actualElem := range actual {
+			found := false
+			for i, expectedElem := range values {
+				if !matched[i] && reflect.DeepEqual(actualElem, expectedElem) {
+					matched[i] = true
+					found = true
+					break
+				}
+			}
+			if !found {
 				return false
 			}
 		}

@@ -332,3 +332,64 @@ func TestExactNotComparable(t *testing.T) {
 	When(greeter.Greet(Exact(data))).ThenReturn("hello world")
 	greeter.Greet(data)
 }
+
+type PointerSliceInterface interface {
+	Test(m []*int) int
+}
+
+type StructPointerSliceInterface interface {
+	Test(m []*St) int
+}
+
+func TestSliceEqualUnorderedPointerMatch(t *testing.T) {
+	r := common.NewMockReporter(t)
+	ctrl := NewMockController(r)
+	m := Mock[PointerSliceInterface](ctrl)
+	v1, v2, v3 := 1, 2, 3
+	WhenSingle(m.Test(SliceEqualUnordered([]*int{&v1, &v2, &v3}))).ThenReturn(3)
+	a1, a2, a3 := 1, 2, 3
+	ret := m.Test([]*int{&a3, &a2, &a1})
+	r.AssertEqual(3, ret)
+}
+
+func TestSliceEqualUnorderedPointerNoMatch(t *testing.T) {
+	r := common.NewMockReporter(t)
+	ctrl := NewMockController(r)
+	m := Mock[PointerSliceInterface](ctrl)
+	v1, v2, v3 := 1, 2, 3
+	WhenSingle(m.Test(SliceEqualUnordered([]*int{&v1, &v2, &v3}))).ThenReturn(3)
+	a1, a2, a3 := 1, 2, 4
+	ret := m.Test([]*int{&a3, &a2, &a1})
+	r.AssertEqual(0, ret)
+}
+
+func TestSliceEqualUnorderedNilPointer(t *testing.T) {
+	r := common.NewMockReporter(t)
+	ctrl := NewMockController(r)
+	m := Mock[PointerSliceInterface](ctrl)
+	v1, v2 := 1, 2
+	WhenSingle(m.Test(SliceEqualUnordered([]*int{&v1, nil, &v2}))).ThenReturn(3)
+	a1, a2 := 1, 2
+	ret := m.Test([]*int{nil, &a2, &a1})
+	r.AssertEqual(3, ret)
+}
+
+func TestSliceEqualUnorderedStructPointer(t *testing.T) {
+	r := common.NewMockReporter(t)
+	ctrl := NewMockController(r)
+	m := Mock[StructPointerSliceInterface](ctrl)
+	s1, s2 := St{value: 10}, St{value: 20}
+	WhenSingle(m.Test(SliceEqualUnordered([]*St{&s1, &s2}))).ThenReturn(2)
+	a1, a2 := St{value: 10}, St{value: 20}
+	ret := m.Test([]*St{&a2, &a1})
+	r.AssertEqual(2, ret)
+}
+
+func TestSliceEqualUnorderedDuplicates(t *testing.T) {
+	r := common.NewMockReporter(t)
+	ctrl := NewMockController(r)
+	m := Mock[SliceInterface](ctrl)
+	WhenSingle(m.Test(SliceEqualUnordered([]int{1, 1, 2}))).ThenReturn(3)
+	ret := m.Test([]int{2, 1, 1})
+	r.AssertEqual(3, ret)
+}
