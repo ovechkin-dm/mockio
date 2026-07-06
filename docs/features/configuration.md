@@ -8,7 +8,7 @@ package main
 
 import (
 	. "github.com/ovechkin-dm/mockio/v2/mock"
-	"github.com/ovechkin-dm/mockio/mockopts"
+	"github.com/ovechkin-dm/mockio/v2/mockopts"
 	"testing"
 )
 
@@ -31,7 +31,7 @@ package main
 
 import (
 	. "github.com/ovechkin-dm/mockio/v2/mock"
-	"github.com/ovechkin-dm/mockio/mockopts"
+	"github.com/ovechkin-dm/mockio/v2/mockopts"
 	"testing"
 )
 
